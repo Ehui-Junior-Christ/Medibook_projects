@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediBook – Carnet Médical</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--primary:#0a2540;--accent:#1a6bff;--accent-light:#e8f0ff;--white:#fff;--gray:#f4f7fb;--text:#1a2535;--text-light:#6b7a8d;--border:#e0e8f0;--success:#00b37e;--danger:#ef4444;--sidebar-w:250px;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--gray);color:var(--text);display:flex;min-height:100vh;}
+  .sidebar{width:var(--sidebar-w);background:var(--primary);color:#fff;position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;}
+  .sidebar-logo{padding:28px 24px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;}
+  .logo-icon{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+  .logo-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;}
+  .sidebar-nav{flex:1;padding:20px 0;}
+  .nav-section{padding:8px 24px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-top:12px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:14px;transition:all 0.2s;border-left:3px solid transparent;}
+  .nav-item:hover{background:rgba(255,255,255,0.08);color:#fff;}
+  .nav-item.active{background:rgba(26,107,255,0.2);color:#fff;border-left-color:var(--accent);}
+  .nav-icon{width:20px;text-align:center;font-size:16px;}
+  .sidebar-footer{padding:20px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+  .user-name{font-size:13px;font-weight:500;}
+  .user-role{font-size:11px;color:rgba(255,255,255,0.5);}
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:var(--white);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+  .page-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--primary);}
+  .content{padding:32px;}
+  .card{background:var(--white);border-radius:14px;border:1px solid var(--border);margin-bottom:24px;overflow:hidden;}
+  .card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .card-title{font-size:15px;font-weight:600;color:var(--primary);}
+  .card-body{padding:24px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+  .vital-box{background:var(--gray);border-radius:12px;padding:16px;text-align:center;}
+  .vital-value{font-size:24px;font-weight:700;color:var(--primary);}
+  .vital-label{font-size:11px;color:var(--text-light);margin-top:4px;}
+  .vital-status{font-size:11px;color:var(--success);font-weight:500;margin-top:2px;}
+  .alert-red{background:#fff0f0;border:1px solid #fca5a5;border-radius:12px;padding:16px;display:flex;gap:12px;margin-bottom:16px;}
+  .timeline{position:relative;padding-left:24px;}
+  .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border);}
+  .timeline-item{position:relative;margin-bottom:20px;}
+  .timeline-dot{position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--white);box-shadow:0 0 0 2px var(--accent);}
+  .timeline-date{font-size:11px;color:var(--text-light);margin-bottom:4px;}
+  .timeline-title{font-size:13px;font-weight:600;}
+  .timeline-desc{font-size:12px;color:var(--text-light);margin-top:2px;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🏥</div>
+    <div><div class="logo-text">MediBook</div><div class="logo-sub">Espace Patient</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+    <a class="nav-item" href="profil.html"><span class="nav-icon">👤</span> Mon Profil</a>
+    <a class="nav-item active" href="carnet-medical.html"><span class="nav-icon">📋</span> Carnet Médical</a>
+    <div class="nav-section">Soins</div>
+    <a class="nav-item" href="consultations.html"><span class="nav-icon">🩺</span> Consultations</a>
+    <a class="nav-item" href="ordonnances.html"><span class="nav-icon">💊</span> Ordonnances</a>
+    <a class="nav-item" href="documents.html"><span class="nav-icon">📄</span> Documents</a>
+    <div class="nav-section">Autres</div>
+    <a class="nav-item" href="rappels.html"><span class="nav-icon">🔔</span> Rappels</a>
+    <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Déconnexion</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar">BS</div>
+    <div><div class="user-name">Bié Sergine</div><div class="user-role">Patient</div></div>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar">
+    <div class="page-title">Carnet Médical</div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-header"><span style="font-size:20px;">📊</span><span class="card-title">Signes vitaux</span></div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="vital-box"><div class="vital-value">165 cm</div><div class="vital-label">Taille</div></div>
+          <div class="vital-box"><div class="vital-value">58 kg</div><div class="vital-label">Poids</div></div>
+          <div class="vital-box"><div class="vital-value">21.3</div><div class="vital-label">IMC</div><div class="vital-status">✅ Normal</div></div>
+          <div class="vital-box"><div class="vital-value">120/80</div><div class="vital-label">Tension (mmHg)</div><div class="vital-status">✅ Normal</div></div>
+          <div class="vital-box"><div class="vital-value">72 bpm</div><div class="vital-label">Fréquence cardiaque</div><div class="vital-status">✅ Normal</div></div>
+          <div class="vital-box"><div class="vital-value">O+</div><div class="vital-label">Groupe sanguin</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card">
+          <div class="card-header"><span style="font-size:20px;">⚠️</span><span class="card-title">Allergies</span></div>
+          <div class="card-body">
+            <div class="alert-red">
+              <span style="font-size:22px;">🚫</span>
+              <div><strong>Pénicilline</strong><div style="font-size:12px;color:#991b1b;margin-top:3px;">Réaction allergique sévère — à signaler à tout professionnel de santé</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span style="font-size:20px;">📝</span><span class="card-title">Antécédents médicaux</span></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="padding:12px;background:var(--gray);border-radius:10px;font-size:13px;"><strong>Hypertension artérielle légère</strong><div style="font-size:11px;color:var(--text-light);margin-top:3px;">Diagnostiquée en 2023 — Sous surveillance</div></div>
+              <div style="padding:12px;background:var(--gray);border-radius:10px;font-size:13px;"><strong>Bronchite aiguë</strong><div style="font-size:11px;color:var(--text-light);margin-top:3px;">Avril 2026 — Guérie</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span style="font-size:20px;">🕐</span><span class="card-title">Historique médical</span></div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Avril 2026</div><div class="timeline-title">Bronchite aiguë</div><div class="timeline-desc">Dr. KOUASSI — Traitement antibiotique 7 jours</div></div>
+            <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Mars 2026</div><div class="timeline-title">Contrôle annuel</div><div class="timeline-desc">Dr. DIALLO — Bilan de santé complet</div></div>
+            <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Décembre 2025</div><div class="timeline-title">Grippe saisonnière</div><div class="timeline-desc">Dr. KOUASSI — Repos + traitement symptomatique</div></div>
+            <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-date">Juin 2025</div><div class="timeline-title">Hypertension légère détectée</div><div class="timeline-desc">Mise sous surveillance médicale</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
