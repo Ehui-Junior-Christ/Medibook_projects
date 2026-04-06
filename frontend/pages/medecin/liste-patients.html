@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Liste des patients</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div>
+                    <div class="sb-logo-text">MediBook</div>
+                    <div class="sb-logo-sub">Portail médical</div>
+                </div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Clinique</span>
+                <a class="sb-item" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a class="sb-item active" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a>
+                <a class="sb-item" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Actions</span>
+                <a class="sb-item" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a>
+                <a class="sb-item" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a>
+                <a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <a class="sb-user" href="profil-medecin.html">
+                <div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div>
+                <div>
+                    <div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div>
+                    <div class="sb-user-role" data-medecin-role>Médecin</div>
+                </div>
+                <span class="sb-user-link">↗</span>
+            </a>
+        </div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Liste des patients</div>
+            <div class="topbar-tools">
+                <div class="patient-search-shell">
+                    <div class="searchbar">
+                        <span>🔎</span>
+                        <input class="patient-search-input" type="text" placeholder="Rechercher...">
+                    </div>
+                    <div class="patient-search-results"></div>
+                    <span class="patient-search-meta patient-search-selected" data-search-selected></span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="flex gap-12 mb-16" style="align-items:center">
+                <div class="searchbar" style="margin-left:0;max-width:none;flex:1">
+                    <span>🔎</span>
+                    <input type="text" placeholder="Rechercher par nom, prénom ou CMU...">
+                </div>
+                <select style="min-width:180px;padding:10px 14px;border:1.5px solid var(--slate-900);border-radius:14px;background:var(--white);outline:none">
+                    <option>Tous les patients</option>
+                    <option>Patients à risque</option>
+                    <option>Consultés ce mois</option>
+                </select>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>CMU</th>
+                            <th>Âge</th>
+                            <th>Dernière consultation</th>
+                            <th>Conditions</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="flex flex-center gap-10">
+                                    <div class="patient-ava sm" data-patient-initials>KJ</div>
+                                    <div>
+                                        <div style="font-weight:700;font-size:13px" data-patient-name>Kouadio Jean Baptiste</div>
+                                        <div style="font-size:11.5px;color:var(--slate-500)" data-patient-phone>+225 07 12 34 56</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-patient-cmu>CMU-2024-08821</td>
+                            <td data-patient-age>37 ans</td>
+                            <td data-patient-last-consultation>12 Mar 2025</td>
+                            <td>
+                                <span class="badge badge-red">Allergie</span>
+                                <span class="badge badge-amber">HTA</span>
+                            </td>
+                            <td><a class="btn btn-primary btn-sm" href="dossier-patient.html">Voir dossier</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="flex flex-center gap-10">
+                                    <div class="patient-ava sm" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AK</div>
+                                    <div>
+                                        <div style="font-weight:700;font-size:13px">Assi Koffi Martial</div>
+                                        <div style="font-size:11.5px;color:var(--slate-500)">+225 05 23 45 67</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>CMU-2023-04512</td>
+                            <td>52 ans</td>
+                            <td>08 Mar 2025</td>
+                            <td>
+                                <span class="badge badge-amber">Diabète</span>
+                            </td>
+                            <td><a class="btn btn-primary btn-sm" href="dossier-patient.html">Voir dossier</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

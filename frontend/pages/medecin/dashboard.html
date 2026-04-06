@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Dashboard médecin</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div>
+                    <div class="sb-logo-text">MediBook</div>
+                    <div class="sb-logo-sub">Portail médical</div>
+                </div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Clinique</span>
+                <a class="sb-item active" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a class="sb-item" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a>
+                <a class="sb-item" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Actions</span>
+                <a class="sb-item" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a>
+                <a class="sb-item" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a>
+                <a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <a class="sb-user" href="profil-medecin.html">
+                <div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div>
+                <div>
+                    <div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div>
+                    <div class="sb-user-role" data-medecin-role>Médecin</div>
+                </div>
+                <span class="sb-user-link">↗</span>
+            </a>
+        </div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Tableau de bord</div>
+            <div class="topbar-tools">
+                <div class="patient-search-shell">
+                    <div class="searchbar">
+                        <span>🔎</span>
+                        <input class="patient-search-input" type="text" placeholder="Rechercher un patient...">
+                    </div>
+                    <div class="patient-search-results"></div>
+                    <span class="patient-search-meta patient-search-selected" data-search-selected></span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="stats-row" data-dashboard-stats>
+                <div class="stat-card" data-emoji="👥"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val" data-stat="patients">0</div><div class="stat-label">Patients suivis</div><div class="stat-trend trend-up" data-stat-trend="patients"></div></div>
+                <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val" data-stat="consultations">0</div><div class="stat-label">Consultations ce jour</div><div class="stat-trend trend-amber" data-stat-trend="consultations"></div></div>
+                <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val" data-stat="ordonnances">0</div><div class="stat-label">Ordonnances émises</div><div class="stat-trend trend-up" data-stat-trend="ordonnances"></div></div>
+                <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val" data-stat="certificats">0</div><div class="stat-label">Certificats créés</div><div class="stat-trend" data-stat-trend="certificats"></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Patients récents</div>
+                    <a class="btn btn-primary btn-sm" href="nouvelle-consultation.html">+ Nouvelle consultation</a>
+                </div>
+                <div class="consult-item">
+                    <div class="patient-ava sm" data-patient-initials>KJ</div>
+                    <div class="flex-1">
+                        <div class="consult-title" data-patient-name>Kouadio Jean Baptiste</div>
+                        <div class="consult-sub"><span data-patient-summary>Fièvre persistante</span> · <span data-patient-last-consultation>12 Mar 2025</span></div>
+                    </div>
+                    <a class="btn btn-secondary btn-sm" href="dossier-patient.html">Voir dossier</a>
+                </div>
+                <div class="consult-item">
+                    <div class="patient-ava sm" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AK</div>
+                    <div class="flex-1">
+                        <div class="consult-title">Assi Koffi Martial</div>
+                        <div class="consult-sub">Bilan diabète · 08 Mar 2025</div>
+                    </div>
+                    <a class="btn btn-secondary btn-sm" href="liste-patients.html">Voir dossier</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
