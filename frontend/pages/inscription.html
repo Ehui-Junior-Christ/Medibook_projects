@@ -7,116 +7,118 @@
   <link rel="stylesheet" href="../css/main.css">
   <script defer src="../js/auth.js"></script>
 </head>
-<body>
-  <main class="page-auth register">
-    <div class="inscrip-card">
-      <aside class="inscrip-left">
-        <div>
-          <div class="logo-area">
-            <div class="logo-mark">🏥</div>
-            <span>MediBook</span>
-          </div>
-          <h2>Création de compte</h2>
-          <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px">
-            <div class="sp-item active" data-step="1"><div class="sp-dot">1</div><div class="sp-lbl">Mon rôle</div></div>
-            <div class="sp-item" data-step="2"><div class="sp-dot">2</div><div class="sp-lbl">Informations</div></div>
-            <div class="sp-item" data-step="3"><div class="sp-dot">3</div><div class="sp-lbl">Mot de passe</div></div>
-            <div class="sp-item" data-step="4"><div class="sp-dot">4</div><div class="sp-lbl">Confirmation</div></div>
-          </div>
+<body class="page-auth register">
+<div class="screen" id="inscription">
+  <div class="inscrip-card">
+    <div class="inscrip-left">
+      <div>
+        <div class="logo-area"><div class="logo-mark">🏥</div><span>MediBook</span></div>
+        <h2>Creation de compte</h2>
+        <div id="sp-list" style="margin-top:12px;display:flex;flex-direction:column;gap:4px">
+          <div class="sp-item active" id="sp1" data-step="1"><div class="sp-dot">1</div><div class="sp-lbl">Mon role</div></div>
+          <div class="sp-item" id="sp2" data-step="2"><div class="sp-dot">2</div><div class="sp-lbl">Informations</div></div>
+          <div class="sp-item" id="sp3" data-step="3"><div class="sp-dot">3</div><div class="sp-lbl">Mot de passe</div></div>
+          <div class="sp-item" id="sp4" data-step="4"><div class="sp-dot">4</div><div class="sp-lbl">Confirmation</div></div>
         </div>
-        <div style="font-size:11px;color:rgba(255,255,255,.28)">© 2025 MediBook</div>
-      </aside>
-
-      <section class="inscrip-right">
-        <div class="inscrip-step active" data-step="1">
-          <h3>Quel est votre rôle ?</h3>
-          <p class="step-sub">Choisissez votre profil pour personnaliser l'inscription.</p>
-          <div class="role-cards">
-            <div class="role-card selected" data-role="patient" onclick="pickRole('patient', this)">
-              <div class="role-card-icon">🧑‍🦱</div>
-              <div class="role-card-name">Patient</div>
-              <div class="role-card-desc">Consultez votre carnet médical</div>
-            </div>
-            <div class="role-card" data-role="medecin" onclick="pickRole('medecin', this)">
-              <div class="role-card-icon">🩺</div>
-              <div class="role-card-name">Médecin</div>
-              <div class="role-card-desc">Gérez consultations et prescriptions</div>
-            </div>
-            <div class="role-card" data-role="infirmier" onclick="pickRole('infirmier', this)">
-              <div class="role-card-icon">💉</div>
-              <div class="role-card-name">Infirmier / Infirmière</div>
-              <div class="role-card-desc">Soins et signes vitaux</div>
-            </div>
-          </div>
-          <div class="inscrip-nav">
-            <span style="font-size:12.5px;color:var(--slate-500)">Déjà un compte ? <a style="color:var(--teal-700);font-weight:600" href="login.html">Se connecter</a></span>
-            <button class="btn btn-primary" type="button" onclick="nextStep(1)">Continuer →</button>
-          </div>
-        </div>
-
-        <div class="inscrip-step" data-step="2">
-          <h3>Informations personnelles</h3>
-          <p class="step-sub">Ces informations permettront de vous identifier.</p>
-          <div class="grid g2">
-            <div class="fld"><label>Nom</label><input type="text" placeholder="Kouadio"></div>
-            <div class="fld"><label>Prénom</label><input type="text" placeholder="Jean Baptiste"></div>
-            <div class="fld"><label>Date de naissance</label><input type="date"></div>
-            <div class="fld"><label>Sexe</label><select><option>Sélectionner</option><option>Masculin</option><option>Féminin</option></select></div>
-            <div class="fld col-full"><label>Numéro CMU</label><input type="text" placeholder="CMU-XXXX-XXXXX"></div>
-            <div class="fld"><label>Téléphone</label><input type="tel" placeholder="+225 07 XX XX XX"></div>
-            <div class="fld"><label>Email</label><input type="email" placeholder="votre@email.ci"></div>
-            <div class="fld col-full" id="f-mat" style="display:none"><label>Numéro matricule (Ordre)</label><input type="text" placeholder="MAT-MED-00XXX"></div>
-            <div class="fld col-full" id="f-spe" style="display:none"><label>Spécialité médicale</label><select><option>Médecine générale</option><option>Cardiologie</option><option>Pédiatrie</option><option>Gynécologie</option></select></div>
-            <div class="fld col-full" id="f-mat-inf" style="display:none"><label>Numéro matricule infirmier</label><input type="text" placeholder="MAT-INF-00XXX"></div>
-            <div class="fld col-full" id="f-srv" style="display:none"><label>Service</label><select><option>Urgences</option><option>Médecine interne</option><option>Pédiatrie</option><option>Maternité</option></select></div>
-            <div class="fld" id="f-sang"><label>Groupe sanguin</label><select><option>Non renseigné</option><option>A+</option><option>B+</option><option>AB+</option><option>O+</option></select></div>
-            <div class="fld" id="f-allergie"><label>Allergie connue</label><input type="text" placeholder="Ex: Pénicilline"></div>
-          </div>
-          <div class="inscrip-nav">
-            <button class="btn btn-secondary" type="button" onclick="prevStep(2)">← Retour</button>
-            <button class="btn btn-primary" type="button" onclick="nextStep(2)">Continuer →</button>
-          </div>
-        </div>
-
-        <div class="inscrip-step" data-step="3">
-          <h3>Créer vos identifiants</h3>
-          <p class="step-sub">Choisissez un mot de passe sécurisé.</p>
-          <div class="grid">
-            <div class="fld"><label>Mot de passe</label><input id="pw1" type="password" placeholder="Au moins 8 caractères" oninput="checkPw()"></div>
-            <div class="pw-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
-            <div id="pw-msg" style="font-size:11.5px;color:var(--slate-400);margin-top:-6px"></div>
-            <div class="fld"><label>Confirmer le mot de passe</label><input id="pw2" type="password" placeholder="Répétez le mot de passe" oninput="checkPw()"></div>
-            <div id="pw-match" style="font-size:11.5px;margin-top:-6px"></div>
-            <div class="pw-rules">
-              <div class="pw-rules-title">Le mot de passe doit contenir :</div>
-              <div class="pw-rule" data-rule="len"><span class="ri">○</span>Au moins 8 caractères</div>
-              <div class="pw-rule" data-rule="upper"><span class="ri">○</span>Une lettre majuscule</div>
-              <div class="pw-rule" data-rule="num"><span class="ri">○</span>Un chiffre</div>
-              <div class="pw-rule" data-rule="special"><span class="ri">○</span>Un caractère spécial</div>
-            </div>
-          </div>
-          <div class="inscrip-nav">
-            <button class="btn btn-secondary" type="button" onclick="prevStep(3)">← Retour</button>
-            <button class="btn btn-primary" type="button" onclick="nextStep(3)">Créer mon compte →</button>
-          </div>
-        </div>
-
-        <div class="inscrip-step" data-step="4">
-          <div class="success-box">
-            <div style="font-size:48px;margin-bottom:14px">✅</div>
-            <div class="success-title">Compte créé avec succès</div>
-            <p class="success-msg">Votre compte MediBook a été créé. Un administrateur validera votre inscription avant activation.</p>
-            <div class="recap-box">
-              <div class="recap-title">Récapitulatif</div>
-              <div class="recap-row"><span class="recap-label">Rôle</span><span id="rc-role" style="font-weight:600">Patient</span></div>
-              <div class="recap-row"><span class="recap-label">Nom</span><span style="font-weight:600">Kouadio</span></div>
-              <div class="recap-row"><span class="recap-label">CMU</span><span style="font-weight:600;font-family:monospace">CMU-XXXX-XXXXX</span></div>
-            </div>
-            <a class="btn btn-primary" style="width:100%" href="login.html">← Retour à la connexion</a>
-          </div>
-        </div>
-      </section>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.28)">© 2025 MediBook</div>
     </div>
-  </main>
+    <div class="inscrip-right">
+
+      <div class="inscrip-step active" id="is1" data-step="1">
+        <h3>Quel est votre role ?</h3>
+        <p class="step-sub">Choisissez votre profil pour personnaliser l'inscription.</p>
+        <div class="role-cards" id="roleCards">
+          <div class="role-card selected" data-role="patient" onclick="pickRole('patient', this)">
+            <div class="role-card-icon">🧑</div>
+            <div class="role-card-name">Patient</div>
+            <div class="role-card-desc">Consultez votre carnet medical</div>
+          </div>
+          <div class="role-card" data-role="medecin" onclick="pickRole('medecin', this)">
+            <div class="role-card-icon">🩺</div>
+            <div class="role-card-name">Medecin</div>
+            <div class="role-card-desc">Gerez consultations et prescriptions</div>
+          </div>
+          <div class="role-card" data-role="infirmier" onclick="pickRole('infirmier', this)">
+            <div class="role-card-icon">💉</div>
+            <div class="role-card-name">Infirmier / Infirmiere</div>
+            <div class="role-card-desc">Soins et signes vitaux</div>
+          </div>
+        </div>
+        <div class="inscrip-nav">
+          <span style="font-size:12.5px;color:var(--slate-500)">Deja un compte ? <a style="color:var(--teal-700);font-weight:600;cursor:pointer" onclick="goLogin()">Se connecter</a></span>
+          <button class="btn btn-primary" onclick="isNext(1)">Continuer →</button>
+        </div>
+      </div>
+
+      <div class="inscrip-step" id="is2" data-step="2">
+        <h3>Informations personnelles</h3>
+        <p class="step-sub">Ces informations permettront de vous identifier.</p>
+        <div class="grid g2" style="gap:12px">
+          <div class="fld"><label>Nom</label><input type="text" id="nom" placeholder="Kouadio"></div>
+          <div class="fld"><label>Prenom</label><input type="text" id="prenom" placeholder="Jean Baptiste"></div>
+          <div class="fld"><label>Date de naissance</label><input type="date"></div>
+          <div class="fld"><label>Sexe</label><select><option value="">Selectionner</option><option>Masculin</option><option>Feminin</option></select></div>
+          <div class="fld col-full"><label>Numero CMU</label><input type="text" id="cmu" placeholder="CMU-XXXX-XXXXX"></div>
+          <div class="fld"><label>Telephone</label><input type="tel" placeholder="+225 07 XX XX XX"></div>
+          <div class="fld"><label>Email</label><input type="email" placeholder="votre@email.ci"></div>
+          <div class="fld col-full" id="f-mat" style="display:none"><label>Numero matricule (Ordre)</label><input type="text" placeholder="MAT-MED-00XXX"></div>
+          <div class="fld col-full" id="f-spe" style="display:none"><label>Specialite medicale</label><select><option>Medecine generale</option><option>Cardiologie</option><option>Pediatrie</option><option>Gynecologie</option><option>Chirurgie</option><option>Urgentiste</option></select></div>
+          <div class="fld col-full" id="f-mat-inf" style="display:none"><label>Numero matricule infirmier</label><input type="text" placeholder="MAT-INF-00XXX"></div>
+          <div class="fld col-full" id="f-srv" style="display:none"><label>Service</label><select><option>Urgences</option><option>Medecine interne</option><option>Pediatrie</option><option>Maternite</option><option>Chirurgie</option><option>Reanimation</option></select></div>
+          <div class="fld" id="f-sang" style="display:none"><label>Groupe sanguin</label><select><option value="">Non renseigne</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div class="fld" id="f-allergie" style="display:none"><label>Allergie connue</label><input type="text" placeholder="Ex: Penicilline"></div>
+        </div>
+        <div class="inscrip-nav">
+          <button class="btn btn-secondary" onclick="isPrev(2)">← Retour</button>
+          <button class="btn btn-primary" onclick="isNext(2)">Continuer →</button>
+        </div>
+      </div>
+
+      <div class="inscrip-step" id="is3" data-step="3">
+        <h3>Creer vos identifiants</h3>
+        <p class="step-sub">Choisissez un mot de passe securise.</p>
+        <div class="grid" style="gap:12px">
+          <div class="fld"><label>Mot de passe</label><input type="password" id="pw1" placeholder="Au moins 8 caracteres" oninput="checkPw()"></div>
+          <div class="pw-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
+          <div id="pw-msg" style="font-size:11.5px;color:var(--slate-400);margin-top:-6px"></div>
+          <div class="fld"><label>Confirmer le mot de passe</label><input type="password" id="pw2" placeholder="Repetez le mot de passe" oninput="checkPw()"></div>
+          <div id="pw-match" style="font-size:11.5px;margin-top:-6px"></div>
+          <div class="pw-rules">
+            <div class="pw-rules-title">Le mot de passe doit contenir :</div>
+            <div class="pw-rule" data-rule="len"><span class="ri">○</span> Au moins 8 caracteres</div>
+            <div class="pw-rule" data-rule="upper"><span class="ri">○</span> Une lettre majuscule</div>
+            <div class="pw-rule" data-rule="num"><span class="ri">○</span> Un chiffre</div>
+            <div class="pw-rule" data-rule="special"><span class="ri">○</span> Un caractere special (!@#$...)</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px">
+            <input type="checkbox" id="cgu" style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--teal-600)">
+            <label for="cgu" style="font-size:12.5px;color:var(--slate-600);cursor:pointer">J'accepte les <a style="color:var(--teal-700);font-weight:600;cursor:pointer">CGU</a> et la <a style="color:var(--teal-700);font-weight:600;cursor:pointer">Politique de confidentialite</a>.</label>
+          </div>
+        </div>
+        <div class="inscrip-nav">
+          <button class="btn btn-secondary" onclick="isPrev(3)">← Retour</button>
+          <button class="btn btn-primary" onclick="isNext(3)">Creer mon compte →</button>
+        </div>
+      </div>
+
+      <div class="inscrip-step" id="is4" data-step="4">
+        <div class="success-box">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Compte cree avec succes !</div>
+          <p class="success-msg">Votre compte MediBook a ete cree. Un administrateur validera votre inscription. Vous recevrez un email de confirmation des l'activation.</p>
+          <div class="recap-box">
+            <div class="recap-title">Recapitulatif</div>
+            <div class="recap-row"><span class="recap-label">Role</span><span id="rc-role" style="font-weight:600">Patient</span></div>
+            <div class="recap-row"><span class="recap-label">Nom</span><span id="rc-nom" style="font-weight:600">-</span></div>
+            <div class="recap-row"><span class="recap-label">CMU</span><span id="rc-cmu" style="font-weight:600;font-family:monospace">-</span></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="goLogin()">← Retour a la connexion</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 </body>
 </html>
