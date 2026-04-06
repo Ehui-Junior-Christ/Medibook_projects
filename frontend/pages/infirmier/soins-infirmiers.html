@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook – Soins infirmiers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/infirmier.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
+    <nav>
+      <div class="sb-section">
+        <span class="sb-section-label">Soins</span>
+        <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+        <a href="liste-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+        <a href="signes-vitaux.html" class="sb-item"><span class="sb-icon">❤️</span>Signes vitaux</a>
+        <a href="soins-infirmiers.html" class="sb-item active"><span class="sb-icon">🩹</span>Soins infirmiers</a>
+        <a href="upload-documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" id="btn-logout">
+        <div class="sb-avatar" id="sb-avatar">KM</div>
+        <div><div class="sb-user-name" id="sb-name">Koné Marie</div><div class="sb-user-role">Infirmier · Urgences</div></div>
+        <span class="sb-logout-icon">↗</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Soins infirmiers</div>
+      <div class="searchbar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Rechercher par patient ou type de soin…">
+      </div>
+      <div class="topbar-right">
+        <div class="icon-btn" id="btn-logout-top">🚪</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- Sélection patient + bouton -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header" style="margin-bottom:0">
+          <div class="card-title">Enregistrer un soin</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <select id="select-patient-soins" class="filtre-select">
+              <option value="">-- Sélectionner un patient --</option>
+              <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
+              <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
+              <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
+            </select>
+            <button class="btn btn-primary" onclick="ouvrirModal('modal-soin-form')">+ Nouveau soin</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique soins -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Historique des soins</div>
+            <div class="card-sub" id="total-soins">10 soins enregistrés</div>
+          </div>
+          <select class="filtre-select" id="filtre-type-soin">
+            <option value="">Tous les types</option>
+            <option value="Pansement">Pansement</option>
+            <option value="Injection IM">Injection IM</option>
+            <option value="Injection IV">Injection IV</option>
+            <option value="Injection SC">Injection SC</option>
+            <option value="Perfusion">Perfusion</option>
+            <option value="Prélèvement sanguin">Prélèvement sanguin</option>
+            <option value="Prélèvement urinaire">Prélèvement urinaire</option>
+            <option value="Soin d'hygiène">Soin d'hygiène</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date / Heure</th>
+                <th>Patient</th>
+                <th>Type de soin</th>
+                <th>Détail</th>
+                <th>Infirmier</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-soins"></tbody>
+          </table>
+        </div>
+
+        <div id="empty-soins" class="empty-state" style="display:none">
+          <div class="empty-icon">🩹</div>
+          <div class="empty-txt">Aucun soin trouvé</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Nouveau soin -->
+<div class="modal-overlay" id="modal-soin-form" onclick="fermerModalOverlay(event, 'modal-soin-form')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Enregistrer un soin infirmier</div>
+      <button class="modal-close" onclick="fermerModal('modal-soin-form')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fld"><label>Patient</label>
+        <select id="sf-patient">
+          <option value="">Sélectionner un patient</option>
+          <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
+          <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
+          <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
+        </select>
+      </div>
+      <div class="fld"><label>Type de soin</label>
+        <select id="sf-type">
+          <option value="">Sélectionner</option>
+          <option>Pansement</option>
+          <option>Injection IM</option>
+          <option>Injection IV</option>
+          <option>Injection SC</option>
+          <option>Perfusion</option>
+          <option>Prélèvement sanguin</option>
+          <option>Prélèvement urinaire</option>
+          <option>Soin d'hygiène</option>
+          <option>Surveillance post-opératoire</option>
+        </select>
+      </div>
+      <div class="fld"><label>Détail / Médicament administré</label>
+        <input type="text" id="sf-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
+      </div>
+      <div class="form-grid-2">
+        <div class="fld"><label>Date</label><input type="date" id="sf-date"></div>
+        <div class="fld"><label>Heure</label><input type="time" id="sf-heure"></div>
+      </div>
+      <div class="fld"><label>Observations</label>
+        <textarea id="sf-obs" rows="3" placeholder="Notes sur le déroulement du soin, réaction du patient…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fermerModal('modal-soin-form')">Annuler</button>
+      <button class="btn btn-primary" onclick="soumettreNouveauSoin()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Confirmation suppression -->
+<div class="modal-overlay" id="modal-confirm-suppr" onclick="fermerModalOverlay(event, 'modal-confirm-suppr')">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Confirmer la suppression</div>
+      <button class="modal-close" onclick="fermerModal('modal-confirm-suppr')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--slate-600)">Êtes-vous sûr de vouloir supprimer ce soin ? Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fermerModal('modal-confirm-suppr')">Annuler</button>
+      <button class="btn btn-danger" onclick="confirmerSuppression()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/infirmier.js"></script>
+</body>
+</html>

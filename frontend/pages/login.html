@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Connexion</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <script defer src="../js/auth.js"></script>
+</head>
+<body class="page-auth login">
+<div class="screen active" id="login">
+  <div class="login-card">
+    <div class="login-left">
+      <div>
+        <div class="ll-logo"><div class="logo-mark">🏥</div><h1>MediBook</h1></div>
+        <div class="ll-tagline">
+          <h2>Votre carnet médical numérique</h2>
+          <p>Accédez aux données de santé de manière sécurisée et centralisée depuis n'importe où.</p>
+        </div>
+        <div class="ll-features">
+          <div class="ll-feat"><div class="ll-feat-icon">🔒</div>Données chiffrées & sécurisées</div>
+          <div class="ll-feat"><div class="ll-feat-icon">📋</div>Dossier médical complet</div>
+          <div class="ll-feat"><div class="ll-feat-icon">📄</div>Ordonnances & certificats PDF</div>
+          <div class="ll-feat"><div class="ll-feat-icon">🔔</div>Rappels automatiques</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.28)">© 2025 MediBook · Équipe 5</div>
+    </div>
+    <div class="login-right">
+      <div class="lr-head">
+        <h3>Connexion</h3>
+        <p>Sélectionnez votre rôle pour continuer</p>
+      </div>
+      <div class="role-selector">
+        <div class="role-btn active" data-role="patient" onclick="setRole('patient',this)">
+          <div class="role-btn-icon">🧑</div>
+          <div class="role-btn-name">Patient</div>
+        </div>
+        <div class="role-btn" data-role="medecin" onclick="setRole('medecin',this)">
+          <div class="role-btn-icon">🩺</div>
+          <div class="role-btn-name">Médecin</div>
+        </div>
+        <div class="role-btn" data-role="infirmier" onclick="setRole('infirmier',this)">
+          <div class="role-btn-icon">💉</div>
+          <div class="role-btn-name">Infirmier</div>
+        </div>
+      </div>
+
+      <!-- Formulaire Patient -->
+      <div id="form-patient">
+        <div class="fld"><label>Nom</label><input type="text" placeholder="Ex: Kouadio"></div>
+        <div class="fld"><label>Prénom</label><input type="text" placeholder="Ex: Jean Baptiste"></div>
+        <div class="fld"><label>Numéro CMU</label><input type="text" placeholder="CMU-2024-XXXXX"></div>
+        <div class="fld"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
+      </div>
+      <!-- Formulaire Pro (Médecin / Infirmier) -->
+      <div id="form-pro" style="display:none">
+        <div class="fld"><label>Numéro matricule</label><input type="text" placeholder="MAT-MED-00XXX"></div>
+        <div class="fld"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
+      </div>
+
+      <button class="btn-login" onclick="goApp()">Se connecter →</button>
+      <p class="login-footer">Pas encore de compte ? <a onclick="goInscription()">S'inscrire</a></p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

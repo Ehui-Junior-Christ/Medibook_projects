@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook – Carnet médical</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/patient.css">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Mon espace</span>
+                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a href="profil.html" class="sb-item"><span class="sb-icon">👤</span>Mon profil</a>
+                <a href="carnet-medical.html" class="sb-item active"><span class="sb-icon">📋</span>Carnet médical</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Historique</span>
+                <a href="consultations.html" class="sb-item"><span class="sb-icon">🩺</span>Consultations</a>
+                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
+                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+                <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-user" id="btn-logout">
+                <div class="sb-avatar" id="sb-avatar">KJ</div>
+                <div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div>
+                <span class="sb-logout-icon">↗</span>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-title">Carnet médical</div>
+            <div class="topbar-right">
+                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            </div>
+        </header>
+
+        <div class="content-area">
+
+            <!-- Bannière patient -->
+            <div class="patient-banner">
+                <div class="patient-ava" id="banner-ava">KJ</div>
+                <div class="flex-1">
+                    <div class="patient-name" id="banner-nom">Kouadio Jean Baptiste</div>
+                    <div class="patient-meta" id="banner-meta">CMU-2024-08821 · Né le 14/03/1987 · 37 ans · Masculin</div>
+                    <div class="badge-row" id="banner-badges"></div>
+                </div>
+            </div>
+
+            <!-- Grille carnet -->
+            <div class="carnet-grid">
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Antécédents personnels</div>
+                    <div id="antecedents-perso" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Antécédents familiaux</div>
+                    <div id="antecedents-familiaux" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Allergies &amp; précautions</div>
+                    <div id="allergies-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:10px">Armoire à médicaments</div>
+                    <div id="armoire-list"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/patient.js"></script>
+</body>
+</html>
