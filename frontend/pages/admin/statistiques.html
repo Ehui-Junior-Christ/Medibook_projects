@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook Admin – Statistiques</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../frontend/css/admin.css">
+    <script src="../frontend/js/admin.js" defer></script>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div class="sb-logo-text">MediBook Admin</div>
+            </div>
+        </div>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Principal</span>
+            <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+            <a href="statistiques.html" class="sb-item active"><span class="sb-icon">📊</span>Statistiques</a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Gestion Utilisateurs</span>
+            <a href="gestion-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-infirmiers.html" class="sb-item"><span class="sb-icon">💉</span>Infirmiers</a>
+            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Système</span>
+            <a href="configuration.html" class="sb-item"><span class="sb-icon">⚙️</span>Configuration</a>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">AD</div>
+                <div>
+                    <div class="sb-user-name">Admin MediBook</div>
+                    <div class="sb-user-role">Super Administrateur</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Statistiques Globales</div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <a href="login.html" class="icon-btn">🚪</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title mb-16">Inscriptions mensuelles</div>
+                    <div class="chart-placeholder">
+                        <div class="chart-bar" style="height: 40%; left: 10%;"></div>
+                        <div class="chart-bar" style="height: 60%; left: 25%;"></div>
+                        <div class="chart-bar" style="height: 50%; left: 40%;"></div>
+                        <div class="chart-bar" style="height: 80%; left: 55%;"></div>
+                        <div class="chart-bar" style="height: 70%; left: 70%;"></div>
+                        <div class="chart-bar" style="height: 90%; left: 85%;"></div>
+                        <span>Graphique des inscriptions (6 derniers mois)</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title mb-16">Répartition des utilisateurs</div>
+                    <div class="chart-placeholder">
+                        <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--teal-500) 0% 60%, var(--amber) 60% 85%, var(--green) 85% 100%);"></div>
+                        <div style="margin-left: 20px; font-size: 12px; text-align: left;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><div style="width:10px; height:10px; background:var(--teal-500);"></div> Patients (60%)</div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><div style="width:10px; height:10px; background:var(--amber);"></div> Médecins (25%)</div>
+                            <div style="display:flex; align-items:center; gap:8px;"><div style="width:10px; height:10px; background:var(--green);"></div> Infirmiers (15%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title mb-16">Indicateurs de performance</div>
+                <div class="grid-2">
+                    <div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Consultations totales</span>
+                            <span style="font-weight:700; color:var(--teal-900);">4,582</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Ordonnances générées</span>
+                            <span style="font-weight:700; color:var(--teal-900);">3,120</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Documents uploadés</span>
+                            <span style="font-weight:700; color:var(--teal-900);">12,450</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Temps moyen de réponse serveur</span>
+                            <span style="font-weight:700; color:var(--teal-900);">124ms</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Taux de disponibilité (Uptime)</span>
+                            <span style="font-weight:700; color:var(--teal-900);">99.98%</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:var(--radius-sm); background:var(--slate-50); margin-bottom:10px;">
+                            <span style="font-size:13px; color:var(--slate-600);">Utilisateurs actifs (24h)</span>
+                            <span style="font-weight:700; color:var(--teal-900);">342</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
