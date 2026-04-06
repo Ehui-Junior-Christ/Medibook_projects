@@ -3,1189 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook – Portail Principal</title>
+    <title>MediBook Admin – Gestion Infirmiers</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{
-            --teal-900:#032B2D;--teal-800:#064E52;--teal-700:#0A6E72;
-            --teal-600:#0D8E94;--teal-500:#10ADAF;--teal-400:#4DC6C8;
-            --teal-300:#89DCDE;--teal-200:#C2EEEF;--teal-100:#E6F7F7;--teal-50:#F2FBFB;
-            --amber:#F59E0B;--amber-light:#FEF3C7;--amber-dark:#92400E;
-            --red:#DC2626;--red-light:#FEE2E2;
-            --green:#059669;--green-light:#D1FAE5;
-            --blue:#2563EB;--blue-light:#EFF6FF;
-            --slate-900:#0F172A;--slate-800:#1E293B;--slate-700:#334155;
-            --slate-600:#475569;--slate-500:#64748B;--slate-400:#94A3B8;
-            --slate-300:#CBD5E1;--slate-200:#E2E8F0;--slate-100:#F1F5F9;--slate-50:#F8FAFC;
-            --white:#FFFFFF;
-            --sidebar:224px;--topbar:60px;--radius:12px;--radius-sm:8px;--radius-lg:18px;
-            --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow:0 4px 16px rgba(0,0,0,.1);
-        }
-        html,body{height:100%;overflow:hidden;background:var(--slate-100)}
-        body{font-family:'DM Sans',sans-serif;color:var(--slate-900);font-size:14px;line-height:1.5}
-        ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:var(--slate-300);border-radius:4px}
-        h1,h2,h3,.font-display{font-family:'Syne',sans-serif}
-
-        /* ===== LAYOUT ===== */
-        .app{display:flex;height:100vh;overflow:hidden}
-        .screen{display:none;width:100%;height:100%}
-        .screen.active{display:flex}
-
-        /* ===== LOGIN ===== */
-        #login{
-            background:linear-gradient(145deg,var(--teal-900) 0%,var(--teal-800) 60%,var(--teal-700) 100%);
-            align-items:center;justify-content:center;position:relative;overflow:hidden;
-        }
-        #login::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 75% 35%,rgba(16,173,175,.3) 0%,transparent 65%);}
-        #login::after{content:'';position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border-radius:50%;background:rgba(13,142,148,.12);pointer-events:none;}
-        .login-card{
-            display:grid;grid-template-columns:1fr 1fr;max-width:880px;width:92%;
-            background:var(--white);border-radius:24px;overflow:hidden;
-            box-shadow:0 40px 100px rgba(0,0,0,.45);position:relative;z-index:1;
-        }
-        .login-left{
-            background:linear-gradient(165deg,var(--teal-800),var(--teal-900));
-            padding:48px 40px;display:flex;flex-direction:column;justify-content:space-between;
-        }
-        .ll-logo{display:flex;align-items:center;gap:12px;margin-bottom:44px}
-        .logo-mark{width:46px;height:46px;background:rgba(255,255,255,.14);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:21px;border:1px solid rgba(255,255,255,.2)}
-        .ll-logo h1{font-family:'Syne',sans-serif;font-size:26px;color:#fff;letter-spacing:-.5px}
-        .ll-tagline h2{font-family:'Syne',sans-serif;font-size:20px;color:#fff;line-height:1.35;margin-bottom:12px}
-        .ll-tagline p{color:rgba(255,255,255,.55);font-size:13px;line-height:1.65}
-        .ll-features{display:flex;flex-direction:column;gap:10px;margin-top:28px}
-        .ll-feat{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.7);font-size:12.5px}
-        .ll-feat-icon{width:28px;height:28px;background:rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-        .login-right{padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
-        .lr-head h3{font-family:'Syne',sans-serif;font-size:21px;margin-bottom:5px}
-        .lr-head p{color:var(--slate-500);font-size:13px;margin-bottom:24px}
-
-        /* Role selector */
-        .role-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px}
-        .role-btn{
-            padding:10px 8px;border-radius:10px;border:1.5px solid var(--slate-200);
-            background:var(--slate-50);cursor:pointer;text-align:center;transition:.2s;
-            font-family:inherit;
-        }
-        .role-btn:hover{border-color:var(--teal-400);background:var(--teal-50)}
-        .role-btn.active{border-color:var(--teal-600);background:var(--teal-100)}
-        .role-btn-icon{font-size:20px;margin-bottom:4px}
-        .role-btn-name{font-size:11.5px;font-weight:600;color:var(--slate-700)}
-        .role-btn.active .role-btn-name{color:var(--teal-700)}
-
-        .fld{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-        .fld label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--slate-500)}
-        .fld input{padding:10px 13px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--slate-900);background:var(--white);outline:none;transition:.2s}
-        .fld input:focus{border-color:var(--teal-500);box-shadow:0 0 0 3px var(--teal-100)}
-        .btn-login{width:100%;padding:12px;background:var(--teal-700);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.2px;transition:.2s;margin-top:4px}
-        .btn-login:hover{background:var(--teal-800);transform:translateY(-1px)}
-        .login-footer{text-align:center;margin-top:14px;font-size:12.5px;color:var(--slate-500)}
-        .login-footer a{color:var(--teal-700);font-weight:600;cursor:pointer;text-decoration:none}
-        .login-footer a:hover{text-decoration:underline}
-
-        /* ===== INSCRIPTION ===== */
-        #inscription{
-            background:linear-gradient(145deg,var(--teal-900),var(--teal-800));
-            align-items:center;justify-content:center;position:relative;overflow:hidden;
-        }
-        #inscription::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 70%,rgba(16,173,175,.25) 0%,transparent 60%);}
-        .inscrip-card{
-            width:min(820px,94vw);background:var(--white);border-radius:24px;overflow:hidden;
-            box-shadow:0 40px 100px rgba(0,0,0,.45);position:relative;z-index:1;display:flex;max-height:96vh;
-        }
-        .inscrip-left{background:linear-gradient(165deg,var(--teal-800),var(--teal-900));padding:36px 28px;display:flex;flex-direction:column;gap:20px;min-width:200px;flex-shrink:0}
-        .inscrip-left .logo-area{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-        .inscrip-left .logo-area span{font-family:'Syne',sans-serif;font-size:17px;color:#fff}
-        .inscrip-left h2{font-family:'Syne',sans-serif;font-size:15px;color:rgba(255,255,255,.8);margin-bottom:4px}
-        .sp-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:.15s}
-        .sp-item.active{background:rgba(255,255,255,.12)}
-        .sp-dot{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.5);flex-shrink:0}
-        .sp-item.done .sp-dot{background:var(--green);border-color:var(--green);color:#fff}
-        .sp-item.active .sp-dot{background:var(--teal-500);border-color:var(--teal-500);color:#fff}
-        .sp-lbl{font-size:12px;color:rgba(255,255,255,.5)}
-        .sp-item.active .sp-lbl,.sp-item.done .sp-lbl{color:rgba(255,255,255,.9);font-weight:500}
-        .inscrip-right{flex:1;padding:32px 36px;overflow-y:auto}
-        .inscrip-step{display:none}
-        .inscrip-step.active{display:block}
-        .inscrip-right h3{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:4px}
-        .step-sub{font-size:13px;color:var(--slate-500);margin-bottom:20px}
-        .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
-        .role-card{border:2px solid var(--slate-200);border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:.2s;text-align:center}
-        .role-card:hover{border-color:var(--teal-400);background:var(--teal-50)}
-        .role-card.selected{border-color:var(--teal-600);background:var(--teal-100)}
-        .role-card-icon{font-size:24px;margin-bottom:5px}
-        .role-card-name{font-size:12.5px;font-weight:600;color:var(--slate-800)}
-        .role-card-desc{font-size:11px;color:var(--slate-500);margin-top:2px}
-        .inscrip-nav{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--slate-200)}
-        .grid{display:grid;gap:12px}
-        .g2{grid-template-columns:1fr 1fr}
-        .col-full{grid-column:1/-1}
-        .fld select{padding:10px 12px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--slate-900);background:var(--white);outline:none;transition:.2s}
-        .fld select:focus{border-color:var(--teal-500);box-shadow:0 0 0 3px var(--teal-100)}
-        .fld textarea{padding:9px 12px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;color:var(--slate-900);background:var(--white);outline:none;transition:.2s;resize:vertical}
-        .fld textarea:focus{border-color:var(--teal-500);box-shadow:0 0 0 3px var(--teal-100)}
-        .pw-bar{display:flex;gap:4px;margin-top:-4px}
-        .pw-seg{flex:1;height:4px;border-radius:2px;background:var(--slate-200)}
-        .pw-rules{background:var(--teal-50);border:1px solid var(--teal-200);border-radius:var(--radius-sm);padding:12px 14px}
-        .pw-rules-title{font-size:12px;font-weight:600;color:var(--teal-800);margin-bottom:6px}
-        .pw-rule{font-size:12px;color:var(--slate-500);display:flex;align-items:center;gap:6px;margin-bottom:4px}
-        .success-box{text-align:center;padding:28px 16px}
-        .success-icon{font-size:48px;margin-bottom:14px}
-        .success-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--teal-800);margin-bottom:6px}
-        .success-msg{font-size:13px;color:var(--slate-500);line-height:1.7;max-width:320px;margin:0 auto 20px}
-        .recap-box{background:var(--teal-50);border:1px solid var(--teal-200);border-radius:var(--radius);padding:14px 18px;text-align:left;margin-bottom:18px}
-        .recap-box .recap-title{font-size:11px;font-weight:700;color:var(--teal-800);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-        .recap-row{font-size:12.5px;display:flex;gap:8px;color:var(--slate-700);margin-bottom:4px}
-        .recap-label{color:var(--slate-500);width:70px;flex-shrink:0}
-
-        /* ===== SIDEBAR ===== */
-        .sidebar{width:var(--sidebar);background:var(--teal-900);color:#fff;display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06)}
-        .sb-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:8px}
-        .sb-logo-inner{display:flex;align-items:center;gap:10px}
-        .sb-logo-mark{width:34px;height:34px;background:var(--teal-600);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-        .sb-logo-text{font-family:'Syne',sans-serif;font-size:17px;color:#fff;letter-spacing:-.3px}
-        .sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
-        .sb-role-badge{margin:0 10px 10px;padding:7px 12px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:7px}
-        .sb-role-patient{background:rgba(77,198,200,.15);color:var(--teal-300)}
-        .sb-role-medecin{background:rgba(245,158,11,.12);color:#FCD34D}
-        .sb-role-infirmier{background:rgba(139,220,222,.12);color:var(--teal-400)}
-        .sb-section{padding:0 8px;margin-bottom:4px}
-        .sb-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.28);padding:8px 8px 4px;display:block}
-        .sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.52);transition:.15s;margin-bottom:1px;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
-        .sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
-        .sb-item.active{background:rgba(255,255,255,.13);color:#fff}
-        .sb-icon{font-size:13px;width:17px;text-align:center;flex-shrink:0}
-        .sb-badge{margin-left:auto;background:var(--amber);color:var(--amber-dark);font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
-        .sb-footer{margin-top:auto;padding:10px 8px;border-top:1px solid rgba(255,255,255,.08)}
-        .sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:.15s}
-        .sb-user:hover{background:rgba(255,255,255,.07)}
-        .sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal-600);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0}
-        .sb-user-name{font-size:12px;font-weight:600;color:#fff}
-        .sb-user-role{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
-
-        /* ===== MAIN ===== */
-        .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--slate-50)}
-        .topbar{height:var(--topbar);background:var(--white);border-bottom:1px solid var(--slate-200);padding:0 22px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-        .topbar-title{font-family:'Syne',sans-serif;font-size:16px;color:var(--slate-900);white-space:nowrap}
-        .searchbar{display:flex;align-items:center;gap:8px;background:var(--slate-100);border:1px solid var(--slate-200);border-radius:var(--radius-sm);padding:7px 12px;flex:1;max-width:340px;margin-left:auto}
-        .searchbar input{border:none;background:transparent;font-size:12.5px;outline:none;width:100%;font-family:inherit;color:var(--slate-900)}
-        .searchbar input::placeholder{color:var(--slate-400)}
-        .topbar-right{display:flex;gap:6px;align-items:center}
-        .icon-btn{width:34px;height:34px;border-radius:var(--radius-sm);border:1px solid var(--slate-200);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;transition:.15s}
-        .icon-btn:hover{background:var(--slate-100)}
-        .notif-dot{position:absolute;top:7px;right:7px;width:6px;height:6px;background:var(--amber);border-radius:50%;border:2px solid var(--white)}
-        .content-area{flex:1;overflow-y:auto;padding:22px}
-        .page{display:none}
-        .page.active{display:block}
-
-        /* ===== STATS ===== */
-        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-        .stat-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--slate-200);padding:16px 18px;position:relative;overflow:hidden}
-        .stat-card::after{content:attr(data-emoji);position:absolute;right:-4px;bottom:-8px;font-size:48px;opacity:.07}
-        .stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--slate-900);margin-bottom:2px}
-        .stat-label{font-size:11.5px;color:var(--slate-500)}
-        .stat-trend{font-size:11px;font-weight:600;margin-top:5px}
-        .trend-up{color:var(--green)}.trend-amber{color:var(--amber-dark)}
-        .stat-accent{height:3px;border-radius:2px;margin-bottom:12px;width:28px}
-
-        /* ===== CARDS ===== */
-        .card{background:var(--white);border-radius:var(--radius);border:1px solid var(--slate-200);padding:18px}
-        .card+.card{margin-top:12px}
-        .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-        .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--slate-900)}
-        .card-sub{font-size:12px;color:var(--slate-500);margin-top:1px}
-
-        /* ===== BADGES ===== */
-        .badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
-        .badge-teal{background:var(--teal-100);color:var(--teal-700)}
-        .badge-red{background:var(--red-light);color:var(--red)}
-        .badge-amber{background:var(--amber-light);color:var(--amber-dark)}
-        .badge-green{background:var(--green-light);color:var(--green)}
-        .badge-slate{background:var(--slate-100);color:var(--slate-600)}
-        .badge-blue{background:var(--blue-light);color:var(--blue)}
-
-        /* ===== BUTTONS ===== */
-        .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:.15s;text-decoration:none}
-        .btn-primary{background:var(--teal-700);color:#fff;border-color:var(--teal-700)}
-        .btn-primary:hover{background:var(--teal-800)}
-        .btn-secondary{background:var(--white);color:var(--slate-700);border-color:var(--slate-200)}
-        .btn-secondary:hover{background:var(--slate-100)}
-        .btn-danger{background:var(--red-light);color:var(--red);border-color:var(--red-light)}
-        .btn-success{background:var(--green-light);color:var(--green);border-color:var(--green-light)}
-        .btn-sm{padding:5px 10px;font-size:12px}
-
-        /* ===== LAYOUT UTILS ===== */
-        .g-2-1{grid-template-columns:2fr 1fr}
-        .g-3-1{grid-template-columns:3fr 1fr}
-        .g3{grid-template-columns:1fr 1fr 1fr}
-        .g4{grid-template-columns:1fr 1fr 1fr 1fr}
-        .flex{display:flex}.flex-center{align-items:center}.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}.gap-14{gap:14px}
-        .flex-1{flex:1}.ml-auto{margin-left:auto}
-        .mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
-
-        /* ===== TABLE ===== */
-        .table-wrap{border-radius:var(--radius);border:1px solid var(--slate-200);overflow:hidden;background:var(--white)}
-        table{width:100%;border-collapse:collapse}
-        thead th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);padding:10px 14px;text-align:left;background:var(--slate-50);border-bottom:1px solid var(--slate-200)}
-        tbody td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
-        tbody tr:last-child td{border-bottom:none}
-        tbody tr:hover td{background:var(--teal-50)}
-
-        /* ===== CONSULTATION ITEM ===== */
-        .consult-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;border:1px solid var(--slate-200);background:var(--white);margin-bottom:8px}
-        .consult-item:hover{border-color:var(--teal-300);background:var(--teal-50)}
-        .consult-date-box{width:44px;flex-shrink:0;text-align:center;background:var(--slate-100);border-radius:7px;padding:5px 4px}
-        .consult-date-d{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--teal-700);line-height:1}
-        .consult-date-m{font-size:9px;text-transform:uppercase;color:var(--slate-500);letter-spacing:.5px;margin-top:2px}
-        .consult-title{font-size:13px;font-weight:600;color:var(--slate-900)}
-        .consult-sub{font-size:11.5px;color:var(--slate-500);margin-top:2px}
-        .consult-doctor{font-size:11px;font-weight:600;color:var(--teal-600);margin-left:auto;flex-shrink:0}
-
-        /* ===== VITAUX ===== */
-        .vital-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-        .vital-card{background:var(--slate-50);border:1px solid var(--slate-200);border-radius:var(--radius-sm);padding:12px;text-align:center}
-        .vital-card.warning{border-color:var(--amber);background:var(--amber-light)}
-        .vital-card.danger{border-color:var(--red);background:var(--red-light)}
-        .vital-icon{font-size:17px;margin-bottom:5px}
-        .vital-val{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--slate-900)}
-        .vital-card.warning .vital-val{color:var(--amber-dark)}
-        .vital-card.danger .vital-val{color:var(--red)}
-        .vital-lbl{font-size:10px;color:var(--slate-500);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
-
-        /* ===== RAPPELS ===== */
-        .rappel-item{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:var(--radius-sm);border:1px solid var(--slate-200);background:var(--white);margin-bottom:7px}
-        .rappel-time{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--teal-700);width:44px;flex-shrink:0}
-        .rappel-icon-box{width:33px;height:33px;border-radius:8px;background:var(--teal-100);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-        .rappel-icon-box.amber{background:var(--amber-light)}
-
-        /* ===== PATIENT BANNER ===== */
-        .patient-banner{background:var(--white);border-radius:var(--radius);border:1px solid var(--slate-200);padding:18px;display:flex;align-items:center;gap:14px;margin-bottom:16px}
-        .patient-ava{width:60px;height:60px;border-radius:13px;background:linear-gradient(135deg,var(--teal-600),var(--teal-400));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#fff;flex-shrink:0;font-family:'Syne',sans-serif}
-        .patient-ava.sm{width:38px;height:38px;font-size:13px;border-radius:9px}
-        .patient-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--slate-900)}
-        .patient-meta{font-size:12px;color:var(--slate-500);margin-top:3px}
-        .badge-row{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
-
-        /* ===== TABS ===== */
-        .tabs-nav{display:flex;gap:2px;border-bottom:1.5px solid var(--slate-200);margin-bottom:16px}
-        .tab-btn{padding:8px 14px;font-size:12.5px;font-weight:500;color:var(--slate-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:.15s;border-top:none;border-left:none;border-right:none;background:transparent;font-family:inherit}
-        .tab-btn.active{color:var(--teal-700);border-bottom-color:var(--teal-700);font-weight:600}
-        .tab-btn:hover:not(.active){color:var(--slate-700)}
-        .tab-content{display:none}.tab-content.active{display:block}
-
-        /* ===== CHIPS & PILLS ===== */
-        .chip-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-        .chip{padding:4px 11px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--slate-200);background:var(--white);color:var(--slate-600);transition:.15s;user-select:none}
-        .chip.sel,.chip:hover{background:var(--teal-100);border-color:var(--teal-400);color:var(--teal-700)}
-        .diag-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-        .dpill{padding:6px 13px;border-radius:var(--radius-sm);border:1px solid var(--slate-200);font-size:12.5px;cursor:pointer;background:var(--white);color:var(--slate-600);transition:.15s}
-        .dpill.sel{background:var(--teal-100);border-color:var(--teal-500);color:var(--teal-700);font-weight:600}
-        .dpill:hover:not(.sel){background:var(--slate-100)}
-
-        /* ===== ORDONNANCE ===== */
-        .ordo-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
-        .ordo-tbl th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--slate-500);padding:7px 7px;text-align:left;background:var(--slate-50);border-bottom:1px solid var(--slate-200)}
-        .ordo-tbl td{padding:4px 4px;border-bottom:1px solid var(--slate-100);vertical-align:middle}
-        .ordo-tbl tr:last-child td{border-bottom:none}
-        .ordo-tbl input,.ordo-tbl select{width:100%;padding:5px 7px;border:1px solid var(--slate-200);border-radius:5px;font-size:12px;font-family:inherit;background:var(--white);color:var(--slate-900);outline:none}
-        .ordo-tbl input:focus,.ordo-tbl select:focus{border-color:var(--teal-500)}
-        .btn-row-del{background:none;border:none;cursor:pointer;color:var(--red);font-size:13px;padding:3px 5px;border-radius:4px;transition:.15s}
-        .btn-row-del:hover{background:var(--red-light)}
-        .add-row-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px dashed var(--slate-300);border-radius:var(--radius-sm);font-size:12px;cursor:pointer;color:var(--slate-500);background:transparent;font-family:inherit;transition:.15s}
-        .add-row-btn:hover{border-color:var(--teal-400);color:var(--teal-700);background:var(--teal-50)}
-
-        /* ===== CERTIFICAT ===== */
-        .cert-preview{border:1px solid var(--slate-200);border-radius:var(--radius);padding:20px 24px;background:var(--white);line-height:1.8;font-size:13px;color:var(--slate-800)}
-        .cert-header{text-align:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--slate-200)}
-        .cert-title-txt{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--teal-800)}
-        .cert-doctor-txt{font-size:12px;color:var(--slate-500);margin-top:3px}
-        .cert-sig{text-align:right;margin-top:20px;font-size:12px;color:var(--slate-500)}
-        .cert-sig-line{width:70px;height:1px;background:var(--slate-700);margin-left:auto;margin-top:16px}
-
-        /* ===== STEPS ===== */
-        .steps{display:flex;align-items:center;gap:0;margin-bottom:18px}
-        .step-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--slate-400);flex:1}
-        .step-item:last-child{flex:none}
-        .step-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--slate-300);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;transition:.2s}
-        .step-item.done .step-dot{background:var(--green);border-color:var(--green);color:#fff}
-        .step-item.active .step-dot{background:var(--teal-700);border-color:var(--teal-700);color:#fff}
-        .step-item.done,.step-item.active{color:var(--slate-700)}
-        .step-line{flex:1;height:1px;background:var(--slate-200);margin:0 4px}
-        .actions-bar{display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid var(--slate-200);margin-top:18px}
-        .actions-right{display:flex;gap:8px}
-
-        /* ===== MODAL ===== */
-        .overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
-        .overlay.open{display:flex}
-        .modal{background:var(--white);border-radius:18px;padding:26px 30px;width:min(520px,92vw);max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px rgba(0,0,0,.25)}
-        .modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:3px}
-        .modal-sub{font-size:13px;color:var(--slate-500);margin-bottom:20px}
-        .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--slate-200)}
-        .status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
-        .status-pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
-        .status-active{background:var(--green-light);color:var(--green)}.status-active::before{background:var(--green)}
-        .status-inactive{background:var(--slate-100);color:var(--slate-500)}.status-inactive::before{background:var(--slate-400)}
-    </style>
+    <link rel="stylesheet" href="../frontend/css/admin.css">
+    <script src="../frontend/js/admin.js" defer></script>
 </head>
 <body>
 <div class="app">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div class="sb-logo-text">MediBook Admin</div>
+            </div>
+        </div>
 
-    <!-- ========== LOGIN ========== -->
-    <div class="screen active" id="login">
-        <div class="login-card">
-            <div class="login-left">
+        <nav class="sb-section">
+            <span class="sb-section-label">Principal</span>
+            <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+            <a href="statistiques.html" class="sb-item"><span class="sb-icon">📊</span>Statistiques</a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Gestion Utilisateurs</span>
+            <a href="gestion-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-infirmiers.html" class="sb-item active"><span class="sb-icon">💉</span>Infirmiers</a>
+            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Système</span>
+            <a href="configuration.html" class="sb-item"><span class="sb-icon">⚙️</span>Configuration</a>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">AD</div>
                 <div>
-                    <div class="ll-logo"><div class="logo-mark">🏥</div><h1>MediBook</h1></div>
-                    <div class="ll-tagline">
-                        <h2>Votre carnet médical numérique</h2>
-                        <p>Accédez aux données de santé de manière sécurisée et centralisée depuis n'importe où.</p>
-                    </div>
-                    <div class="ll-features">
-                        <div class="ll-feat"><div class="ll-feat-icon">🔒</div>Données chiffrées & sécurisées</div>
-                        <div class="ll-feat"><div class="ll-feat-icon">📋</div>Dossier médical complet</div>
-                        <div class="ll-feat"><div class="ll-feat-icon">📄</div>Ordonnances & certificats PDF</div>
-                        <div class="ll-feat"><div class="ll-feat-icon">🔔</div>Rappels automatiques</div>
-                    </div>
+                    <div class="sb-user-name">Admin MediBook</div>
+                    <div class="sb-user-role">Super Administrateur</div>
                 </div>
-                <div style="font-size:11px;color:rgba(255,255,255,.28)">© 2025 MediBook · Équipe 5</div>
-            </div>
-            <div class="login-right">
-                <div class="lr-head">
-                    <h3>Connexion</h3>
-                    <p>Sélectionnez votre rôle pour continuer</p>
-                </div>
-                <div class="role-selector">
-                    <div class="role-btn active" onclick="setRole('patient',this)">
-                        <div class="role-btn-icon">🧑</div>
-                        <div class="role-btn-name">Patient</div>
-                    </div>
-                    <div class="role-btn" onclick="setRole('medecin',this)">
-                        <div class="role-btn-icon">🩺</div>
-                        <div class="role-btn-name">Médecin</div>
-                    </div>
-                    <div class="role-btn" onclick="setRole('infirmier',this)">
-                        <div class="role-btn-icon">💉</div>
-                        <div class="role-btn-name">Infirmier</div>
-                    </div>
-                </div>
-
-                <!-- Formulaire Patient -->
-                <div id="form-patient">
-                    <div class="fld"><label>Nom</label><input type="text" placeholder="Ex: Kouadio"></div>
-                    <div class="fld"><label>Prénom</label><input type="text" placeholder="Ex: Jean Baptiste"></div>
-                    <div class="fld"><label>Numéro CMU</label><input type="text" placeholder="CMU-2024-XXXXX"></div>
-                    <div class="fld"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
-                </div>
-                <!-- Formulaire Pro (Médecin / Infirmier) -->
-                <div id="form-pro" style="display:none">
-                    <div class="fld"><label>Numéro matricule</label><input type="text" placeholder="MAT-MED-00XXX"></div>
-                    <div class="fld"><label>Mot de passe</label><input type="password" placeholder="••••••••"></div>
-                </div>
-
-                <button class="btn-login" onclick="goApp()">Se connecter →</button>
-                <p class="login-footer">Pas encore de compte ? <a onclick="goInscription()">S'inscrire</a></p>
             </div>
         </div>
-    </div>
+    </aside>
 
-    <!-- ========== INSCRIPTION ========== -->
-    <div class="screen" id="inscription">
-        <div class="inscrip-card">
-            <div class="inscrip-left">
-                <div>
-                    <div class="logo-area"><div class="logo-mark">🏥</div><span>MediBook</span></div>
-                    <h2>Création de compte</h2>
-                    <div id="sp-list" style="margin-top:12px;display:flex;flex-direction:column;gap:4px">
-                        <div class="sp-item active" id="sp1"><div class="sp-dot">1</div><div class="sp-lbl">Mon rôle</div></div>
-                        <div class="sp-item" id="sp2"><div class="sp-dot">2</div><div class="sp-lbl">Informations</div></div>
-                        <div class="sp-item" id="sp3"><div class="sp-dot">3</div><div class="sp-lbl">Mot de passe</div></div>
-                        <div class="sp-item" id="sp4"><div class="sp-dot">4</div><div class="sp-lbl">Confirmation</div></div>
-                    </div>
-                </div>
-                <div style="font-size:11px;color:rgba(255,255,255,.28)">© 2025 MediBook</div>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Gestion des Infirmiers</div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <a href="login.html" class="icon-btn">🚪</a>
             </div>
-            <div class="inscrip-right">
+        </header>
 
-                <!-- Étape 1 : Rôle -->
-                <div class="inscrip-step active" id="is1">
-                    <h3>Quel est votre rôle ?</h3>
-                    <p class="step-sub">Choisissez votre profil pour personnaliser l'inscription.</p>
-                    <div class="role-cards" id="roleCards">
-                        <div class="role-card selected" onclick="pickRole(this,'patient')">
-                            <div class="role-card-icon">🧑‍🦱</div>
-                            <div class="role-card-name">Patient</div>
-                            <div class="role-card-desc">Consultez votre carnet médical</div>
-                        </div>
-                        <div class="role-card" onclick="pickRole(this,'medecin')">
-                            <div class="role-card-icon">🩺</div>
-                            <div class="role-card-name">Médecin</div>
-                            <div class="role-card-desc">Gérez consultations et prescriptions</div>
-                        </div>
-                        <div class="role-card" onclick="pickRole(this,'infirmier')">
-                            <div class="role-card-icon">💉</div>
-                            <div class="role-card-name">Infirmier / Infirmière</div>
-                            <div class="role-card-desc">Soins et signes vitaux</div>
-                        </div>
-                    </div>
-                    <div class="inscrip-nav">
-                        <span style="font-size:12.5px;color:var(--slate-500)">Déjà un compte ? <a style="color:var(--teal-700);font-weight:600;cursor:pointer" onclick="goLogin()">Se connecter</a></span>
-                        <button class="btn btn-primary" onclick="isNext(1)">Continuer →</button>
-                    </div>
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Liste des Infirmiers</div>
+                    <button class="btn btn-primary">+ Ajouter un infirmier</button>
                 </div>
 
-                <!-- Étape 2 : Infos -->
-                <div class="inscrip-step" id="is2">
-                    <h3>Informations personnelles</h3>
-                    <p class="step-sub">Ces informations permettront de vous identifier.</p>
-                    <div class="grid g2" style="gap:12px">
-                        <div class="fld"><label>Nom</label><input type="text" placeholder="Kouadio"></div>
-                        <div class="fld"><label>Prénom</label><input type="text" placeholder="Jean Baptiste"></div>
-                        <div class="fld"><label>Date de naissance</label><input type="date"></div>
-                        <div class="fld"><label>Sexe</label><select><option value="">Sélectionner</option><option>Masculin</option><option>Féminin</option></select></div>
-                        <div class="fld col-full"><label>Numéro CMU</label><input type="text" placeholder="CMU-XXXX-XXXXX"></div>
-                        <div class="fld"><label>Téléphone</label><input type="tel" placeholder="+225 07 XX XX XX"></div>
-                        <div class="fld"><label>Email</label><input type="email" placeholder="votre@email.ci"></div>
-                        <!-- Médecin -->
-                        <div class="fld col-full" id="f-mat" style="display:none"><label>Numéro matricule (Ordre)</label><input type="text" placeholder="MAT-MED-00XXX"></div>
-                        <div class="fld col-full" id="f-spe" style="display:none"><label>Spécialité médicale</label><select><option>Médecine générale</option><option>Cardiologie</option><option>Pédiatrie</option><option>Gynécologie</option><option>Chirurgie</option><option>Urgentiste</option></select></div>
-                        <!-- Infirmier -->
-                        <div class="fld col-full" id="f-mat-inf" style="display:none"><label>Numéro matricule infirmier</label><input type="text" placeholder="MAT-INF-00XXX"></div>
-                        <div class="fld col-full" id="f-srv" style="display:none"><label>Service</label><select><option>Urgences</option><option>Médecine interne</option><option>Pédiatrie</option><option>Maternité</option><option>Chirurgie</option><option>Réanimation</option></select></div>
-                        <!-- Patient seulement -->
-                        <div class="fld" id="f-sang" style="display:none"><label>Groupe sanguin</label><select><option value="">Non renseigné</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
-                        <div class="fld" id="f-allergie" style="display:none"><label>Allergie connue</label><input type="text" placeholder="Ex: Pénicilline…"></div>
-                    </div>
-                    <div class="inscrip-nav">
-                        <button class="btn btn-secondary" onclick="isPrev(2)">← Retour</button>
-                        <button class="btn btn-primary" onclick="isNext(2)">Continuer →</button>
-                    </div>
+                <div class="search-bar">
+                    <label for="search-infirmier" style="display:none;">Rechercher un infirmier</label>
+                    <input type="text" id="search-infirmier" class="fld" style="margin-bottom:0; flex:1;" placeholder="Rechercher par nom, service ou matricule...">
+                    <button class="btn btn-secondary">Filtrer</button>
                 </div>
 
-                <!-- Étape 3 : Mot de passe -->
-                <div class="inscrip-step" id="is3">
-                    <h3>Créer vos identifiants</h3>
-                    <p class="step-sub">Choisissez un mot de passe sécurisé.</p>
-                    <div class="grid" style="gap:12px">
-                        <div class="fld"><label>Mot de passe</label><input type="password" id="pw1" placeholder="Au moins 8 caractères" oninput="checkPw()"></div>
-                        <div class="pw-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
-                        <div id="pw-msg" style="font-size:11.5px;color:var(--slate-400);margin-top:-6px"></div>
-                        <div class="fld"><label>Confirmer le mot de passe</label><input type="password" id="pw2" placeholder="Répétez le mot de passe" oninput="checkPw()"></div>
-                        <div id="pw-match" style="font-size:11.5px;margin-top:-6px"></div>
-                        <div class="pw-rules">
-                            <div class="pw-rules-title">Le mot de passe doit contenir :</div>
-                            <div class="pw-rule" data-rule="len"><span class="ri">○</span> Au moins 8 caractères</div>
-                            <div class="pw-rule" data-rule="upper"><span class="ri">○</span> Une lettre majuscule</div>
-                            <div class="pw-rule" data-rule="num"><span class="ri">○</span> Un chiffre</div>
-                            <div class="pw-rule" data-rule="special"><span class="ri">○</span> Un caractère spécial (!@#$…)</div>
-                        </div>
-                        <div style="display:flex;align-items:flex-start;gap:8px">
-                            <input type="checkbox" id="cgu" style="width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--teal-600)">
-                            <label for="cgu" style="font-size:12.5px;color:var(--slate-600);cursor:pointer">J'accepte les <a style="color:var(--teal-700);font-weight:600;cursor:pointer">CGU</a> et la <a style="color:var(--teal-700);font-weight:600;cursor:pointer">Politique de confidentialité</a>.</label>
-                        </div>
-                    </div>
-                    <div class="inscrip-nav">
-                        <button class="btn btn-secondary" onclick="isPrev(3)">← Retour</button>
-                        <button class="btn btn-primary" onclick="isNext(3)">Créer mon compte →</button>
-                    </div>
-                </div>
-
-                <!-- Étape 4 : Succès -->
-                <div class="inscrip-step" id="is4">
-                    <div class="success-box">
-                        <div class="success-icon">✅</div>
-                        <div class="success-title">Compte créé avec succès !</div>
-                        <p class="success-msg">Votre compte MediBook a été créé. Un administrateur validera votre inscription. Vous recevrez un email de confirmation dès l'activation.</p>
-                        <div class="recap-box">
-                            <div class="recap-title">Récapitulatif</div>
-                            <div class="recap-row"><span class="recap-label">Rôle</span><span id="rc-role" style="font-weight:600">Patient</span></div>
-                            <div class="recap-row"><span class="recap-label">Nom</span><span id="rc-nom" style="font-weight:600">—</span></div>
-                            <div class="recap-row"><span class="recap-label">CMU</span><span id="rc-cmu" style="font-weight:600;font-family:monospace">—</span></div>
-                        </div>
-                        <button class="btn btn-primary" style="width:100%" onclick="goLogin()">← Retour à la connexion</button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== DASHBOARD ========== -->
-    <div class="screen" id="dashboard">
-        <aside class="sidebar">
-            <div class="sb-logo">
-                <div class="sb-logo-inner">
-                    <div class="sb-logo-mark">🏥</div>
-                    <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
-                </div>
-            </div>
-
-            <!-- Badge rôle actif -->
-            <div class="sb-role-badge" id="role-badge">
-                <span id="role-badge-icon">🧑</span>
-                <span id="role-badge-txt">Patient</span>
-            </div>
-
-            <!-- Nav Patient -->
-            <nav id="nav-patient">
-                <div class="sb-section">
-                    <span class="sb-section-label">Mon espace</span>
-                    <button class="sb-item active" onclick="goPage('dash',this)"><span class="sb-icon">🏠</span>Tableau de bord</button>
-                    <button class="sb-item" onclick="goPage('profil',this)"><span class="sb-icon">👤</span>Mon profil</button>
-                    <button class="sb-item" onclick="goPage('carnet',this)"><span class="sb-icon">📋</span>Carnet médical</button>
-                </div>
-                <div class="sb-section">
-                    <span class="sb-section-label">Historique</span>
-                    <button class="sb-item" onclick="goPage('consultations-pat',this)"><span class="sb-icon">🩺</span>Consultations</button>
-                    <button class="sb-item" onclick="goPage('ordonnances-pat',this)"><span class="sb-icon">💊</span>Ordonnances</button>
-                    <button class="sb-item" onclick="goPage('documents-pat',this)"><span class="sb-icon">📁</span>Documents</button>
-                    <button class="sb-item" onclick="goPage('rappels',this)"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></button>
-                </div>
-            </nav>
-
-            <!-- Nav Médecin -->
-            <nav id="nav-medecin" style="display:none">
-                <div class="sb-section">
-                    <span class="sb-section-label">Clinique</span>
-                    <button class="sb-item active" onclick="goPage('dash',this)"><span class="sb-icon">🏠</span>Tableau de bord</button>
-                    <button class="sb-item" onclick="goPage('patients',this)"><span class="sb-icon">👥</span>Mes patients</button>
-                    <button class="sb-item" onclick="goPage('dossier',this)"><span class="sb-icon">📋</span>Dossier patient</button>
-                </div>
-                <div class="sb-section">
-                    <span class="sb-section-label">Actions</span>
-                    <button class="sb-item" onclick="goPage('nouvelle-consult',this)"><span class="sb-icon">➕</span>Nouvelle consultation</button>
-                    <button class="sb-item" onclick="goPage('ordo-form',this)"><span class="sb-icon">💊</span>Nouvelle ordonnance</button>
-                    <button class="sb-item" onclick="goPage('certificats',this)"><span class="sb-icon">📄</span>Certificats</button>
-                </div>
-            </nav>
-
-            <!-- Nav Infirmier -->
-            <nav id="nav-infirmier" style="display:none">
-                <div class="sb-section">
-                    <span class="sb-section-label">Soins</span>
-                    <button class="sb-item active" onclick="goPage('dash',this)"><span class="sb-icon">🏠</span>Tableau de bord</button>
-                    <button class="sb-item" onclick="goPage('patients',this)"><span class="sb-icon">👥</span>Patients</button>
-                    <button class="sb-item" onclick="goPage('vitaux',this)"><span class="sb-icon">❤️</span>Signes vitaux</button>
-                    <button class="sb-item" onclick="goPage('soins',this)"><span class="sb-icon">🩹</span>Soins infirmiers</button>
-                </div>
-            </nav>
-
-            <div class="sb-footer">
-                <div class="sb-user" onclick="logout()">
-                    <div class="sb-avatar" id="sb-av">KJ</div>
-                    <div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role" id="sb-role-txt">Patient</div></div>
-                    <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,.3)">↗</span>
-                </div>
-            </div>
-        </aside>
-
-        <div class="main">
-            <header class="topbar">
-                <div class="topbar-title" id="page-title">Tableau de bord</div>
-                <div class="searchbar"><span style="font-size:13px;color:var(--slate-400)">🔍</span><input type="text" placeholder="Rechercher…"></div>
-                <div class="topbar-right">
-                    <div class="icon-btn">🔔<div class="notif-dot"></div></div>
-                    <div class="icon-btn">⚙️</div>
-                    <div class="icon-btn" onclick="logout()">🚪</div>
-                </div>
-            </header>
-            <div class="content-area">
-
-                <!-- ===== DASHBOARD ===== -->
-                <div class="page active" id="page-dash">
-                    <!-- Patient dashboard -->
-                    <div id="dash-patient">
-                        <div class="stats-row">
-                            <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">12</div><div class="stat-label">Consultations totales</div><div class="stat-trend trend-up">↑ +2 ce mois</div></div>
-                            <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">5</div><div class="stat-label">Ordonnances actives</div><div class="stat-trend trend-amber">1 renouvelable</div></div>
-                            <div class="stat-card" data-emoji="📁"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">8</div><div class="stat-label">Documents médicaux</div><div class="stat-trend" style="color:var(--slate-400)">2 images</div></div>
-                            <div class="stat-card" data-emoji="📅"><div class="stat-accent" style="background:var(--red)"></div><div class="stat-val">1</div><div class="stat-label">RDV à venir</div><div class="stat-trend trend-amber">28 Mars 2025</div></div>
-                        </div>
-                        <div class="grid g-2-1 gap-14">
-                            <div>
-                                <div class="card">
-                                    <div class="card-header"><div><div class="card-title">Dernières consultations</div></div><button class="btn btn-secondary btn-sm" onclick="goPage('consultations-pat',null)">Tout voir</button></div>
-                                    <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">12</div><div class="consult-date-m">Mar</div></div><div class="flex-1"><div class="consult-title">Fièvre persistante</div><div class="consult-sub">Paludisme P. falciparum · CHU Treichville</div></div><div class="consult-doctor">Dr. Bamba A.</div></div>
-                                    <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">02</div><div class="consult-date-m">Fév</div></div><div class="flex-1"><div class="consult-title">Bilan cardiologique</div><div class="consult-sub">Contrôle HTA · Clinique Sainte Marie</div></div><div class="consult-doctor">Dr. Koné M.</div></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Infirmier</th>
+                            <th>Service</th>
+                            <th>Matricule</th>
+                            <th>Établissement</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-row">
+                                    <div class="user-ava">KM</div>
+                                    <div>
+                                        <div style="font-weight:600">Koné Marie</div>
+                                        <div style="font-size:11px;color:var(--slate-500)">kone.marie@soins.ci</div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <div class="card mb-12">
-                                    <div class="card-title mb-8">Mes conditions</div>
-                                    <div class="flex gap-6" style="flex-wrap:wrap"><span class="badge badge-red">🩸 O+</span><span class="badge badge-amber">⚠️ Allergie Pénicilline</span><span class="badge badge-teal">💙 HTA</span></div>
+                            </td>
+                            <td><span class="badge badge-green">Urgences</span></td>
+                            <td><span style="font-family:monospace">MAT-INF-00854</span></td>
+                            <td>CHU de Treichville</td>
+                            <td><span class="badge badge-green">Actif</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px">
+                                    <button class="btn btn-secondary btn-sm">Modifier</button>
+                                    <button class="btn btn-danger btn-sm">Suspendre</button>
                                 </div>
-                                <div class="card">
-                                    <div class="card-header"><div class="card-title">Rappels du jour</div><span class="badge badge-amber">3</span></div>
-                                    <div class="rappel-item"><div class="rappel-time">08h00</div><div class="rappel-icon-box">💊</div><div><div style="font-size:13px;font-weight:600">Amlodipine 5mg</div><div style="font-size:11.5px;color:var(--slate-500)">1 comprimé – matin</div></div></div>
-                                    <div class="rappel-item"><div class="rappel-time">20h00</div><div class="rappel-icon-box">💊</div><div><div style="font-size:13px;font-weight:600">Losartan 50mg</div><div style="font-size:11.5px;color:var(--slate-500)">1 comprimé – soir</div></div></div>
-                                    <div class="rappel-item" style="border-color:var(--amber)"><div class="rappel-time" style="color:var(--amber-dark)">28 Mar</div><div class="rappel-icon-box amber">📅</div><div><div style="font-size:13px;font-weight:600">RDV Cardiologie</div><div style="font-size:11.5px;color:var(--slate-500)">Dr. Koné M. – 10h30</div></div></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-row">
+                                    <div class="user-ava" style="background:var(--teal-100)">TB</div>
+                                    <div>
+                                        <div style="font-weight:600">Traoré Bakary</div>
+                                        <div style="font-size:11px;color:var(--slate-500)">traore.b@soins.ci</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Médecin dashboard -->
-                    <div id="dash-medecin" style="display:none">
-                        <div class="stats-row">
-                            <div class="stat-card" data-emoji="👥"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">28</div><div class="stat-label">Patients aujourd'hui</div><div class="stat-trend trend-up">↑ +4 vs hier</div></div>
-                            <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">7</div><div class="stat-label">Consultations ce jour</div><div class="stat-trend trend-amber">3 en attente</div></div>
-                            <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">15</div><div class="stat-label">Ordonnances émises</div><div class="stat-trend trend-up">Ce mois</div></div>
-                            <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">4</div><div class="stat-label">Certificats créés</div><div class="stat-trend" style="color:var(--slate-400)">Ce mois</div></div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header"><div class="card-title">Patients récents</div><button class="btn btn-primary btn-sm" onclick="goPage('nouvelle-consult',null)">+ Nouvelle consultation</button></div>
-                            <div class="consult-item"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="consult-title">Kouadio Jean Baptiste</div><div class="consult-sub">Fièvre persistante · 12 Mar 2025</div></div><button class="btn btn-secondary btn-sm" onclick="goPage('dossier',null)">Voir dossier</button></div>
-                            <div class="consult-item"><div class="patient-ava sm" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AK</div><div class="flex-1"><div class="consult-title">Assi Koffi Martial</div><div class="consult-sub">Bilan diabète · 08 Mar 2025</div></div><button class="btn btn-secondary btn-sm">Voir dossier</button></div>
-                        </div>
-                    </div>
-                    <!-- Infirmier dashboard -->
-                    <div id="dash-infirmier" style="display:none">
-                        <div class="stats-row">
-                            <div class="stat-card" data-emoji="👥"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">12</div><div class="stat-label">Patients en soin</div></div>
-                            <div class="stat-card" data-emoji="❤️"><div class="stat-accent" style="background:var(--red)"></div><div class="stat-val">5</div><div class="stat-label">Mesures aujourd'hui</div></div>
-                            <div class="stat-card" data-emoji="🩹"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">8</div><div class="stat-label">Soins effectués</div></div>
-                            <div class="stat-card" data-emoji="📁"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">3</div><div class="stat-label">Documents uploadés</div></div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header"><div class="card-title">Soins du jour</div><button class="btn btn-primary btn-sm" onclick="openModal('soin-form')">+ Enregistrer soin</button></div>
-                            <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">14</div><div class="consult-date-m">Mar</div></div><div class="flex-1"><div class="consult-title">Injection IM – Artéméther 80mg</div><div class="consult-sub">Kouadio Jean Baptiste · 10h00</div></div><span class="badge badge-teal">Effectué</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== PROFIL PATIENT ===== -->
-                <div class="page" id="page-profil">
-                    <div class="grid g-2-1 gap-14">
-                        <div class="card">
-                            <div class="card-header"><div class="card-title">Informations personnelles</div><button class="btn btn-secondary btn-sm">✏️ Modifier</button></div>
-                            <div class="flex flex-center gap-14 mb-16">
-                                <div style="width:70px;height:70px;border-radius:16px;background:linear-gradient(135deg,var(--teal-600),var(--teal-400));display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0">KJ</div>
-                                <div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700">Kouadio Jean Baptiste</div><div style="font-size:12px;color:var(--slate-500);margin-top:3px">CMU-2024-08821</div><button class="btn btn-secondary btn-sm mt-8">📷 Changer photo</button></div>
-                            </div>
-                            <div class="grid g2" style="gap:12px">
-                                <div class="fld"><label>Nom</label><input type="text" value="Kouadio"></div>
-                                <div class="fld"><label>Prénom</label><input type="text" value="Jean Baptiste"></div>
-                                <div class="fld"><label>Date de naissance</label><input type="date" value="1987-03-14"></div>
-                                <div class="fld"><label>CMU</label><input type="text" value="CMU-2024-08821" readonly></div>
-                                <div class="fld"><label>Téléphone</label><input type="text" value="+225 07 12 34 56"></div>
-                                <div class="fld"><label>Email</label><input type="email" value="jb.kouadio@email.ci"></div>
-                            </div>
-                            <div class="actions-bar"><span></span><div class="actions-right"><button class="btn btn-primary">Enregistrer</button></div></div>
-                        </div>
-                        <div>
-                            <div class="card mb-12"><div class="card-title mb-8">Conditions médicales</div><div style="display:flex;flex-direction:column;gap:7px"><span class="badge badge-teal">O+ Rhésus+</span><span class="badge badge-red">⚠️ Allergie: Pénicilline</span><span class="badge badge-amber">Hypertension artérielle</span></div></div>
-                            <div class="card"><div class="card-title mb-8">Établissements fréquentés</div><div style="font-size:13px;display:flex;flex-direction:column;gap:7px"><div>🏥 CHU de Treichville</div><div>🏥 Clinique Sainte Marie</div><div>🏥 Polyclinique Internationale</div></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== CARNET MÉDICAL ===== -->
-                <div class="page" id="page-carnet">
-                    <div class="patient-banner">
-                        <div class="patient-ava">KJ</div>
-                        <div class="flex-1"><div class="patient-name">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821 · Né le 14/03/1987 · 37 ans · Masculin</div><div class="badge-row"><span class="badge badge-teal">O+ Rhésus+</span><span class="badge badge-red">Allergie Pénicilline</span><span class="badge badge-amber">Hypertension</span></div></div>
-                    </div>
-                    <div class="grid g2 gap-14">
-                        <div class="card"><div class="card-title mb-8">Antécédents personnels</div><div style="font-size:13px;display:flex;flex-direction:column;gap:6px"><div class="flex flex-center gap-8"><span class="badge badge-slate">2020</span><span>Paludisme à P. falciparum</span></div><div class="flex flex-center gap-8"><span class="badge badge-slate">2018</span><span>Fièvre typhoïde</span></div><div class="flex flex-center gap-8"><span class="badge badge-amber">Chronique</span><span>Hypertension artérielle</span></div></div></div>
-                        <div class="card"><div class="card-title mb-8">Antécédents familiaux</div><div style="font-size:13px;display:flex;flex-direction:column;gap:6px"><div>👨 Père : Diabète type 2</div><div>👩 Mère : Hypertension</div></div></div>
-                        <div class="card"><div class="card-title mb-8">Allergies & précautions</div><div style="font-size:13px;display:flex;flex-direction:column;gap:6px"><div class="flex flex-center gap-8"><span class="badge badge-red">Pénicilline</span><span>Réaction allergique sévère</span></div><div class="flex flex-center gap-8"><span class="badge badge-amber">AINS</span><span>Intolérance digestive</span></div></div></div>
-                        <div class="card"><div class="card-title mb-8">Armoire à médicaments</div><div style="font-size:13px;display:flex;flex-direction:column;gap:7px"><div class="flex flex-center gap-8"><span>💊</span><div><div style="font-weight:600">Amlodipine 5mg</div><div style="font-size:11.5px;color:var(--slate-500)">1x/j matin · en cours</div></div></div><div class="flex flex-center gap-8"><span>💊</span><div><div style="font-weight:600">Losartan 50mg</div><div style="font-size:11.5px;color:var(--slate-500)">1x/j soir · en cours</div></div></div></div></div>
-                    </div>
-                </div>
-
-                <!-- ===== CONSULTATIONS PATIENT ===== -->
-                <div class="page" id="page-consultations-pat">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Mes consultations</div><span class="badge badge-slate">12 consultations</span></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">12</div><div class="consult-date-m">Mar</div></div><div class="flex-1"><div class="consult-title">Fièvre persistante – Paludisme P. falciparum</div><div class="consult-sub">TA: 130/85 · T°: 39.2°C · CHU Treichville</div></div><div class="consult-doctor">Dr. Bamba A.</div></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">02</div><div class="consult-date-m">Fév</div></div><div class="flex-1"><div class="consult-title">Bilan cardiologique – Contrôle HTA</div><div class="consult-sub">TA: 145/92 · FC: 78bpm · Clinique Sainte Marie</div></div><div class="consult-doctor">Dr. Koné M.</div></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">15</div><div class="consult-date-m">Jan</div></div><div class="flex-1"><div class="consult-title">Bilan annuel de routine</div><div class="consult-sub">Polyclinique Internationale d'Abidjan</div></div><div class="consult-doctor">Dr. Traoré S.</div></div>
-                    </div>
-                </div>
-
-                <!-- ===== ORDONNANCES PATIENT ===== -->
-                <div class="page" id="page-ordonnances-pat">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Mes ordonnances</div><span class="badge badge-teal">5 actives</span></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">12</div><div class="consult-date-m">Mar</div></div><div class="flex-1"><div class="consult-title">Artéméther/Luméfantrine + Paracétamol</div><div class="consult-sub">Dr. Bamba A. · 2 médicaments · valide 30 jours</div></div><div style="display:flex;gap:6px"><span class="badge badge-green">Active</span><button class="btn btn-secondary btn-sm">📄 PDF</button></div></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">02</div><div class="consult-date-m">Fév</div></div><div class="flex-1"><div class="consult-title">Amlodipine 5mg + Losartan 50mg</div><div class="consult-sub">Dr. Koné M. · 2 médicaments · renouvelable</div></div><div style="display:flex;gap:6px"><span class="badge badge-green">Active</span><button class="btn btn-secondary btn-sm">📄 PDF</button></div></div>
-                    </div>
-                </div>
-
-                <!-- ===== DOCUMENTS PATIENT ===== -->
-                <div class="page" id="page-documents-pat">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Documents médicaux</div></div>
-                        <div class="grid g3 gap-14" style="padding:0">
-                            <div class="card" style="text-align:center;cursor:pointer"><div style="font-size:34px;margin-bottom:8px">🧪</div><div style="font-size:13px;font-weight:600">Bilan sanguin NFS</div><div style="font-size:12px;color:var(--slate-500);margin-top:4px">12 Mar 2025 · PDF</div><button class="btn btn-secondary btn-sm mt-8">⬇️ Télécharger</button></div>
-                            <div class="card" style="text-align:center;cursor:pointer"><div style="font-size:34px;margin-bottom:8px">🩻</div><div style="font-size:13px;font-weight:600">Radiographie thorax</div><div style="font-size:12px;color:var(--slate-500);margin-top:4px">02 Fév 2025 · JPEG</div><button class="btn btn-secondary btn-sm mt-8">⬇️ Télécharger</button></div>
-                            <div class="card" style="text-align:center;cursor:pointer"><div style="font-size:34px;margin-bottom:8px">📋</div><div style="font-size:13px;font-weight:600">Compte-rendu cardio</div><div style="font-size:12px;color:var(--slate-500);margin-top:4px">02 Fév 2025 · PDF</div><button class="btn btn-secondary btn-sm mt-8">⬇️ Télécharger</button></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== RAPPELS ===== -->
-                <div class="page" id="page-rappels">
-                    <div class="grid g2 gap-14">
-                        <div class="card"><div class="card-header"><div class="card-title">Rappels médicaments</div><span class="badge badge-amber">2</span></div><div class="rappel-item"><div class="rappel-time">08h00</div><div class="rappel-icon-box">💊</div><div><div style="font-size:13px;font-weight:600">Amlodipine 5mg</div><div style="font-size:11.5px;color:var(--slate-500)">1 comprimé · matin · tous les jours</div></div></div><div class="rappel-item"><div class="rappel-time">20h00</div><div class="rappel-icon-box">💊</div><div><div style="font-size:13px;font-weight:600">Losartan 50mg</div><div style="font-size:11.5px;color:var(--slate-500)">1 comprimé · soir · tous les jours</div></div></div></div>
-                        <div class="card"><div class="card-header"><div class="card-title">Prochains rendez-vous</div><span class="badge badge-teal">1</span></div><div class="rappel-item" style="border-color:var(--teal-300)"><div class="rappel-time" style="color:var(--teal-700)">28 Mar</div><div class="rappel-icon-box">📅</div><div><div style="font-size:13px;font-weight:600">Cardiologie – Dr. Koné M.</div><div style="font-size:11.5px;color:var(--slate-500)">10h30 · Clinique Sainte Marie</div></div></div></div>
-                    </div>
-                </div>
-
-                <!-- ===== DOSSIER PATIENT (Médecin) ===== -->
-                <div class="page" id="page-dossier">
-                    <div class="patient-banner">
-                        <div class="patient-ava">KJ</div>
-                        <div class="flex-1"><div class="patient-name">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821 · Né le 14/03/1987 · 📞 +225 07 12 34 56</div><div class="badge-row"><span class="badge badge-teal">O+ Rhésus+</span><span class="badge badge-red">Allergie Pénicilline</span><span class="badge badge-amber">Hypertension</span></div></div>
-                        <button class="btn btn-primary" onclick="goPage('nouvelle-consult',null)">+ Nouvelle consultation</button>
-                    </div>
-                    <div class="tabs-nav">
-                        <button class="tab-btn active" onclick="switchTab(this,'dtab-consult')">Consultations</button>
-                        <button class="tab-btn" onclick="switchTab(this,'dtab-ordo')">Ordonnances</button>
-                        <button class="tab-btn" onclick="switchTab(this,'dtab-docs')">Documents</button>
-                        <button class="tab-btn" onclick="switchTab(this,'dtab-ant')">Antécédents</button>
-                        <button class="tab-btn" onclick="switchTab(this,'dtab-vit')">Signes vitaux</button>
-                    </div>
-                    <div class="tab-content active" id="dtab-consult">
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">12</div><div class="consult-date-m">Mar</div></div><div class="flex-1"><div class="consult-title">Fièvre persistante – Paludisme P. falciparum</div><div class="consult-sub">TA: 130/85 · T°: 39.2°C · FC: 98bpm</div></div><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm">✏️</button><button class="btn btn-danger btn-sm">🗑️</button></div></div>
-                        <div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">02</div><div class="consult-date-m">Fév</div></div><div class="flex-1"><div class="consult-title">Bilan cardiologique – Contrôle HTA</div><div class="consult-sub">TA: 145/92 · FC: 78bpm</div></div><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm">✏️</button><button class="btn btn-danger btn-sm">🗑️</button></div></div>
-                    </div>
-                    <div class="tab-content" id="dtab-ordo"><div class="card"><div class="card-title mb-8">Ordonnance – 12/03/2025</div><table style="width:100%;font-size:13px;border-collapse:collapse"><tr style="background:var(--slate-50)"><th style="padding:7px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--slate-500)">Médicament</th><th style="padding:7px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--slate-500)">Dosage</th><th style="padding:7px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--slate-500)">Posologie</th><th style="padding:7px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--slate-500)">Durée</th></tr><tr><td style="padding:7px">Artéméther/Luméfantrine</td><td style="padding:7px">80/480mg</td><td style="padding:7px">2x/j – matin, soir</td><td style="padding:7px">3 jours</td></tr><tr><td style="padding:7px">Paracétamol</td><td style="padding:7px">1000mg</td><td style="padding:7px">3x/j</td><td style="padding:7px">5 jours</td></tr></table><div class="mt-8"><button class="btn btn-secondary btn-sm">📄 PDF</button></div></div></div>
-                    <div class="tab-content" id="dtab-docs"><div class="grid g3 gap-14"><div class="card" style="text-align:center"><div style="font-size:30px;margin-bottom:6px">🧪</div><div style="font-size:13px;font-weight:600">Bilan NFS</div><div style="font-size:12px;color:var(--slate-500);margin-top:4px">12 Mar · PDF</div><button class="btn btn-secondary btn-sm mt-8">⬇️</button></div><div class="card" style="text-align:center;border:2px dashed var(--slate-200);background:var(--slate-50);cursor:pointer" onclick="openModal('upload-doc')"><div style="font-size:30px;margin-bottom:6px">➕</div><div style="font-size:13px;color:var(--slate-500)">Ajouter document</div></div></div></div>
-                    <div class="tab-content" id="dtab-ant"><div class="grid g2 gap-14"><div class="card"><div class="card-title mb-8">Maladies passées</div><div style="font-size:13px;display:flex;flex-direction:column;gap:6px"><div class="flex flex-center gap-8"><span class="badge badge-slate">2020</span><span>Paludisme P. falciparum</span></div></div></div><div class="card"><div class="card-title mb-8">Maladies chroniques</div><div class="flex flex-center gap-8"><span class="badge badge-amber">Chronique</span><span>Hypertension artérielle</span></div></div><div class="card"><div class="card-title mb-8">Antécédents familiaux</div><div style="font-size:13px"><div>👨 Père – Diabète type 2</div><div>👩 Mère – Hypertension</div></div></div><div class="card"><div class="card-title mb-8">Allergies</div><div style="font-size:13px;display:flex;flex-direction:column;gap:6px"><div class="flex flex-center gap-8"><span class="badge badge-red">Pénicilline</span><span>Réaction sévère</span></div></div></div></div></div>
-                    <div class="tab-content" id="dtab-vit"><div class="vital-grid"><div class="vital-card warning"><div class="vital-icon">🩸</div><div class="vital-val">145/92</div><div class="vital-lbl">Tension (mmHg)</div></div><div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">37.1°C</div><div class="vital-lbl">Température</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">78 bpm</div><div class="vital-lbl">Fréq. cardiaque</div></div><div class="vital-card"><div class="vital-icon">💨</div><div class="vital-val">97%</div><div class="vital-lbl">SpO₂</div></div></div></div>
-                </div>
-
-                <!-- ===== NOUVELLE CONSULTATION ===== -->
-                <div class="page" id="page-nouvelle-consult">
-                    <div class="patient-banner">
-                        <div class="patient-ava sm">KJ</div>
-                        <div class="flex-1"><div class="patient-name" style="font-size:15px">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821 · 37 ans</div></div>
-                        <span class="badge badge-red">⚠️ Allergie Pénicilline</span>
-                        <span class="badge badge-amber">Hypertension</span>
-                    </div>
-                    <div class="steps mb-16">
-                        <div class="step-item done"><div class="step-dot">✓</div><span>Patient</span></div>
-                        <div class="step-line"></div>
-                        <div class="step-item active"><div class="step-dot">2</div><span>Symptômes</span></div>
-                        <div class="step-line"></div>
-                        <div class="step-item"><div class="step-dot">3</div><span>Diagnostic</span></div>
-                        <div class="step-line"></div>
-                        <div class="step-item"><div class="step-dot">4</div><span>Traitement</span></div>
-                    </div>
-                    <div class="card">
-                        <div class="tabs-nav">
-                            <button class="tab-btn active" onclick="switchTab(this,'ct1')">1 · Motif & Symptômes</button>
-                            <button class="tab-btn" onclick="switchTab(this,'ct2')">2 · Signes vitaux</button>
-                            <button class="tab-btn" onclick="switchTab(this,'ct3')">3 · Diagnostic</button>
-                            <button class="tab-btn" onclick="switchTab(this,'ct4')">4 · Traitement & Suivi</button>
-                        </div>
-                        <div class="tab-content active" id="ct1">
-                            <div class="grid g2" style="gap:12px">
-                                <div class="fld col-full"><label>Motif principal de consultation</label><input type="text" placeholder="Ex: fièvre persistante depuis 3 jours…"></div>
-                                <div class="fld"><label>Date de début des symptômes</label><input type="date"></div>
-                                <div class="fld"><label>Urgence</label><select><option>Consultation ordinaire</option><option>Semi-urgente</option><option>Urgente</option></select></div>
-                                <div class="col-full" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500)">Symptômes observés</div>
-                                <div class="col-full"><div class="chip-wrap"><span class="chip" onclick="this.classList.toggle('sel')">Fièvre</span><span class="chip" onclick="this.classList.toggle('sel')">Céphalée</span><span class="chip" onclick="this.classList.toggle('sel')">Toux</span><span class="chip" onclick="this.classList.toggle('sel')">Douleur abdominale</span><span class="chip" onclick="this.classList.toggle('sel')">Vomissements</span><span class="chip" onclick="this.classList.toggle('sel')">Diarrhée</span><span class="chip" onclick="this.classList.toggle('sel')">Dyspnée</span><span class="chip" onclick="this.classList.toggle('sel')">Frissons</span><span class="chip" onclick="this.classList.toggle('sel')">Fatigue intense</span><span class="chip" onclick="this.classList.toggle('sel')">Vertiges</span><span class="chip" onclick="this.classList.toggle('sel')">Œdèmes</span></div></div>
-                                <div class="fld col-full"><label>Autres observations</label><textarea rows="3" placeholder="Décrire les symptômes supplémentaires…"></textarea></div>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="ct2">
-                            <div class="vital-grid mb-12">
-                                <div class="vital-card warning"><div class="vital-icon">🩸</div><div class="vital-val">145/92</div><div class="vital-lbl">Tension ⚠️</div></div>
-                                <div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">38.7°C</div><div class="vital-lbl">Température</div></div>
-                                <div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">96 bpm</div><div class="vital-lbl">Fréq. cardiaque</div></div>
-                                <div class="vital-card"><div class="vital-icon">💨</div><div class="vital-val">97%</div><div class="vital-lbl">SpO₂</div></div>
-                            </div>
-                            <div class="grid g4" style="gap:12px">
-                                <div class="fld"><label>TA syst.</label><input type="number" placeholder="145"></div>
-                                <div class="fld"><label>TA diast.</label><input type="number" placeholder="92"></div>
-                                <div class="fld"><label>Temp. (°C)</label><input type="number" step="0.1" placeholder="38.7"></div>
-                                <div class="fld"><label>FC (bpm)</label><input type="number" placeholder="96"></div>
-                                <div class="fld"><label>Poids (kg)</label><input type="number" placeholder="82"></div>
-                                <div class="fld"><label>SpO₂ (%)</label><input type="number" placeholder="97"></div>
-                                <div class="fld"><label>Glycémie</label><input type="number" step="0.1" placeholder="5.4"></div>
-                                <div class="fld"><label>FR (/min)</label><input type="number" placeholder="18"></div>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="ct3">
-                            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Diagnostic rapide</div>
-                            <div class="diag-pills mb-12"><div class="dpill" onclick="selDiag(this)">Paludisme</div><div class="dpill" onclick="selDiag(this)">Infection bactérienne</div><div class="dpill" onclick="selDiag(this)">Infection virale</div><div class="dpill" onclick="selDiag(this)">HTA décompensée</div><div class="dpill" onclick="selDiag(this)">Typhoïde</div><div class="dpill" onclick="selDiag(this)">Autre</div></div>
-                            <div class="grid g2" style="gap:12px">
-                                <div class="fld col-full"><label>Diagnostic retenu</label><textarea rows="3" placeholder="Ex: Paludisme à Plasmodium falciparum, forme non compliquée…"></textarea></div>
-                                <div class="fld col-full"><label>Observations cliniques</label><textarea rows="3" placeholder="Examen physique, auscultation, palpation…"></textarea></div>
-                                <div class="fld"><label>Examens complémentaires</label><input type="text" placeholder="NFS, CRP, Goutte épaisse…"></div>
-                                <div class="fld"><label>Orientation</label><select><option>Aucune</option><option>Cardiologue</option><option>Laboratoire</option><option>Urgences</option></select></div>
-                            </div>
-                        </div>
-                        <div class="tab-content" id="ct4">
-                            <div class="grid g2" style="gap:12px">
-                                <div class="fld col-full"><label>Plan de traitement</label><textarea rows="3" placeholder="Traitement médicamenteux, soins recommandés…"></textarea></div>
-                                <div class="fld"><label>Prochain rendez-vous</label><input type="date"></div>
-                                <div class="fld"><label>Arrêt de travail</label><select><option>Non</option><option>Oui – 3 jours</option><option>Oui – 5 jours</option><option>Oui – 7 jours</option></select></div>
-                                <div class="fld col-full"><label>Notes complémentaires</label><textarea rows="2" placeholder="Informations supplémentaires…"></textarea></div>
-                            </div>
-                            <div class="actions-bar">
-                                <button class="btn btn-secondary">💾 Brouillon</button>
-                                <div class="actions-right">
-                                    <button class="btn btn-secondary" onclick="goPage('certificats',null)">📄 Créer certificat</button>
-                                    <button class="btn btn-secondary" onclick="goPage('ordo-form',null)">💊 Créer ordonnance</button>
-                                    <button class="btn btn-primary">✅ Valider consultation</button>
+                            </td>
+                            <td><span class="badge badge-green">Pédiatrie</span></td>
+                            <td><span style="font-family:monospace">MAT-INF-00912</span></td>
+                            <td>Clinique Sainte-Marie</td>
+                            <td><span class="badge badge-green">Actif</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px">
+                                    <button class="btn btn-secondary btn-sm">Modifier</button>
+                                    <button class="btn btn-danger btn-sm">Suspendre</button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== ORDONNANCE FORM ===== -->
-                <div class="page" id="page-ordo-form">
-                    <div class="card mb-12">
-                        <div class="card-header mb-0"><div class="card-title">Rechercher un patient</div></div>
-                        <div style="display:flex;gap:10px;margin-top:12px">
-                            <input type="text" placeholder="🔍 Nom, prénom ou numéro CMU…" style="flex:1;padding:9px 13px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none">
-                            <button class="btn btn-secondary">Rechercher</button>
-                        </div>
-                        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
-                            <div class="consult-item" onclick="this.parentElement.style.display='none'"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="consult-title">Kouadio Jean Baptiste</div><div class="consult-sub">CMU-2024-08821 · 37 ans · Allergie Pénicilline</div></div><span class="badge badge-red">⚠️ Allergie</span></div>
-                        </div>
-                    </div>
-                    <div class="patient-banner"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821 · Né le 14/03/1987</div></div><span class="badge badge-red">⚠️ Allergie Pénicilline</span><span class="badge badge-amber">Hypertension</span></div>
-                    <div class="card">
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:10px">Informations de l'ordonnance</div>
-                        <div class="grid g4" style="gap:12px;margin-bottom:18px">
-                            <div class="fld"><label>Date</label><input type="date"></div>
-                            <div class="fld"><label>Consultation liée</label><select><option>12/03/2025 – Fièvre persistante</option><option>— Indépendante</option></select></div>
-                            <div class="fld"><label>Renouvellement</label><select><option>Non renouvelable</option><option>1 renouvellement</option><option>2 renouvellements</option></select></div>
-                            <div class="fld"><label>Validité</label><select><option>30 jours</option><option>60 jours</option><option>90 jours</option></select></div>
-                        </div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Médicaments prescrits</div>
-                        <div style="overflow-x:auto;border:1px solid var(--slate-200);border-radius:var(--radius-sm);margin-bottom:10px">
-                            <table class="ordo-tbl">
-                                <thead><tr><th style="width:22%">Médicament</th><th style="width:12%">Dosage</th><th style="width:9%">Voie</th><th style="width:8%">Prises/j</th><th style="width:18%">Moment(s)</th><th style="width:8%">Durée (j)</th><th style="width:19%">Instructions</th><th style="width:4%"></th></tr></thead>
-                                <tbody id="ordoRows">
-                                <tr><td><input type="text" value="Artéméther/Luméfantrine"></td><td><input type="text" value="80/480mg"></td><td><select><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="2" min="1" max="6"></td><td><input type="text" value="Matin, Soir"></td><td><input type="number" value="3"></td><td><input type="text" placeholder="Avec les repas"></td><td><button class="btn-row-del" onclick="delRow(this)">✕</button></td></tr>
-                                <tr><td><input type="text" value="Paracétamol"></td><td><input type="text" value="1000mg"></td><td><select><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="3" min="1" max="6"></td><td><input type="text" value="Matin, Midi, Soir"></td><td><input type="number" value="5"></td><td><input type="text" placeholder="Si fièvre > 38.5°C"></td><td><button class="btn-row-del" onclick="delRow(this)">✕</button></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button class="add-row-btn" onclick="addRow()">+ Ajouter un médicament</button>
-                        <div class="grid g2" style="gap:12px;margin-top:16px">
-                            <div class="fld col-full"><label>Recommandations</label><textarea rows="2" placeholder="Repos complet, hydratation abondante…"></textarea></div>
-                        </div>
-                        <!-- Aperçu -->
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin:18px 0 10px">Aperçu de l'ordonnance</div>
-                        <div class="cert-preview" style="background:var(--slate-50)">
-                            <div class="cert-header">
-                                <div class="cert-title-txt">Ordonnance médicale</div>
-                                <div class="cert-doctor-txt">Dr. Bamba Adama · Médecin Généraliste · N° Ordre : MAT-MED-00142</div>
-                                <div class="cert-doctor-txt">CHU de Treichville, Abidjan · Tél : +225 27 21 24 26 26</div>
-                            </div>
-                            <div style="font-size:13px;line-height:1.9">
-                                <p><strong>Patient :</strong> Kouadio Jean Baptiste &nbsp;|&nbsp; CMU : CMU-2024-08821 &nbsp;|&nbsp; Né le : 14/03/1987</p>
-                                <hr style="border:none;border-top:0.5px solid var(--slate-200);margin:8px 0">
-                                <p>① Artéméther/Luméfantrine 80/480mg — Oral — 2 prises/j (matin, soir) — 3 jours</p>
-                                <p>② Paracétamol 1000mg — Oral — 3 prises/j (matin, midi, soir) — 5 jours</p>
-                            </div>
-                            <div class="cert-sig">Fait à Abidjan, le …<div class="cert-sig-line"></div></div>
-                        </div>
-                        <div class="actions-bar">
-                            <button class="btn btn-secondary">💾 Brouillon</button>
-                            <div class="actions-right"><button class="btn btn-secondary">📄 PDF</button><button class="btn btn-success">🖨️ Imprimer</button><button class="btn btn-primary">✅ Valider & envoyer</button></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== CERTIFICATS ===== -->
-                <div class="page" id="page-certificats">
-                    <div class="patient-banner"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821 · 37 ans</div></div></div>
-                    <div class="card">
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Type de certificat</div>
-                        <div class="diag-pills mb-16" id="certTypePills">
-                            <div class="dpill sel" onclick="setCert(this,'apt')">Aptitude au travail</div>
-                            <div class="dpill" onclick="setCert(this,'arret')">Arrêt de travail</div>
-                            <div class="dpill" onclick="setCert(this,'dispense')">Dispense scolaire/sport</div>
-                            <div class="dpill" onclick="setCert(this,'general')">Certificat médical général</div>
-                        </div>
-                        <div class="grid g2" style="gap:12px">
-                            <div class="fld"><label>Date du certificat</label><input type="date" id="cDate" oninput="updateCert()"></div>
-                            <div class="fld"><label>Consultation liée</label><select><option>12/03/2025 – Fièvre persistante</option><option>02/02/2025 – Bilan cardio</option></select></div>
-                            <div class="fld" id="fArretD" style="display:none"><label>Début de l'arrêt</label><input type="date" id="arretD" oninput="updateCert()"></div>
-                            <div class="fld" id="fArretF" style="display:none"><label>Fin de l'arrêt</label><input type="date" id="arretF" oninput="updateCert()"></div>
-                            <div class="fld"><label>Destinataire</label><input type="text" id="cDest" placeholder="À qui de droit, Employeur…" oninput="updateCert()"></div>
-                            <div class="fld"><label>Motif médical</label><select id="cMotif" onchange="updateCert()"><option value="pour raisons de santé">pour raisons de santé</option><option value="suite à une consultation">suite à une consultation</option></select></div>
-                            <div class="fld col-full"><label>Restrictions</label><input type="text" id="cRestr" placeholder="Ex: Éviter les efforts physiques…" oninput="updateCert()"></div>
-                        </div>
-                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin:16px 0 8px">Aperçu du certificat</div>
-                        <div class="cert-preview">
-                            <div class="cert-header">
-                                <div class="cert-title-txt" id="cpTitle">Certificat d'aptitude au travail</div>
-                                <div class="cert-doctor-txt">Dr. Bamba Adama · Médecin Généraliste · MAT-MED-00142</div>
-                                <div class="cert-doctor-txt">CHU de Treichville, Abidjan</div>
-                            </div>
-                            <div style="font-size:13px;line-height:2" id="cpBody">
-                                <p>Je soussigné, <strong>Dr. Bamba Adama</strong>, Médecin Généraliste, certifie avoir examiné ce jour :</p>
-                                <p><strong>M. Kouadio Jean Baptiste</strong>, né le <strong>14/03/1987</strong>, N° CMU : <strong>CMU-2024-08821</strong></p>
-                                <p id="cpMain" style="margin-top:8px">Et atteste que l'état de santé de ce patient lui permet d'exercer son activité professionnelle sans restriction particulière.</p>
-                                <p id="cpRestr" style="font-style:italic;color:var(--slate-500)"></p>
-                            </div>
-                            <div class="cert-sig">Fait à Abidjan, le <span id="cpDate">…</span><div class="cert-sig-line"></div></div>
-                        </div>
-                        <div class="actions-bar">
-                            <button class="btn btn-secondary">💾 Brouillon</button>
-                            <div class="actions-right"><button class="btn btn-secondary">📄 PDF</button><button class="btn btn-primary">✅ Valider & transmettre</button></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ===== PATIENTS (Médecin + Infirmier) ===== -->
-                <div class="page" id="page-patients">
-                    <div class="flex flex-center gap-10 mb-12">
-                        <input type="text" placeholder="🔍 Rechercher par nom, prénom ou CMU…" style="flex:1;padding:9px 13px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none">
-                        <select style="padding:9px 12px;border:1.5px solid var(--slate-200);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;background:var(--white)"><option>Tous les patients</option><option>Mes patients</option></select>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead><tr><th>Patient</th><th>CMU</th><th>Âge</th><th>Dernière consultation</th><th>Conditions</th><th>Actions</th></tr></thead>
-                            <tbody>
-                            <tr><td><div class="flex flex-center gap-8"><div class="patient-ava sm">KJ</div><div><div style="font-weight:600">Kouadio Jean Baptiste</div><div style="font-size:11.5px;color:var(--slate-500)">+225 07 12 34 56</div></div></div></td><td><span style="font-family:monospace;font-size:12px">CMU-2024-08821</span></td><td>37 ans</td><td>12 Mar 2025</td><td><div class="flex gap-6"><span class="badge badge-red">Allergie</span><span class="badge badge-amber">HTA</span></div></td><td><button class="btn btn-primary btn-sm" onclick="goPage('dossier',null)">Voir dossier</button></td></tr>
-                            <tr><td><div class="flex flex-center gap-8"><div class="patient-ava sm" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">AK</div><div><div style="font-weight:600">Assi Koffi Martial</div><div style="font-size:11.5px;color:var(--slate-500)">+225 05 23 45 67</div></div></div></td><td><span style="font-family:monospace;font-size:12px">CMU-2023-04512</span></td><td>52 ans</td><td>08 Mar 2025</td><td><span class="badge badge-amber">Diabète</span></td><td><button class="btn btn-primary btn-sm">Voir dossier</button></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- ===== SIGNES VITAUX (Infirmier) ===== -->
-                <div class="page" id="page-vitaux">
-                    <div class="patient-banner"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821</div></div><button class="btn btn-primary btn-sm" onclick="openModal('saisie-vitaux')">+ Enregistrer mesures</button></div>
-                    <div class="card mb-12">
-                        <div class="card-title mb-12">Dernières mesures — 14 Mar 2025 à 09h30</div>
-                        <div class="vital-grid"><div class="vital-card warning"><div class="vital-icon">🩸</div><div class="vital-val">145/92</div><div class="vital-lbl">Tension (mmHg)</div></div><div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">37.1°C</div><div class="vital-lbl">Température</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">78 bpm</div><div class="vital-lbl">Fréq. cardiaque</div></div><div class="vital-card"><div class="vital-icon">⚖️</div><div class="vital-val">82 kg</div><div class="vital-lbl">Poids / IMC: 27.1</div></div></div>
-                        <div class="vital-grid mt-8"><div class="vital-card"><div class="vital-icon">💨</div><div class="vital-val">97%</div><div class="vital-lbl">SpO₂</div></div><div class="vital-card"><div class="vital-icon">🍬</div><div class="vital-val">5.4 mmol/L</div><div class="vital-lbl">Glycémie</div></div><div class="vital-card"><div class="vital-icon">🌬️</div><div class="vital-val">16 /min</div><div class="vital-lbl">Fréq. respiratoire</div></div><div class="vital-card"><div class="vital-icon">👤</div><div class="vital-val">–</div><div class="vital-lbl">–</div></div></div>
-                    </div>
-                </div>
-
-                <!-- ===== SOINS INFIRMIERS ===== -->
-                <div class="page" id="page-soins">
-                    <div class="patient-banner"><div class="patient-ava sm">KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px">Kouadio Jean Baptiste</div><div class="patient-meta">CMU-2024-08821</div></div><button class="btn btn-primary btn-sm" onclick="openModal('soin-form')">+ Enregistrer soin</button></div>
-                    <div class="card">
-                        <div class="card-title mb-12">Derniers soins</div>
-                        <div class="table-wrap" style="padding:0">
-                            <table><thead><tr><th>Date / Heure</th><th>Type</th><th>Détail</th><th>Infirmier</th><th></th></tr></thead>
-                                <tbody>
-                                <tr><td>14 Mar · 10h00</td><td><span class="badge badge-teal">Injection IM</span></td><td>Artéméther 80mg – bras gauche</td><td>Koné M.</td><td><button class="btn btn-danger btn-sm">✕</button></td></tr>
-                                <tr><td>14 Mar · 08h30</td><td><span class="badge badge-amber">Pansement</span></td><td>Plaie avant-bras droit</td><td>Koné M.</td><td><button class="btn btn-danger btn-sm">✕</button></td></tr>
-                                </tbody></table>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== MODALS ========== -->
-    <div class="overlay" id="overlay" onclick="closeOut(event)">
-        <div class="modal" id="modal-saisie-vitaux" style="display:none">
-            <div class="modal-title">Enregistrer les signes vitaux</div>
-            <div class="modal-sub">Patient : Kouadio Jean Baptiste · CMU-2024-08821</div>
-            <div class="grid g2" style="gap:12px">
-                <div class="fld"><label>TA systolique</label><input type="number" placeholder="120"></div>
-                <div class="fld"><label>TA diastolique</label><input type="number" placeholder="80"></div>
-                <div class="fld"><label>Température (°C)</label><input type="number" step="0.1" placeholder="37.0"></div>
-                <div class="fld"><label>Poids (kg)</label><input type="number" placeholder="70"></div>
-                <div class="fld"><label>FC (bpm)</label><input type="number" placeholder="72"></div>
-                <div class="fld"><label>SpO₂ (%)</label><input type="number" placeholder="98"></div>
-                <div class="fld"><label>Glycémie</label><input type="number" step="0.1" placeholder="5.5"></div>
-                <div class="fld"><label>FR (/min)</label><input type="number" placeholder="16"></div>
-            </div>
-            <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
-        </div>
-        <div class="modal" id="modal-upload-doc" style="display:none">
-            <div class="modal-title">Ajouter un document médical</div>
-            <div class="modal-sub">Lié à la consultation du 12/03/2025</div>
-            <div class="grid" style="gap:12px">
-                <div class="fld"><label>Type de document</label><select><option>Analyse biologique (PDF)</option><option>Image médicale (IRM, Scanner…)</option><option>Radiographie</option><option>Échographie</option></select></div>
-                <div class="fld"><label>Description</label><input type="text" placeholder="Ex: Bilan sanguin NFS + CRP"></div>
-                <div style="border:2px dashed var(--slate-300);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer" onmouseover="this.style.borderColor='var(--teal-400)'" onmouseout="this.style.borderColor='var(--slate-300)'">
-                    <div style="font-size:30px;margin-bottom:7px">📂</div>
-                    <div style="font-size:13px;font-weight:600;color:var(--slate-600)">Glisser-déposer un fichier</div>
-                    <div style="font-size:12px;color:var(--slate-400);margin-top:4px">PDF, JPEG, PNG · Max 20 MB</div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary">Uploader</button></div>
         </div>
-        <div class="modal" id="modal-soin-form" style="display:none">
-            <div class="modal-title">Enregistrer un soin infirmier</div>
-            <div class="modal-sub">Patient : Kouadio Jean Baptiste</div>
-            <div class="grid g2" style="gap:12px">
-                <div class="fld col-full"><label>Type de soin</label><select><option>Pansement</option><option>Injection IM</option><option>Injection IV</option><option>Injection SC</option><option>Perfusion</option><option>Prélèvement sanguin</option><option>Prélèvement urinaire</option><option>Soin d'hygiène</option></select></div>
-                <div class="fld col-full"><label>Détail / Médicament</label><input type="text" placeholder="Ex: Artéméther 80mg – bras gauche"></div>
-                <div class="fld"><label>Date</label><input type="date"></div>
-                <div class="fld"><label>Heure</label><input type="time"></div>
-                <div class="fld col-full"><label>Observations</label><textarea rows="2" placeholder="Notes sur le déroulement…"></textarea></div>
-            </div>
-            <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
-        </div>
-    </div>
-
-    <script>
-        let currentRole='patient';
-        const roles={
-            patient:{nav:'nav-patient',dash:'dash-patient',av:'KJ',name:'Kouadio J.B.',badge:'sb-role-patient',icon:'🧑',txt:'Patient'},
-            medecin:{nav:'nav-medecin',dash:'dash-medecin',av:'BA',name:'Dr. Bamba A.',badge:'sb-role-medecin',icon:'🩺',txt:'Médecin'},
-            infirmier:{nav:'nav-infirmier',dash:'dash-infirmier',av:'KM',name:'Koné Marie',badge:'sb-role-infirmier',icon:'💉',txt:'Infirmier'}
-        };
-        const titles={dash:'Tableau de bord',profil:'Mon profil',carnet:'Carnet médical','consultations-pat':'Mes consultations','ordonnances-pat':'Mes ordonnances','documents-pat':'Documents médicaux',rappels:'Rappels & alertes',dossier:'Dossier patient',patients:'Liste des patients','nouvelle-consult':'Nouvelle consultation','ordo-form':'Nouvelle ordonnance',certificats:'Certificats médicaux',vitaux:'Signes vitaux',soins:'Soins infirmiers'};
-
-        function setRole(role,el){
-            currentRole=role;
-            document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
-            el.classList.add('active');
-            const pro=role==='medecin'||role==='infirmier';
-            document.getElementById('form-patient').style.display=pro?'none':'block';
-            document.getElementById('form-pro').style.display=pro?'block':'none';
-        }
-
-        function goApp(){
-            document.getElementById('login').classList.remove('active');
-            document.getElementById('dashboard').classList.add('active');
-            applyRole(currentRole);
-        }
-        function logout(){
-            document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('login').classList.add('active');
-        }
-        function applyRole(role){
-            const r=roles[role];
-            ['patient','medecin','infirmier'].forEach(k=>{
-                document.getElementById('nav-'+k).style.display=k===role?'block':'none';
-                document.getElementById('dash-'+k).style.display=k===role?'block':'none';
-            });
-            document.getElementById('sb-av').textContent=r.av;
-            document.getElementById('sb-name').textContent=r.name;
-            document.getElementById('sb-role-txt').textContent=r.txt;
-            const rb=document.getElementById('role-badge');
-            rb.className='sb-role-badge '+r.badge;
-            document.getElementById('role-badge-icon').textContent=r.icon;
-            document.getElementById('role-badge-txt').textContent=r.txt;
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            document.getElementById('page-dash').classList.add('active');
-            document.getElementById('page-title').textContent='Tableau de bord';
-        }
-
-        function goPage(id,el){
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            const pg=document.getElementById('page-'+id);
-            if(pg)pg.classList.add('active');
-            document.getElementById('page-title').textContent=titles[id]||id;
-            const nav=document.getElementById('nav-'+currentRole);
-            if(nav){nav.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));}
-            if(el)el.classList.add('active');
-        }
-
-        function goInscription(){
-            document.getElementById('login').classList.remove('active');
-            document.getElementById('inscription').classList.add('active');
-            setStep(1);
-        }
-        function goLogin(){
-            document.getElementById('inscription').classList.remove('active');
-            document.getElementById('login').classList.add('active');
-        }
-
-        let inscRole='patient',inscStep=1;
-        function pickRole(el,role){
-            inscRole=role;
-            document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
-            el.classList.add('selected');
-            const isMed=role==='medecin',isInf=role==='infirmier',isPat=role==='patient';
-            document.getElementById('f-mat').style.display=isMed?'flex':'none';
-            document.getElementById('f-spe').style.display=isMed?'flex':'none';
-            document.getElementById('f-mat-inf').style.display=isInf?'flex':'none';
-            document.getElementById('f-srv').style.display=isInf?'flex':'none';
-            document.getElementById('f-sang').style.display=isPat?'flex':'none';
-            document.getElementById('f-allergie').style.display=isPat?'flex':'none';
-        }
-        function setStep(n){
-            inscStep=n;
-            for(let i=1;i<=4;i++){
-                document.getElementById('is'+i).classList.toggle('active',i===n);
-                const sp=document.getElementById('sp'+i);
-                sp.classList.remove('active','done');
-                if(i<n){sp.classList.add('done');sp.querySelector('.sp-dot').textContent='✓';}
-                else if(i===n){sp.classList.add('active');sp.querySelector('.sp-dot').textContent=i;}
-                else{sp.querySelector('.sp-dot').textContent=i;}
-            }
-        }
-        function isNext(from){if(from===3){document.getElementById('rc-role').textContent=inscRole.charAt(0).toUpperCase()+inscRole.slice(1);}setStep(from+1);}
-        function isPrev(from){setStep(from-1);}
-
-        function checkPw(){
-            const pw=document.getElementById('pw1').value;
-            const rules={len:pw.length>=8,upper:/[A-Z]/.test(pw),num:/[0-9]/.test(pw),special:/[!@#$%^&*]/.test(pw)};
-            const score=Object.values(rules).filter(Boolean).length;
-            const colors=['','var(--red)','var(--amber)','var(--amber)','var(--green)'];
-            const msgs=['','Très faible','Faible','Moyen','Fort'];
-            for(let i=1;i<=4;i++){document.getElementById('ps'+i).style.background=i<=score?colors[score]:'var(--slate-200)';}
-            document.getElementById('pw-msg').textContent=pw?'Force : '+msgs[score]:'';
-            document.getElementById('pw-msg').style.color=colors[score]||'var(--slate-400)';
-            document.querySelectorAll('.pw-rule').forEach(r=>{
-                const ok=rules[r.dataset.rule];
-                r.querySelector('.ri').textContent=ok?'✓':'○';
-                r.style.color=ok?'var(--green)':'var(--slate-500)';
-            });
-            const pw2=document.getElementById('pw2').value;
-            const m=document.getElementById('pw-match');
-            if(pw2){m.textContent=pw===pw2?'✓ Les mots de passe correspondent':'✗ Ne correspondent pas';m.style.color=pw===pw2?'var(--green)':'var(--red)';}
-            else m.textContent='';
-        }
-
-        function switchTab(el,tid){
-            const container=el.closest('.card')||el.closest('.page');
-            if(container){
-                container.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-                container.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-            }
-            el.classList.add('active');
-            const t=document.getElementById(tid);
-            if(t)t.classList.add('active');
-        }
-        function selDiag(el){document.querySelectorAll('#ct3 .dpill').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');}
-
-        let certType='apt';
-        const certTitles={apt:"Certificat d'aptitude au travail",arret:"Certificat d'arrêt de travail",dispense:"Certificat de dispense",general:"Certificat médical général"};
-        function setCert(el,type){
-            certType=type;
-            document.getElementById('certTypePills').querySelectorAll('.dpill').forEach(d=>d.classList.remove('sel'));
-            el.classList.add('sel');
-            document.getElementById('fArretD').style.display=type==='arret'?'flex':'none';
-            document.getElementById('fArretF').style.display=type==='arret'?'flex':'none';
-            updateCert();
-        }
-        function updateCert(){
-            const d=document.getElementById('cDate').value;
-            document.getElementById('cpDate').textContent=d?new Date(d).toLocaleDateString('fr-FR'):'…';
-            document.getElementById('cpTitle').textContent=certTitles[certType]||'';
-            const motif=document.getElementById('cMotif').value;
-            const restr=document.getElementById('cRestr').value;
-            let main='';
-            if(certType==='apt')main='Et atteste que l\'état de santé de ce patient lui permet d\'exercer son activité professionnelle sans restriction particulière.';
-            else if(certType==='arret'){const d1=document.getElementById('arretD').value;const d2=document.getElementById('arretF').value;const f1=d1?new Date(d1).toLocaleDateString('fr-FR'):'…';const f2=d2?new Date(d2).toLocaleDateString('fr-FR'):'…';main=`Prescrit un arrêt de travail du <strong>${f1}</strong> au <strong>${f2}</strong>, ${motif}.`;}
-            else if(certType==='dispense')main=`Délivre une dispense d'activité scolaire / sportive, ${motif}.`;
-            else main=`Certifie avoir examiné le patient ce jour (${motif}).`;
-            document.getElementById('cpMain').innerHTML=main;
-            document.getElementById('cpRestr').innerHTML=restr?`<em>Restrictions : ${restr}</em>`:'';
-        }
-
-        function addRow(){const tb=document.getElementById('ordoRows');const tr=document.createElement('tr');tr.innerHTML=`<td><input type="text" placeholder="Médicament"></td><td><input type="text" placeholder="Dosage"></td><td><select><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="1" min="1" max="6"></td><td><input type="text" placeholder="Matin…"></td><td><input type="number" value="7"></td><td><input type="text" placeholder="Instructions"></td><td><button class="btn-row-del" onclick="delRow(this)">✕</button></td>`;tb.appendChild(tr);}
-        function delRow(btn){const rows=document.getElementById('ordoRows').rows;if(rows.length>1)btn.closest('tr').remove();}
-
-        function openModal(id){document.getElementById('overlay').classList.add('open');document.querySelectorAll('.modal').forEach(m=>m.style.display='none');const m=document.getElementById('modal-'+id);if(m)m.style.display='block';}
-        function closeModal(){document.getElementById('overlay').classList.remove('open');}
-        function closeOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
-    </script>
-
-    <div>
+    </main>
+</div>
 </body>
-
 </html>
