@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Nouvelle ordonnance</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">🏥</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div></div></div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section"><span class="sb-section-label">Clinique</span><a class="sb-item" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a><a class="sb-item" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a><a class="sb-item" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a></div>
+            <div class="sb-section"><span class="sb-section-label">Actions</span><a class="sb-item" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a><a class="sb-item active" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a><a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a></div>
+        </nav>
+        <div class="sb-footer"><a class="sb-user" href="profil-medecin.html"><div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div><div><div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div><div class="sb-user-role" data-medecin-role>Médecin</div></div><span class="sb-user-link">↗</span></a></div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Nouvelle ordonnance</div>
+            <div class="topbar-tools">
+                <div class="patient-search-shell">
+                    <div class="searchbar"><span>🔎</span><input class="patient-search-input" type="text" placeholder="Rechercher un patient..."></div>
+                    <div class="patient-search-results"></div>
+                    <span class="patient-search-meta patient-search-selected" data-search-selected></span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="card patient-picker-card">
+                <div class="patient-picker-head">Rechercher un patient</div>
+                <div class="patient-picker-bar">
+                    <div class="searchbar" style="flex:1">
+                        <span>🔎</span>
+                        <input type="text" placeholder="Nom, prénom ou numéro CMU...">
+                    </div>
+                    <button class="btn btn-secondary" type="button">Rechercher</button>
+                </div>
+                <div class="patient-picker-result">
+                    <div class="patient-ava sm" data-patient-initials>KJ</div>
+                    <div class="patient-picker-copy flex-1">
+                        <div class="patient-picker-name" data-patient-name>Kouadio Jean Baptiste</div>
+                        <div class="patient-picker-meta"><span data-patient-cmu>CMU-2024-08821</span> · <span data-patient-age>37 ans</span> · <span data-patient-allergy>Allergie Pénicilline</span></div>
+                    </div>
+                    <span class="badge badge-red">⚠ Allergie</span>
+                </div>
+            </div>
+            <div class="patient-banner"><div class="patient-ava sm" data-patient-initials>KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px" data-patient-name>Kouadio Jean Baptiste</div><div class="patient-meta" data-patient-meta-long>CMU-2024-08821 · Né le 14/03/1987 · +225 07 12 34 56</div></div><span class="badge badge-red" data-patient-allergy>Allergie Pénicilline</span></div>
+            <div class="card">
+                <div class="grid g4">
+                    <div class="fld"><label>Date</label><input id="oDate" type="date" oninput="updateOrdonnance()"></div>
+                    <div class="fld"><label>Consultation liée</label><select id="oConsult" onchange="updateOrdonnance()"><option>12/03/2025 - Fièvre persistante</option><option>08/03/2025 - Bilan diabète</option><option>21/03/2025 - Suivi prénatal</option></select></div>
+                    <div class="fld"><label>Renouvellement</label><select id="oRenew" onchange="updateOrdonnance()"><option>Non renouvelable</option><option>1 renouvellement</option></select></div>
+                    <div class="fld"><label>Validité</label><select id="oValidity" onchange="updateOrdonnance()"><option>30 jours</option><option>60 jours</option></select></div>
+                </div>
+                <div style="overflow-x:auto;border:1px solid var(--slate-200);border-radius:var(--radius-sm);margin:12px 0">
+                    <table class="ordo-tbl">
+                        <thead><tr><th>Médicament</th><th>Dosage</th><th>Voie</th><th>Prises/j</th><th>Moments</th><th>Durée</th><th>Instructions</th><th></th></tr></thead>
+                        <tbody id="ordoRows">
+                            <tr>
+                                <td><input type="text" value="Artéméther/Luméfantrine" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="80/480mg" oninput="updateOrdonnance()"></td>
+                                <td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td>
+                                <td><input type="number" value="2" min="1" max="6" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="matin, soir" oninput="updateOrdonnance()"></td>
+                                <td><input type="number" value="3" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="Avec les repas" oninput="updateOrdonnance()"></td>
+                                <td><button class="btn-row-del" type="button" onclick="delRow(this)">✕</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" value="Paracétamol" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="1000mg" oninput="updateOrdonnance()"></td>
+                                <td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td>
+                                <td><input type="number" value="3" min="1" max="6" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="matin, midi, soir" oninput="updateOrdonnance()"></td>
+                                <td><input type="number" value="5" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="Après repas" oninput="updateOrdonnance()"></td>
+                                <td><button class="btn-row-del" type="button" onclick="delRow(this)">✕</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="add-row-btn" type="button" onclick="addRow()">+ Ajouter un médicament</button>
+                <div class="fld mt-8">
+                    <label>Recommandations</label>
+                    <textarea id="oReco" rows="3" placeholder="Repos complet, hydratation abondante..." oninput="updateOrdonnance()"></textarea>
+                </div>
+                <div style="margin:16px 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500)">Aperçu de l'ordonnance</div>
+                <div class="cert-preview" id="ordonnancePreviewPrint">
+                    <div class="cert-header">
+                        <div class="cert-title-txt">Ordonnance médicale</div>
+                        <div class="cert-doctor-txt"><span data-medecin-name>Dr. Bamba A.</span> · <span data-medecin-specialty>Médecine générale</span> · N° Ordre : MAT-MED-00142</div>
+                        <div class="cert-doctor-txt">CHU de Treichville, Abidjan · Tél : +225 27 21 24 26 26</div>
+                    </div>
+                    <div id="ordoPreviewBody">
+                        <p><strong>Patient :</strong> <span data-patient-name>Kouadio Jean Baptiste</span> | <strong>CMU :</strong> <span data-patient-cmu>CMU-2024-08821</span> | <strong>Né le :</strong> <span data-patient-birth>14/03/1987</span></p>
+                        <p><strong>Date :</strong> <span id="opDate">...</span> | <strong>Consultation :</strong> <span id="opConsult">12/03/2025 - Fièvre persistante</span></p>
+                        <div id="opLines">
+                            <p>① Artéméther/Luméfantrine 80/480mg - Oral - 2 prises/j (matin, soir) - 3 jours</p>
+                            <p>② Paracétamol 1000mg - Oral - 3 prises/j (matin, midi, soir) - 5 jours</p>
+                        </div>
+                        <p id="opReco"><strong>Recommandations :</strong> Repos complet, hydratation abondante...</p>
+                        <p><strong>Renouvellement :</strong> <span id="opRenew">Non renouvelable</span> | <strong>Validité :</strong> <span id="opValidity">30 jours</span></p>
+                    </div>
+                    <div class="cert-sig">Fait à Abidjan, le <span id="opSignatureDate">...</span><div class="cert-sig-line"></div></div>
+                </div>
+                <div class="actions-bar">
+                    <button class="btn btn-secondary" type="button" id="ordoDraftBtn">💾 Brouillon</button>
+                    <div class="actions-right">
+                        <button class="btn btn-secondary" type="button" id="ordoPdfBtn">📄 PDF</button>
+                        <button class="btn btn-success" type="button" id="ordoPrintBtn">🖨️ Imprimer</button>
+                        <button class="btn btn-primary" type="button" id="ordoValidateBtn">✅ Valider & envoyer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

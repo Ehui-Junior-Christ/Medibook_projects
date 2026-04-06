@@ -220,7 +220,13 @@ function goLogin() {
 }
 
 function goApp() {
-  window.location.href = "./patient/dashboard.html";
+  const dashboardByRole = {
+    patient: "./patient/dashboard.html",
+    medecin: "./medecin/dashboard.html",
+    infirmier: "./infirmier/dashboard.html"
+  };
+
+  window.location.href = dashboardByRole[selectedRole] || dashboardByRole.patient;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
