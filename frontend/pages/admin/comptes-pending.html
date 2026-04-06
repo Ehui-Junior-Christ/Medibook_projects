@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook Admin – Comptes en attente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../frontend/css/admin.css">
+    <script src="../frontend/js/admin.js" defer></script>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div class="sb-logo-text">MediBook Admin</div>
+            </div>
+        </div>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Principal</span>
+            <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+            <a href="statistiques.html" class="sb-item"><span class="sb-icon">📊</span>Statistiques</a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Gestion Utilisateurs</span>
+            <a href="gestion-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-infirmiers.html" class="sb-item"><span class="sb-icon">💉</span>Infirmiers</a>
+            <a href="comptes-pending.html" class="sb-item active"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Système</span>
+            <a href="configuration.html" class="sb-item"><span class="sb-icon">⚙️</span>Configuration</a>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">AD</div>
+                <div>
+                    <div class="sb-user-name">Admin MediBook</div>
+                    <div class="sb-user-role">Super Administrateur</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Comptes en attente de validation</div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔</div>
+                <a href="login.html" class="icon-btn">🚪</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Demandes d'inscription (Professionnels)</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Rôle</th>
+                            <th>Matricule / Diplôme</th>
+                            <th>Établissement</th>
+                            <th>Date Demande</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-row">
+                                    <div class="user-ava">DB</div>
+                                    <div>
+                                        <div style="font-weight:600">Dr. Bakayoko Drissa</div>
+                                        <div style="font-size:11px;color:var(--slate-500)">bakayoko@med.ci</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-teal">Médecin</span></td>
+                            <td><span style="font-family:monospace">MAT-MED-00982</span></td>
+                            <td>CHU de Cocody</td>
+                            <td>Il y a 2 heures</td>
+                            <td>
+                                <div style="display:flex;gap:6px">
+                                    <button class="btn btn-primary btn-sm">Valider</button>
+                                    <button class="btn btn-danger btn-sm">Rejeter</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-row">
+                                    <div class="user-ava" style="background:var(--blue-light)">IK</div>
+                                    <div>
+                                        <div style="font-weight:600">Inf. Kouamé Isabelle</div>
+                                        <div style="font-size:11px;color:var(--slate-500)">kouame.i@soins.ci</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-green">Infirmier</span></td>
+                            <td><span style="font-family:monospace">MAT-INF-01245</span></td>
+                            <td>Polyclinique Avicenne</td>
+                            <td>Hier, 16:45</td>
+                            <td>
+                                <div style="display:flex;gap:6px">
+                                    <button class="btn btn-primary btn-sm">Valider</button>
+                                    <button class="btn btn-danger btn-sm">Rejeter</button>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

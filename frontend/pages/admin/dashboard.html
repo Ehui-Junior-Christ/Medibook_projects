@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook Admin – Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../frontend/css/admin.css">
+    <script src="../frontend/js/admin.js" defer></script>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div class="sb-logo-text">MediBook Admin</div>
+            </div>
+        </div>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Principal</span>
+            <a href="dashboard.html" class="sb-item active"><span class="sb-icon">🏠</span>Tableau de bord</a>
+            <a href="statistiques.html" class="sb-item"><span class="sb-icon">📊</span>Statistiques</a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Gestion Utilisateurs</span>
+            <a href="gestion-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-infirmiers.html" class="sb-item"><span class="sb-icon">💉</span>Infirmiers</a>
+            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+        </nav>
+
+        <nav class="sb-section">
+            <span class="sb-section-label">Système</span>
+            <a href="configuration.html" class="sb-item"><span class="sb-icon">⚙️</span>Configuration</a>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user">
+                <div class="sb-avatar">AD</div>
+                <div>
+                    <div class="sb-user-name">Admin MediBook</div>
+                    <div class="sb-user-role">Super Administrateur</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Tableau de bord</div>
+            <div class="topbar-right">
+                <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+                <a href="login.html" class="icon-btn" title="Déconnexion">🚪</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="stats-row">
+                <div class="stat-card" data-emoji="👥">
+                    <div class="stat-accent" style="background:var(--teal-500)"></div>
+                    <div class="stat-val">1,284</div>
+                    <div class="stat-label">Patients inscrits</div>
+                    <div class="stat-trend trend-up">↑ +12% ce mois</div>
+                </div>
+                <div class="stat-card" data-emoji="🩺">
+                    <div class="stat-accent" style="background:var(--amber)"></div>
+                    <div class="stat-val">86</div>
+                    <div class="stat-label">Médecins actifs</div>
+                    <div class="stat-trend trend-up">↑ +3 nouveaux</div>
+                </div>
+                <div class="stat-card" data-emoji="💉">
+                    <div class="stat-accent" style="background:var(--green)"></div>
+                    <div class="stat-val">142</div>
+                    <div class="stat-label">Infirmiers actifs</div>
+                    <div class="stat-trend">Stable</div>
+                </div>
+                <div class="stat-card" data-emoji="⏳">
+                    <div class="stat-accent" style="background:var(--red)"></div>
+                    <div class="stat-val">5</div>
+                    <div class="stat-label">Comptes en attente</div>
+                    <div class="stat-trend trend-down">↓ -2 traités</div>
+                </div>
+            </div>
+
+            <div class="grid-2-1">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Dernières inscriptions (Pros)</div>
+                        <a href="comptes-pending.html" class="btn btn-secondary">Voir tout</a>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Rôle</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <div class="user-row">
+                                        <div class="user-ava">DB</div>
+                                        <div>
+                                            <div style="font-weight:600">Dr. Bakayoko</div>
+                                            <div style="font-size:11px;color:var(--slate-500)">bakayoko@med.ci</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-teal">Médecin</span></td>
+                                <td>Aujourd'hui</td>
+                                <td><span class="badge badge-amber">En attente</span></td>
+                                <td><button class="btn btn-primary btn-sm">Valider</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="user-row">
+                                        <div class="user-ava" style="background:var(--blue-light)">IK</div>
+                                        <div>
+                                            <div style="font-weight:600">Inf. Kouamé</div>
+                                            <div style="font-size:11px;color:var(--slate-500)">kouame@soins.ci</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-green">Infirmier</span></td>
+                                <td>Hier</td>
+                                <td><span class="badge badge-amber">En attente</span></td>
+                                <td><button class="btn btn-primary btn-sm">Valider</button></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title mb-12">Activité du système</div>
+                    <div style="display:flex;flex-direction:column;gap:15px;margin-top:15px">
+                        <div style="display:flex;gap:12px">
+                            <div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:5px"></div>
+                            <div>
+                                <div style="font-weight:600;font-size:13px">Serveur Principal</div>
+                                <div style="font-size:11px;color:var(--green)">Opérationnel (99.9%)</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px">
+                            <div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:5px"></div>
+                            <div>
+                                <div style="font-weight:600;font-size:13px">Base de données</div>
+                                <div style="font-size:11px;color:var(--green)">Connectée</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px">
+                            <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:5px"></div>
+                            <div>
+                                <div style="font-weight:600;font-size:13px">Sauvegarde Cloud</div>
+                                <div style="font-size:11px;color:var(--amber-dark)">En cours... (85%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
