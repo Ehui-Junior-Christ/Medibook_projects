@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook – Mon Profil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/patient.css">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div>
+                    <div class="sb-logo-text">MediBook</div>
+                    <div class="sb-logo-sub">Portail médical</div>
+                </div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Mon espace</span>
+                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a href="profil.html" class="sb-item active"><span class="sb-icon">👤</span>Mon profil</a>
+                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">📋</span>Carnet médical</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Historique</span>
+                <a href="consultations.html" class="sb-item"><span class="sb-icon">🩺</span>Consultations</a>
+                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
+                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+                <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-user" id="btn-logout">
+                <div class="sb-avatar" id="sb-avatar">KJ</div>
+                <div>
+                    <div class="sb-user-name" id="sb-name">Kouadio J.B.</div>
+                    <div class="sb-user-role">Patient</div>
+                </div>
+                <span class="sb-logout-icon">↗</span>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-title">Mon profil</div>
+            <div class="topbar-right">
+                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="profil-grid">
+
+                <!-- Infos personnelles -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Informations personnelles</div>
+                        <button class="btn btn-secondary btn-sm" id="btn-edit">✏️ Modifier</button>
+                    </div>
+
+                    <div class="profil-ava-row">
+                        <div class="profil-ava" id="profil-ava">KJ</div>
+                        <div>
+                            <div class="profil-nom" id="profil-nom">Kouadio Jean Baptiste</div>
+                            <div class="profil-cmu" id="profil-cmu">CMU-2024-08821</div>
+                            <button class="btn btn-secondary btn-sm" style="margin-top:8px" id="btn-photo">📷 Changer photo</button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid" id="form-profil">
+                        <div class="fld">
+                            <label>Nom</label>
+                            <input type="text" id="inp-nom" value="Kouadio" disabled>
+                        </div>
+                        <div class="fld">
+                            <label>Prénom</label>
+                            <input type="text" id="inp-prenom" value="Jean Baptiste" disabled>
+                        </div>
+                        <div class="fld">
+                            <label>Date de naissance</label>
+                            <input type="date" id="inp-naissance" value="1987-03-14" disabled>
+                        </div>
+                        <div class="fld">
+                            <label>Numéro CMU</label>
+                            <input type="text" id="inp-cmu" value="CMU-2024-08821" disabled readonly>
+                        </div>
+                        <div class="fld">
+                            <label>Téléphone</label>
+                            <input type="tel" id="inp-tel" value="+225 07 12 34 56" disabled>
+                        </div>
+                        <div class="fld">
+                            <label>Email</label>
+                            <input type="email" id="inp-email" value="jb.kouadio@email.ci" disabled>
+                        </div>
+                    </div>
+
+                    <div class="actions-bar" id="actions-profil" style="display:none">
+                        <button class="btn btn-secondary" id="btn-annuler">Annuler</button>
+                        <button class="btn btn-primary" id="btn-sauvegarder">Enregistrer</button>
+                    </div>
+                </div>
+
+                <!-- Colonne droite -->
+                <div>
+                    <div class="card card-sm">
+                        <div class="card-title" style="margin-bottom:10px">Conditions médicales</div>
+                        <div class="badge-row" id="conditions-list"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom:10px">Établissements fréquentés</div>
+                        <div id="etablissements-list" style="font-size:13px;display:flex;flex-direction:column;gap:8px"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/patient.js"></script>
+</body>
+</html>
