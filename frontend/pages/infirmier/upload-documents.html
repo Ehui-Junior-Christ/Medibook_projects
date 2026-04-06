@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook – Upload Documents</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/infirmier.css">
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
+    <nav>
+      <div class="sb-section">
+        <span class="sb-section-label">Soins</span>
+        <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+        <a href="liste-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+        <a href="signes-vitaux.html" class="sb-item"><span class="sb-icon">❤️</span>Signes vitaux</a>
+        <a href="soins-infirmiers.html" class="sb-item"><span class="sb-icon">🩹</span>Soins infirmiers</a>
+        <a href="upload-documents.html" class="sb-item active"><span class="sb-icon">📁</span>Documents</a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" id="btn-logout">
+        <div class="sb-avatar" id="sb-avatar">KM</div>
+        <div><div class="sb-user-name" id="sb-name">Koné Marie</div><div class="sb-user-role">Infirmier · Urgences</div></div>
+        <span class="sb-logout-icon">↗</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Documents médicaux</div>
+      <div class="topbar-right">
+        <div class="icon-btn" id="btn-logout-top">🚪</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- Formulaire upload -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header">
+          <div class="card-title">Ajouter un document médical</div>
+        </div>
+
+        <div class="upload-grid">
+          <div>
+            <div class="fld">
+              <label>Patient</label>
+              <select id="up-patient">
+                <option value="">-- Sélectionner un patient --</option>
+                <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
+                <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
+                <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label>Consultation liée</label>
+              <select id="up-consultation">
+                <option value="">-- Sélectionner une consultation --</option>
+                <option value="1">12/03/2025 – Fièvre persistante (Dr. Bamba A.)</option>
+                <option value="2">02/02/2025 – Bilan cardiologique (Dr. Koné M.)</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label>Type de document</label>
+              <select id="up-type">
+                <option value="">Sélectionner</option>
+                <option value="ANALYSE_BIOLOGIQUE">Analyse biologique (PDF)</option>
+                <option value="IRM">IRM</option>
+                <option value="SCANNER">Scanner</option>
+                <option value="RADIOGRAPHIE">Radiographie</option>
+                <option value="ECHOGRAPHIE">Échographie</option>
+                <option value="AUTRE">Autre</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label>Description</label>
+              <input type="text" id="up-description" placeholder="Ex: Bilan sanguin NFS + CRP · 14/03/2025">
+            </div>
+          </div>
+
+          <!-- Zone drag & drop -->
+          <div>
+            <div class="upload-zone" id="upload-zone"
+              ondragover="dragOver(event)"
+              ondragleave="dragLeave(event)"
+              ondrop="dropFichier(event)"
+              onclick="document.getElementById('file-input').click()">
+              <div class="upload-zone-icon">📂</div>
+              <div class="upload-zone-titre">Glisser-déposer un fichier</div>
+              <div class="upload-zone-sous">ou cliquer pour parcourir</div>
+              <div class="upload-zone-formats">PDF, JPEG, PNG · Max 20 MB</div>
+            </div>
+            <input type="file" id="file-input" style="display:none"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onchange="fichierSelectionne(this.files[0])">
+
+            <!-- Aperçu fichier sélectionné -->
+            <div id="fichier-selectionne" class="fichier-apercu" style="display:none">
+              <span class="fichier-icone" id="fichier-icone">📄</span>
+              <div class="flex-1">
+                <div class="fichier-nom" id="fichier-nom">—</div>
+                <div class="fichier-taille" id="fichier-taille">—</div>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="retirerFichier()">✕</button>
+            </div>
+
+            <!-- Barre de progression -->
+            <div id="upload-progress" style="display:none">
+              <div class="progress-label">Envoi en cours…</div>
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions-bar">
+          <div id="upload-msg" class="upload-feedback" style="display:none"></div>
+          <div class="actions-right">
+            <button class="btn btn-secondary" onclick="resetUpload()">Réinitialiser</button>
+            <button class="btn btn-primary" onclick="soumettreFichier()">⬆️ Uploader le document</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents uploadés récemment -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Documents uploadés récemment</div>
+          <span class="badge badge-slate" id="badge-total-docs">3 documents</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Patient</th>
+                <th>Type</th>
+                <th>Date upload</th>
+                <th>Taille</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-documents"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/infirmier.js"></script>
+</body>
+</html>
