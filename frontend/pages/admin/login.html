@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook Admin – Connexion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../frontend/css/admin.css">
+    <script src="../frontend/js/admin.js" defer></script>
+</head>
+<body class="login-body">
+<div class="login-card">
+    <div class="login-logo">
+        <div class="login-logo-mark">🏥</div>
+        <h1>MediBook Admin</h1>
+    </div>
+    <div class="card-header" style="display:block; text-align:center; margin-bottom:30px;">
+        <h3 style="font-family:'Syne'; font-size:22px; margin-bottom:8px;">Espace Administration</h3>
+        <p style="color:var(--slate-500); font-size:14px;">Connectez-vous pour gérer la plateforme</p>
+    </div>
+    <form action="dashboard.html">
+        <div class="fld">
+            <label for="admin-id">Identifiant Administrateur</label>
+            <input type="text" id="admin-id" placeholder="admin@medibook.ci" required>
+        </div>
+        <div class="fld">
+            <label for="admin-password">Mot de passe</label>
+            <input type="password" id="admin-password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-login">Se connecter au Dashboard</button>
+    </form>
+    <div style="margin-top:20px; font-size:13px;">
+        <a href="#" style="color:var(--teal-700); text-decoration:none; font-weight:600;">Mot de passe oublié ?</a>
+    </div>
+</div>
+</body>
+</html>

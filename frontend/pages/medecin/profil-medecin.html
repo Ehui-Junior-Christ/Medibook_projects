@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Profil médecin</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">🏥</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div></div></div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section"><span class="sb-section-label">Clinique</span><a class="sb-item" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a><a class="sb-item" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a><a class="sb-item" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a></div>
+            <div class="sb-section"><span class="sb-section-label">Actions</span><a class="sb-item" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a><a class="sb-item" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a><a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a></div>
+        </nav>
+        <div class="sb-footer"><a class="sb-user" href="profil-medecin.html"><div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div><div><div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div><div class="sb-user-role" data-medecin-role>Médecin</div></div><span class="sb-user-link">↗</span></a></div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Profil médecin</div>
+            <div class="topbar-tools">
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="card mb-16">
+                <div class="profile-hero">
+                    <div class="profile-avatar-xl" id="mpAvatarPreview" data-medecin-avatar data-medecin-initials>BA</div>
+                    <div>
+                        <div class="card-title" style="font-size:22px" data-medecin-name>Dr. Bamba A.</div>
+                        <div class="profile-meta"><span data-medecin-specialty>Médecine générale</span> · <span data-medecin-matricule>MAT-MED-00142</span></div>
+                        <div class="profile-meta"><span data-medecin-phone>+225 27 21 24 26 26</span> · <span data-medecin-email>bamba.adama@medibook.ci</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title mb-16">Modifier le profil</div>
+                <form id="medecinProfileForm">
+                    <div class="grid g2">
+                        <div class="fld">
+                            <label>Nom complet</label>
+                            <input id="mpName" type="text" placeholder="Dr. Bamba Adama" readonly>
+                        </div>
+                        <div class="fld">
+                            <label>Spécialité</label>
+                            <input id="mpSpecialty" type="text" placeholder="Médecine générale" readonly>
+                        </div>
+                        <div class="fld">
+                            <label>Rôle</label>
+                            <input id="mpRole" type="text" placeholder="Médecin" readonly>
+                        </div>
+                        <div class="fld">
+                            <label>Matricule</label>
+                            <input id="mpMatricule" type="text" placeholder="MAT-MED-00142" readonly>
+                        </div>
+                        <div class="fld">
+                            <label>Téléphone</label>
+                            <input id="mpPhone" type="text" placeholder="+225 27 21 24 26 26">
+                        </div>
+                        <div class="fld">
+                            <label>Email</label>
+                            <input id="mpEmail" type="email" placeholder="bamba.adama@medibook.ci">
+                        </div>
+                        <div class="fld col-full">
+                            <label>Photo de profil</label>
+                            <input id="mpAvatar" type="file" accept="image/*">
+                        </div>
+                        <div class="fld col-full">
+                            <label>Biographie</label>
+                            <textarea id="mpBio" rows="4" placeholder="Présentation du médecin, expertise, disponibilité..."></textarea>
+                        </div>
+                    </div>
+                    <div class="actions-bar">
+                        <a class="btn btn-secondary" href="dashboard.html">Retour</a>
+                        <button class="btn btn-primary" type="submit">Enregistrer le profil</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

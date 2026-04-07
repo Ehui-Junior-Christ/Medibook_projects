@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Nouvelle consultation</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">🏥</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div></div></div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section"><span class="sb-section-label">Clinique</span><a class="sb-item" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a><a class="sb-item" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a><a class="sb-item" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a></div>
+            <div class="sb-section"><span class="sb-section-label">Actions</span><a class="sb-item active" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a><a class="sb-item" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a><a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a></div>
+        </nav>
+        <div class="sb-footer"><a class="sb-user" href="profil-medecin.html"><div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div><div><div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div><div class="sb-user-role" data-medecin-role>Médecin</div></div><span class="sb-user-link">↗</span></a></div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Nouvelle consultation</div>
+            <div class="topbar-tools">
+                <div class="patient-search-shell">
+                    <div class="searchbar"><span>🔎</span><input class="patient-search-input" type="text" placeholder="Rechercher un patient..."></div>
+                    <div class="patient-search-results"></div>
+                    <span class="patient-search-meta patient-search-selected" data-search-selected></span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="card patient-picker-card">
+                <div class="patient-picker-head">Rechercher un patient</div>
+                <div class="patient-picker-bar">
+                    <div class="searchbar" style="flex:1">
+                        <span>🔎</span>
+                        <input type="text" placeholder="Nom, prénom ou numéro CMU...">
+                    </div>
+                    <button class="btn btn-secondary" type="button">Rechercher</button>
+                </div>
+                <div class="patient-picker-result">
+                    <div class="patient-ava sm" data-patient-initials>KJ</div>
+                    <div class="patient-picker-copy flex-1">
+                        <div class="patient-picker-name" data-patient-name>Kouadio Jean Baptiste</div>
+                        <div class="patient-picker-meta"><span data-patient-cmu>CMU-2024-08821</span> · <span data-patient-age>37 ans</span> · <span data-patient-allergy>Allergie Pénicilline</span></div>
+                    </div>
+                    <span class="badge badge-red">⚠ Allergie</span>
+                </div>
+            </div>
+            <div class="page" id="page-nouvelle-consult">
+                <div class="patient-banner">
+                    <div class="patient-ava sm" data-patient-initials>KJ</div>
+                    <div class="flex-1"><div class="patient-name" style="font-size:15px" data-patient-name>Kouadio Jean Baptiste</div><div class="patient-meta" data-patient-meta-short>CMU-2024-08821 · 37 ans</div></div>
+                    <span class="badge badge-red">⚠️ <span data-patient-allergy>Allergie Pénicilline</span></span>
+                    <span class="badge badge-amber" data-patient-condition>Hypertension</span>
+                </div>
+                <div class="steps mb-16" data-consultation-steps>
+                    <div class="step-item active" data-step="1"><div class="step-dot">1</div><span>Patient</span></div>
+                    <div class="step-line"></div>
+                    <div class="step-item" data-step="2"><div class="step-dot">2</div><span>Signes vitaux</span></div>
+                    <div class="step-line"></div>
+                    <div class="step-item" data-step="3"><div class="step-dot">3</div><span>Diagnostic</span></div>
+                    <div class="step-line"></div>
+                    <div class="step-item" data-step="4"><div class="step-dot">4</div><span>Traitement</span></div>
+                </div>
+                <div class="card" data-tabs>
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-target="ct1" data-step="1">1 · Motif & symptômes</button>
+                        <button class="tab-btn" data-target="ct2" data-step="2">2 · Signes vitaux</button>
+                        <button class="tab-btn" data-target="ct3" data-step="3">3 · Diagnostic</button>
+                        <button class="tab-btn" data-target="ct4" data-step="4">4 · Traitement & suivi</button>
+                    </div>
+                    <div class="tab-content active" id="ct1" data-step="1">
+                        <div class="grid g2" style="gap:12px">
+                            <div class="fld col-full"><label>Motif principal de consultation</label><input type="text" placeholder="Ex: fièvre persistante depuis 3 jours…"></div>
+                            <div class="fld"><label>Date de début des symptômes</label><input type="date"></div>
+                            <div class="fld"><label>Urgence</label><select><option>Consultation ordinaire</option><option>Semi-urgente</option><option>Urgente</option></select></div>
+                            <div class="col-full" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500)">Symptômes observés</div>
+                            <div class="col-full"><div class="chip-wrap"><span class="chip">Fièvre</span><span class="chip">Céphalée</span><span class="chip">Toux</span><span class="chip">Douleur abdominale</span><span class="chip">Vomissements</span><span class="chip">Diarrhée</span><span class="chip">Dyspnée</span><span class="chip">Frissons</span><span class="chip">Fatigue intense</span><span class="chip">Vertiges</span><span class="chip">Œdèmes</span></div></div>
+                            <div class="fld col-full"><label>Autres observations</label><textarea rows="3" placeholder="Décrire les symptômes supplémentaires…"></textarea></div>
+                        </div>
+                        <div class="actions-bar"><div></div><button class="btn btn-primary consult-nav" type="button" data-direction="next">Suivant</button></div>
+                    </div>
+                    <div class="tab-content" id="ct2" data-step="2">
+                        <div class="vital-grid mb-12"><div class="vital-card warning"><div class="vital-icon">🩸</div><div class="vital-val">145/92</div><div class="vital-lbl">Tension ⚠️</div></div><div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">38.7°C</div><div class="vital-lbl">Température</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">96 bpm</div><div class="vital-lbl">Fréq. cardiaque</div></div><div class="vital-card"><div class="vital-icon">💨</div><div class="vital-val">97%</div><div class="vital-lbl">SpO₂</div></div></div>
+                        <div class="grid g4" style="gap:12px"><div class="fld"><label>TA (Tension artérielle)</label><input type="text" placeholder="145/92"></div><div class="fld"><label>Température (Température corporelle)</label><input type="number" step="0.1" placeholder="38.7"></div><div class="fld"><label>FC (Fréquence cardiaque)</label><input type="number" placeholder="96"></div><div class="fld"><label>SpO₂ (Saturation pulsée en oxygène)</label><input type="number" placeholder="97"></div><div class="fld"><label>Poids (kg)</label><input type="number" placeholder="82"></div><div class="fld"><label>Glycémie</label><input type="number" step="0.1" placeholder="5.4"></div><div class="fld"><label>FR (/min)</label><input type="number" placeholder="18"></div><div class="fld"><label>Taille (cm)</label><input type="number" placeholder="174"></div></div>
+                        <div class="actions-bar"><button class="btn btn-secondary consult-nav" type="button" data-direction="prev">Précédent</button><button class="btn btn-primary consult-nav" type="button" data-direction="next">Suivant</button></div>
+                    </div>
+                    <div class="tab-content" id="ct3" data-step="3">
+                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500);margin-bottom:8px">Diagnostic rapide</div>
+                        <div class="diag-pills mb-12"><div class="dpill sel">Paludisme</div><div class="dpill">Infection bactérienne</div><div class="dpill">Infection virale</div><div class="dpill">HTA décompensée</div><div class="dpill">Typhoïde</div><div class="dpill">Autre</div></div>
+                        <div class="grid g2" style="gap:12px"><div class="fld col-full"><label>Diagnostic retenu</label><textarea rows="3" placeholder="Ex: Paludisme à Plasmodium falciparum, forme non compliquée…"></textarea></div><div class="fld col-full"><label>Observations cliniques</label><textarea rows="3" placeholder="Examen physique, auscultation, palpation…"></textarea></div><div class="fld"><label>Examens complémentaires</label><input type="text" placeholder="NFS, CRP, Goutte épaisse…"></div><div class="fld"><label>Orientation</label><select><option>Aucune</option><option>Cardiologue</option><option>Laboratoire</option><option>Urgences</option></select></div></div>
+                        <div class="actions-bar"><button class="btn btn-secondary consult-nav" type="button" data-direction="prev">Précédent</button><button class="btn btn-primary consult-nav" type="button" data-direction="next">Suivant</button></div>
+                    </div>
+                    <div class="tab-content" id="ct4" data-step="4">
+                        <div class="grid g2" style="gap:12px"><div class="fld col-full"><label>Plan de traitement</label><textarea rows="3" placeholder="Traitement médicamenteux, soins recommandés…"></textarea></div><div class="fld"><label>Prochain rendez-vous</label><input type="date"></div><div class="fld"><label>Arrêt de travail</label><select><option>Non</option><option>Oui – 3 jours</option><option>Oui – 5 jours</option><option>Oui – 7 jours</option></select></div><div class="fld col-full"><label>Notes complémentaires</label><textarea rows="2" placeholder="Informations supplémentaires…"></textarea></div></div>
+                        <div class="actions-bar"><button class="btn btn-secondary consult-nav" type="button" data-direction="prev">Précédent</button><div class="actions-right"><button class="btn btn-secondary" type="button">💾 Brouillon</button><a class="btn btn-secondary" href="nouveau-certificat.html">📄 Créer certificat</a><a class="btn btn-secondary" href="nouvelle-ordonnance.html">💊 Créer ordonnance</a><button class="btn btn-primary" type="button">✅ Valider consultation</button></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

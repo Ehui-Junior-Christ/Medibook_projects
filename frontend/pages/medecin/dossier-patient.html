@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Dossier patient</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/medecin.js"></script>
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div>
+                    <div class="sb-logo-text">MediBook</div>
+                    <div class="sb-logo-sub">Portail médical</div>
+                </div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-medecin"><span>🩺</span><span>Médecin</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Clinique</span>
+                <a class="sb-item" href="dashboard.html"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a class="sb-item" href="liste-patients.html"><span class="sb-icon">👥</span>Mes patients</a>
+                <a class="sb-item active" href="dossier-patient.html"><span class="sb-icon">📋</span>Dossier patient</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Actions</span>
+                <a class="sb-item" href="nouvelle-consultation.html"><span class="sb-icon">➕</span>Nouvelle consultation</a>
+                <a class="sb-item" href="nouvelle-ordonnance.html"><span class="sb-icon">💊</span>Nouvelle ordonnance</a>
+                <a class="sb-item" href="nouveau-certificat.html"><span class="sb-icon">📄</span>Certificats</a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <a class="sb-user" href="profil-medecin.html">
+                <div class="sb-avatar" data-medecin-avatar data-medecin-initials>BA</div>
+                <div>
+                    <div class="sb-user-name" data-medecin-name>Dr. Bamba A.</div>
+                    <div class="sb-user-role" data-medecin-role>Médecin</div>
+                </div>
+                <span class="sb-user-link">↗</span>
+            </a>
+        </div>
+    </aside>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">Dossier patient</div>
+            <div class="topbar-tools">
+                <div class="patient-search-shell">
+                    <div class="searchbar">
+                        <span>🔎</span>
+                        <input class="patient-search-input" type="text" placeholder="Rechercher un patient...">
+                    </div>
+                    <div class="patient-search-results"></div>
+                    <span class="patient-search-meta patient-search-selected" data-search-selected></span>
+                </div>
+                <div class="topbar-right">
+                    <button class="icon-btn icon-btn-badge" type="button" data-action="notifications" title="Notifications">🔔</button>
+                    <button class="icon-btn" type="button" data-action="settings" title="Paramètres">⚙️</button>
+                    <button class="icon-btn logout" type="button" data-action="logout" title="Déconnexion">🚪</button>
+                </div>
+            </div>
+        </header>
+        <div class="content-area">
+            <div class="flex gap-12 mb-16" style="align-items:center">
+                <div class="searchbar" style="margin-left:0;max-width:none;flex:1">
+                    <span>🔎</span>
+                    <input type="text" placeholder="Rechercher par nom, prénom ou CMU...">
+                </div>
+                <select style="min-width:180px;padding:10px 14px;border:1.5px solid var(--slate-900);border-radius:14px;background:var(--white);outline:none">
+                    <option>Tous les patients</option>
+                    <option>Patients à risque</option>
+                    <option>Consultés ce mois</option>
+                </select>
+            </div>
+            <div class="patient-banner">
+                <div class="patient-ava" data-patient-initials>KJ</div>
+                <div class="flex-1">
+                    <div class="patient-name" data-patient-name>Kouadio Jean Baptiste</div>
+                    <div class="patient-meta" data-patient-meta-long>CMU-2024-08821 · Né le 14/03/1987 · +225 07 12 34 56</div>
+                    <div class="badge-row">
+                        <span class="badge badge-teal" data-patient-blood>O+ Rhésus+</span>
+                        <span class="badge badge-red" data-patient-allergy>Allergie Pénicilline</span>
+                        <span class="badge badge-amber" data-patient-condition>Hypertension</span>
+                    </div>
+                </div>
+                <a class="btn btn-primary" href="nouvelle-consultation.html">+ Nouvelle consultation</a>
+            </div>
+            <section data-tabs>
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-target="dtab-consult">Consultations</button>
+                    <button class="tab-btn" data-target="dtab-ordo">Ordonnances</button>
+                    <button class="tab-btn" data-target="dtab-ant">Antécédents</button>
+                    <button class="tab-btn" data-target="dtab-vit">Signes vitaux</button>
+                </div>
+                <div class="tab-content active" id="dtab-consult">
+                    <div class="consult-item">
+                        <div class="consult-date-box">
+                            <div class="consult-date-d">12</div>
+                            <div class="consult-date-m">Mar</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="consult-title"><span data-patient-summary>Fièvre persistante</span> - Suivi</div>
+                            <div class="consult-sub">TA: 130/85 · T°: 39.2°C · FC: 98 bpm</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="dtab-ordo">
+                    <div class="card">
+                        <div class="card-title mb-16">Ordonnance - <span data-patient-last-consultation>12 Mar 2025</span></div>
+                        <div class="table-wrap" style="border:none">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Médicament</th>
+                                        <th>Dosage</th>
+                                        <th>Posologie</th>
+                                        <th>Durée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Artéméther/Luméfantrine</td>
+                                        <td>80/480mg</td>
+                                        <td>2x/j - matin, soir</td>
+                                        <td>3 jours</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paracétamol</td>
+                                        <td>1000mg</td>
+                                        <td>3x/j</td>
+                                        <td>5 jours</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-8">
+                            <button class="btn btn-secondary btn-sm" type="button">📄 PDF</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="dtab-ant">
+                    <div class="grid g2 gap-14">
+                        <div class="card">
+                            <div class="card-title mb-8">Maladies passées</div>
+                            <div><span class="badge badge-slate">2020</span> Paludisme P. falciparum</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title mb-8">Maladies chroniques</div>
+                            <div><span class="badge badge-amber">Chronique</span> <span data-patient-condition>Hypertension</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="dtab-vit">
+                    <div class="vital-grid">
+                        <div class="vital-card warning">
+                            <div class="vital-icon">🩸</div>
+                            <div class="vital-val">145/92</div>
+                            <div class="vital-lbl">Tension (mmHg)</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon">🌡️</div>
+                            <div class="vital-val">37.1°C</div>
+                            <div class="vital-lbl">Température</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon">❤️</div>
+                            <div class="vital-val">78 bpm</div>
+                            <div class="vital-lbl">Fréq. cardiaque</div>
+                        </div>
+                        <div class="vital-card">
+                            <div class="vital-icon">🫁</div>
+                            <div class="vital-val">97%</div>
+                            <div class="vital-lbl">SpO₂</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook – Mes ordonnances</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/patient.css">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Mon espace</span>
+                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a href="profil.html" class="sb-item"><span class="sb-icon">👤</span>Mon profil</a>
+                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">📋</span>Carnet médical</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Historique</span>
+                <a href="consultations.html" class="sb-item"><span class="sb-icon">🩺</span>Consultations</a>
+                <a href="ordonnances.html" class="sb-item active"><span class="sb-icon">💊</span>Ordonnances</a>
+                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+                <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-user" id="btn-logout">
+                <div class="sb-avatar" id="sb-avatar">KJ</div>
+                <div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div>
+                <span class="sb-logout-icon">↗</span>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-title">Mes ordonnances</div>
+            <div class="topbar-right">
+                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Ordonnances médicales</div>
+                        <div class="card-sub">Lecture seule · Émises par vos médecins</div>
+                    </div>
+                    <span class="badge badge-teal" id="badge-actives">5 actives</span>
+                </div>
+
+                <!-- Liste injectée par patient.js -->
+                <div id="liste-ordonnances"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/patient.js"></script>
+</body>
+</html>
