@@ -3,80 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook – Rappels</title>
+    <title>MediBook - Rappels</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../css/main.css">
     <link rel="stylesheet" href="../../css/patient.css">
 </head>
 <body>
 <div class="app-shell">
-
     <aside class="sidebar">
-        <div class="sb-logo">
-            <div class="sb-logo-inner">
-                <div class="sb-logo-mark">🏥</div>
-                <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
-            </div>
-        </div>
-        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">&#127973;</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div></div></div>
+        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
         <nav>
-            <div class="sb-section">
-                <span class="sb-section-label">Mon espace</span>
-                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
-                <a href="profil.html" class="sb-item"><span class="sb-icon">👤</span>Mon profil</a>
-                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">📋</span>Carnet médical</a>
-            </div>
-            <div class="sb-section">
-                <span class="sb-section-label">Historique</span>
-                <a href="consultation.html" class="sb-item"><span class="sb-icon">🩺</span>Consultations</a>
-                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
-                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
-                <a href="rappels.html" class="sb-item active"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
-            </div>
+            <div class="sb-section"><span class="sb-section-label">Mon espace</span><a href="dashboard.html" class="sb-item"><span class="sb-icon">&#127968;</span>Tableau de bord</a><a href="profil.html" class="sb-item"><span class="sb-icon">&#128100;</span>Mon profil</a><a href="carnet-medical.html" class="sb-item"><span class="sb-icon">&#128203;</span>Carnet medical</a></div>
+            <div class="sb-section"><span class="sb-section-label">Historique</span><a href="consultation.html" class="sb-item"><span class="sb-icon">&#129658;</span>Consultations</a><a href="ordonnances.html" class="sb-item"><span class="sb-icon">&#128138;</span>Ordonnances</a><a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a><a href="rappels.html" class="sb-item active"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a></div>
         </nav>
-        <div class="sb-footer">
-            <div class="sb-user" id="btn-logout">
-                <div class="sb-avatar" id="sb-avatar">KJ</div>
-                <div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div>
-                <span class="sb-logout-icon">↗</span>
-            </div>
-        </div>
+        <div class="sb-footer"><div class="sb-user" id="btn-logout"><div class="sb-avatar" id="sb-avatar">KJ</div><div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div><span class="sb-user-link">&#8599;</span></div></div>
     </aside>
-
-    <div class="main">
+    <main class="main">
         <header class="topbar">
-            <div class="topbar-title">Rappels &amp; alertes</div>
-            <div class="topbar-right">
-                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            <div class="topbar-title">Rappels et alertes</div>
+            <div class="topbar-tools">
+                <div class="searchbar"><span class="search-icon">&#128269;</span><input type="text" placeholder="Rechercher un rappel..."></div>
+                <div class="topbar-right"><button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button><button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button><button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button></div>
             </div>
         </header>
-
         <div class="content-area">
-            <div class="rappels-grid">
-
-                <!-- Rappels médicaments -->
+            <div class="grid g2 gap-14 rappels-grid">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Rappels médicaments</div>
-                        <span class="badge badge-amber" id="count-medicaments">2</span>
+                    <div class="card-header"><div class="card-title">Medicaments</div><span class="badge badge-amber" id="count-medicaments">2</span></div>
+                    <div id="liste-rappels-medicaments">
+                        <div class="rappel-item"><div class="rappel-time">08h00</div><div class="rappel-icon-box">&#128138;</div><div><div class="consult-title">Paracetamol 1000 mg</div><div class="consult-sub">Apres le petit-dejeuner</div></div></div>
+                        <div class="rappel-item"><div class="rappel-time">20h00</div><div class="rappel-icon-box">&#128138;</div><div><div class="consult-title">Amoxicilline 500 mg</div><div class="consult-sub">1 gelule le soir</div></div></div>
                     </div>
-                    <div id="liste-rappels-medicaments"></div>
                 </div>
-
-                <!-- Prochains rendez-vous -->
                 <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Prochains rendez-vous</div>
-                        <span class="badge badge-teal" id="count-rdv">1</span>
-                    </div>
-                    <div id="liste-rappels-rdv"></div>
+                    <div class="card-header"><div class="card-title">Prochains rendez-vous</div><span class="badge badge-teal" id="count-rdv">1</span></div>
+                    <div id="liste-rappels-rdv"><div class="rappel-item"><div class="rappel-time">14h30</div><div class="rappel-icon-box">&#128197;</div><div><div class="consult-title">Controle cardiologique</div><div class="consult-sub">28 mars 2025 - CHU Treichville</div></div></div></div>
                 </div>
-
             </div>
         </div>
-    </div>
+    </main>
 </div>
-
 <script src="../../js/api.js"></script>
 <script src="../../js/patient.js"></script>
 </body>
