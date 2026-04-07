@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../../css/patient.css">
 </head>
 <body>
-<div class="app">
+<div class="app-shell">
 
     <aside class="sidebar">
         <div class="sb-logo">
@@ -28,7 +28,7 @@
             </div>
             <div class="sb-section">
                 <span class="sb-section-label">Historique</span>
-                <a href="consultations.html" class="sb-item active"><span class="sb-icon">🩺</span>Consultations</a>
+                <a href="consultation.html" class="sb-item active"><span class="sb-icon">🩺</span>Consultations</a>
                 <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
                 <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
                 <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
@@ -56,28 +56,34 @@
         </header>
 
         <div class="content-area">
-            <div class="card">
+            <div class="card consult-history-card">
                 <div class="card-header">
-                    <div>
-                        <div class="card-title">Historique des consultations</div>
-                        <div class="card-sub" id="total-consultations">12 consultations</div>
-                    </div>
-                    <select class="filtre-select" id="filtre-annee">
-                        <option value="">Toutes les années</option>
-                        <option value="2025">2025</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                    </select>
+                    <div class="card-title">Historique</div>
+                    <span class="badge badge-slate">12 consultations</span>
                 </div>
-
-                <!-- Liste injectée par patient.js -->
-                <div id="liste-consultations-full"></div>
-
-                <!-- État vide -->
-                <div id="empty-state" class="empty-state" style="display:none">
-                    <div class="empty-icon">🩺</div>
-                    <div class="empty-txt">Aucune consultation trouvée</div>
-                    <div class="empty-sub">Essayez un autre terme de recherche</div>
+                <div class="consult-history-list">
+                    <div class="consult-item consult-item-lg">
+                        <div class="consult-date-box consult-date-box-lg">
+                            <div class="consult-date-d">12</div>
+                            <div class="consult-date-m">MAR</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="consult-title consult-title-lg">Fièvre persistante - Paludisme P. falciparum</div>
+                            <div class="consult-sub consult-sub-lg">TA: 130/85 · T°: 39.2°C · CHU Treichville</div>
+                        </div>
+                        <div class="consult-doctor consult-doctor-lg">Dr. Bamba A.</div>
+                    </div>
+                    <div class="consult-item consult-item-lg">
+                        <div class="consult-date-box consult-date-box-lg">
+                            <div class="consult-date-d">02</div>
+                            <div class="consult-date-m">FÉV</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="consult-title consult-title-lg">Bilan cardiologique - Contrôle HTA</div>
+                            <div class="consult-sub consult-sub-lg">TA: 145/92 · FC: 78 bpm</div>
+                        </div>
+                        <div class="consult-doctor consult-doctor-lg">Dr. Koné M.</div>
+                    </div>
                 </div>
             </div>
         </div>

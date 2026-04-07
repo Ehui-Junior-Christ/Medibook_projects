@@ -1,4 +1,7 @@
+let selectedRole = "patient";
+
 function toggleRole(role) {
+  selectedRole = role;
   const patientForm = document.getElementById("form-patient");
   const proForm = document.getElementById("form-pro");
   document.querySelectorAll(".role-btn").forEach((btn) => {
@@ -11,7 +14,19 @@ function toggleRole(role) {
   }
 }
 
+function setRole(role, button) {
+  selectedRole = role;
+  document.querySelectorAll(".role-btn").forEach((node) => {
+    node.classList.remove("active");
+  });
+  if (button) {
+    button.classList.add("active");
+  }
+  toggleRole(role);
+}
+
 function pickRole(role, card) {
+  selectedRole = role;
   document.querySelectorAll(".role-card").forEach((node) => {
     node.classList.remove("selected");
   });
@@ -72,6 +87,37 @@ function nextStep(current) {
 
 function prevStep(current) {
   setStep(current - 1);
+}
+
+function isNext(current) {
+  nextStep(current);
+}
+
+function isPrev(current) {
+  prevStep(current);
+}
+
+function goInscription() {
+  window.location.href = "./inscription.html";
+}
+
+function goLogin() {
+  window.location.href = "./login.html";
+}
+
+function goApp() {
+  const activeRole =
+    document.querySelector(".role-btn.active")?.dataset.role ||
+    document.querySelector(".role-card.selected")?.dataset.role ||
+    selectedRole;
+
+  const dashboardByRole = {
+    patient: "./patient/dashboard.html",
+    medecin: "./medecin/dashboard.html",
+    infirmier: "./infirmier/dashboard.html"
+  };
+
+  window.location.href = dashboardByRole[activeRole] || dashboardByRole.patient;
 }
 
 function checkPw() {

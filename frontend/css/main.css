@@ -58,6 +58,7 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 4px; }
 
+.app,
 .app-shell { display: flex; min-height: 100vh; }
 .sidebar {
   width: var(--sidebar);
@@ -607,6 +608,39 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 .consult-title { font-size: 13px; font-weight: 600; }
 .consult-sub { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; }
 .consult-doctor { font-size: 11px; font-weight: 600; color: var(--teal-600); margin-left: auto; }
+.consult-history-card {
+  padding: 18px 22px;
+  border-radius: 18px;
+}
+.consult-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.consult-item-lg {
+  padding: 16px 18px;
+  border-radius: 14px;
+  margin-bottom: 0;
+}
+.consult-date-box-lg {
+  width: 58px;
+  border-radius: 12px;
+  padding: 10px 6px;
+}
+.consult-title-lg {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+.consult-sub-lg {
+  font-size: 12px;
+  margin-top: 6px;
+}
+.consult-doctor-lg {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-600);
+}
 
 .rappel-item { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border-radius: var(--radius-sm); margin-bottom: 7px; }
 .rappel-time { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--teal-700); width: 44px; }
