@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<<< feature-patient
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediBook – Tableau de bord Patient</title>
@@ -140,16 +141,28 @@
         .quick-btn .q-icon{font-size:20px;margin-bottom:4px}
         .quick-btn .q-label{font-size:11.5px;font-weight:500;color:var(--slate-700)}
     </style>
+
+ <meta charset="UTF-8">
+ <meta name = "viewport" content = "width = device-width, initial-scale=1.0">
+ <title> Tableau de bord du Patient </title>
+ <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="../../css/main.css">
+ <link rel="stylesheet" href="../../css/patient.css">
+        main
 </head>
 <body>
 <div class="app">
 
+    feature-patient
     <!-- SIDEBAR -->
+
+     main
     <aside class="sidebar">
         <div class="sb-logo">
             <div class="sb-logo-inner">
                 <div class="sb-logo-mark">🏥</div>
                 <div>
+     feature-patient
                     <div class="sb-logo-text">MediBook</div>
                     <div class="sb-logo-sub">Portail médical</div>
                 </div>
@@ -181,10 +194,64 @@
                     <div class="sb-user-role">Patient</div>
                 </div>
                 <span style="margin-left:auto;font-size:12px;color:rgba(255,255,255,.3)">↗</span>
+
+                    <div class="sb-logo-texte">Medibook</div>
+                    <div class="sb-logo-sub">Portail médical</div>
+                </div>
+            </div>
+
+        </div>
+        <div class="sb-role-badge sb-role-patient">
+            <span>🧑</span>
+            <span>Patient</span>
+        </div>
+        <nav>
+            <div class="sb-section">
+            <span class="sb-section-label">Mon espace</span>
+            <a href="dashboard.html" class="sb-item active">
+                <span class="sb-icon">🏠</span> Tableau de bord
+            </a>
+            <a href="profil.html" class="sb-item">
+                <span class="sb-icon">👤</span>Mon profil
+            </a>
+            <a href="carnet-medical.html" class="sb-item">
+                <span class="sb-icon">📋</span>Carnet médical
+            </a>
+           </div>
+            <div class="sb-section">
+
+                <span class="sb-section-label">Historique</span>
+                <a href="consultations.html" class="sb-item">
+                    <span class="sb-icon">🩺</span>Consultations
+                </a>
+                <a href="ordonnances.html" class="sb-item">
+                    <span class="sb-icon">💊</span>Ordonnances
+                </a>
+                <a href="documents.html" class="sb-item">
+                    <span class="sb-icon">📁</span>Documents
+                </a>
+                <a href="rappels.html" class="sb-item">
+                    <span class="sb-icon">🔔</span>Rappels
+                    <span class="sb-badge">3</span>
+                </a>
+
+            </div>
+        </nav>
+
+        <div class="sb-footer">
+            <div class="sb-user" id="btn-logout">
+                <div class="sb-avatar" id="sb-avatar">KJ</div>
+                <div>
+                    <div class="sb-user-name" id="sb-name">Kouadio J.B.</div>
+                    <div class="sb-user-role">Patient</div>
+                </div>
+                <span class="sb-logout-icon">↗</span>
+         main
             </div>
         </div>
     </aside>
 
+       feature-patient
     <!-- MAIN -->
     <div class="main">
         <!-- TOPBAR -->
@@ -295,10 +362,80 @@
                             <div style="width:34px;height:34px;background:var(--teal-50);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🌡️</div>
                             <div class="flex-1"><div class="consult-title">Ibuprofène 400mg</div><div class="consult-sub">1 comprimé le soir · 5 jours</div></div>
                             <span class="badge badge-teal">Actif</span>
+
+    <!--  MAIN -->
+    <div class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div class="topbar-title">Tableau de bord</div>
+            <div class="searchbar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Rechercher consultation, document…">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn" id="btn-notif">
+                    🔔
+                    <div class="notif-dot"></div>
+                </div>
+                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            </div>
+        </header>
+
+        <!-- CONTENU -->
+        <div class="content-area">
+
+            <!-- STATS -->
+            <div class="stats-row">
+                <div class="stat-card" data-emoji="🩺">
+                    <div class="stat-accent" style="background:#10ADAF"></div>
+                    <div class="stat-val" id="stat-consultations">12</div>
+                    <div class="stat-label">Consultations totales</div>
+                    <div class="stat-trend trend-up">↑ +2 ce mois</div>
+                </div>
+                <div class="stat-card" data-emoji="💊">
+                    <div class="stat-accent" style="background:#F59E0B"></div>
+                    <div class="stat-val" id="stat-ordonnances">5</div>
+                    <div class="stat-label">Ordonnances actives</div>
+                    <div class="stat-trend trend-amber">1 renouvelable</div>
+                </div>
+                <div class="stat-card" data-emoji="📁">
+                    <div class="stat-accent" style="background:#059669"></div>
+                    <div class="stat-val" id="stat-documents">8</div>
+                    <div class="stat-label">Documents médicaux</div>
+                    <div class="stat-trend stat-neutral">2 images médicales</div>
+                </div>
+                <div class="stat-card" data-emoji="📅">
+                    <div class="stat-accent" style="background:#DC2626"></div>
+                    <div class="stat-val" id="stat-rdv">1</div>
+                    <div class="stat-label">RDV à venir</div>
+                    <div class="stat-trend trend-amber">28 Mars 2025</div>
+                </div>
+            </div>
+
+            <!-- GRILLE PRINCIPALE -->
+            <div class="dashboard-grid">
+
+                <!-- Colonne gauche -->
+                <div class="col-left">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Dernières consultations</div>
+                                <div class="card-sub">3 consultations récentes</div>
+                            </div>
+                            <a href="consultations.html" class="btn btn-secondary btn-sm">Tout voir</a>
+                        </div>
+
+                        <!-- Liste consultations -->
+                        <div id="liste-consultations">
+                            <!-- Injectée par patient.js -->
+     main
                         </div>
                     </div>
                 </div>
 
+     feature-patient
                 <!-- RIGHT COLUMN -->
                 <div>
                     <!-- PROCHAIN RDV -->
@@ -355,3 +492,41 @@
 </html>
 
 echo "dashboard.html créé"
+
+                <!-- Colonne droite -->
+                <div class="col-right">
+
+                    <!-- Conditions médicales -->
+                    <div class="card card-sm">
+                        <div class="card-title">Mes conditions</div>
+                        <div class="badge-row" id="conditions-badges">
+                            <!-- Injectées par patient.js -->
+                        </div>
+                    </div>
+
+                    <!-- Rappels du jour -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Rappels du jour</div>
+                            <span class="badge badge-amber" id="rappels-count">3</span>
+                        </div>
+                        <div id="liste-rappels">
+                            <!-- Injectée par patient.js -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /content-area -->
+    </div><!-- /main -->
+</div><!-- /app -->
+
+<script src="../../js/api.js"></script>
+<script src="../../js/patient.js"></script>
+    </aside>
+</div>
+
+</body>
+</html>
+   main

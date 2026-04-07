@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook – Mes consultations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/patient.css">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-inner">
+                <div class="sb-logo-mark">🏥</div>
+                <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+            </div>
+        </div>
+        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+        <nav>
+            <div class="sb-section">
+                <span class="sb-section-label">Mon espace</span>
+                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+                <a href="profil.html" class="sb-item"><span class="sb-icon">👤</span>Mon profil</a>
+                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">📋</span>Carnet médical</a>
+            </div>
+            <div class="sb-section">
+                <span class="sb-section-label">Historique</span>
+                <a href="consultations.html" class="sb-item active"><span class="sb-icon">🩺</span>Consultations</a>
+                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
+                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+                <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
+            </div>
+        </nav>
+        <div class="sb-footer">
+            <div class="sb-user" id="btn-logout">
+                <div class="sb-avatar" id="sb-avatar">KJ</div>
+                <div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div>
+                <span class="sb-logout-icon">↗</span>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-title">Mes consultations</div>
+            <div class="searchbar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Rechercher une consultation…">
+            </div>
+            <div class="topbar-right">
+                <div class="icon-btn" id="btn-logout-top">🚪</div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Historique des consultations</div>
+                        <div class="card-sub" id="total-consultations">12 consultations</div>
+                    </div>
+                    <select class="filtre-select" id="filtre-annee">
+                        <option value="">Toutes les années</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                </div>
+
+                <!-- Liste injectée par patient.js -->
+                <div id="liste-consultations-full"></div>
+
+                <!-- État vide -->
+                <div id="empty-state" class="empty-state" style="display:none">
+                    <div class="empty-icon">🩺</div>
+                    <div class="empty-txt">Aucune consultation trouvée</div>
+                    <div class="empty-sub">Essayez un autre terme de recherche</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/patient.js"></script>
+</body>
+</html>
