@@ -1,416 +1,326 @@
-/* ============================================================
-   MediBook – patient.css
-   Styles spécifiques au module Patient (toutes les pages)
-   Auteur : Bie Jacquy Sergine
-   ============================================================ */
+/* Styles specifiques au portail patient */
 
-/* ===== DASHBOARD – grille ===== */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 14px;
-}
-
-.col-left  { display: flex; flex-direction: column; gap: 12px; }
-.col-right { display: flex; flex-direction: column; gap: 12px; }
-
-/* ===== PROFIL ===== */
-.profil-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 14px;
-}
-
-.profil-ava-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.profil-ava {
-  width: 72px;
-  height: 72px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #0D8E94, #4DC6C8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 26px;
-  color: #fff;
-  flex-shrink: 0;
-  font-family: 'Syne', sans-serif;
-}
-
-.profil-nom {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--slate-900);
-}
-
-.profil-cmu {
-  font-size: 12px;
-  color: var(--slate-500);
-  margin-top: 3px;
-}
-
-/* ===== FORMULAIRE ===== */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.fld {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.fld label {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  color: var(--slate-500);
-}
-
-.fld input,
-.fld select,
-.fld textarea {
-  padding: 9px 12px;
-  border: 1.5px solid var(--slate-200);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--slate-900);
-  background: var(--white);
-  outline: none;
-  transition: .2s;
-  resize: vertical;
-}
-
-.fld input:focus,
-.fld select:focus,
-.fld textarea:focus {
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px var(--teal-100);
-}
-
-.fld input:disabled { background: var(--slate-50); color: var(--slate-600); cursor: default; }
-
-.fld.col-full { grid-column: 1 / -1; }
-
-/* ===== ACTIONS BAR ===== */
-.actions-bar {
+.patient-hero {
+  background: linear-gradient(135deg, var(--teal-900), var(--teal-700));
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid var(--slate-200);
-  margin-top: 18px;
+  gap: 18px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  position: relative;
 }
 
-.actions-right { display: flex; gap: 8px; }
+.patient-hero::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  right: -40px;
+  top: -50px;
+}
 
-/* ===== BANNIÈRE PATIENT ===== */
-.patient-banner {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--slate-200);
-  padding: 18px;
-  display: flex;
-  align-items: center;
+.patient-hero-copy,
+.patient-hero-mark {
+  position: relative;
+  z-index: 1;
+}
+
+.patient-hero h1 {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.patient-hero p {
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 560px;
+}
+
+.patient-hero-mark {
+  font-size: 62px;
+  opacity: 0.85;
+}
+
+.dashboard-grid,
+.profil-grid,
+.carnet-grid,
+.documents-grid {
+  display: grid;
   gap: 14px;
-  margin-bottom: 16px;
 }
 
-.patient-ava {
-  width: 60px;
-  height: 60px;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #0D8E94, #4DC6C8);
+.dashboard-grid {
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+}
+
+.profil-grid {
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
+}
+
+.carnet-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+}
+
+.documents-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stack {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 20px;
-  color: #fff;
-  flex-shrink: 0;
-  font-family: 'Syne', sans-serif;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.patient-ava.sm {
+.summary-grid,
+.quick-links,
+.profile-form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.summary-grid,
+.quick-links,
+.profile-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-item,
+.metric-card {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+}
+
+.summary-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--slate-500);
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.quick-link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--slate-200);
+  background: linear-gradient(180deg, var(--slate-50), var(--white));
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.quick-link-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--teal-300);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.quick-link-icon,
+.document-icon {
   width: 38px;
   height: 38px;
-  font-size: 13px;
-  border-radius: 9px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--teal-100);
 }
 
-.patient-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.patient-meta {
-  font-size: 12px;
-  color: var(--slate-500);
-  margin-top: 3px;
-}
-
-.flex-1 { flex: 1; }
-
-/* ===== CARNET MÉDICAL ===== */
-.carnet-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+.document-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 24px;
 }
 
 .medoc-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid var(--slate-100);
-  font-size: 13px;
 }
 
-.medoc-item:last-child { border-bottom: none; }
-.medoc-name   { font-weight: 600; }
-.medoc-detail { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; }
-
-/* ===== CONSULTATIONS ===== */
-.filtre-select {
-  padding: 6px 10px;
-  border: 1.5px solid var(--slate-200);
-  border-radius: var(--radius-sm);
-  font-size: 12.5px;
-  font-family: inherit;
-  color: var(--slate-700);
-  background: var(--white);
-  outline: none;
-  cursor: pointer;
-  transition: .2s;
+.medoc-item:last-child {
+  border-bottom: none;
 }
 
-.filtre-select:focus {
-  border-color: var(--teal-500);
-  box-shadow: 0 0 0 3px var(--teal-100);
-}
-
-/* ===== ÉTAT VIDE ===== */
-.empty-state {
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--slate-400);
-}
-
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-txt  { font-size: 14px; font-weight: 500; color: var(--slate-500); }
-.empty-sub  { font-size: 12px; margin-top: 4px; }
-
-/* ===== ORDONNANCES ===== */
-.ordo-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-  margin-top: 10px;
-}
-
-.ordo-table th {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  color: var(--slate-500);
-  padding: 7px 8px;
-  text-align: left;
-  background: var(--slate-50);
-  border-bottom: 1px solid var(--slate-200);
-}
-
-.ordo-table td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--slate-100);
-  vertical-align: middle;
-}
-
-.ordo-table tr:last-child td { border-bottom: none; }
-
-/* ===== DOCUMENTS ===== */
-.docs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.doc-card {
-  text-align: center;
-  cursor: pointer;
-  padding: 18px;
-  transition: .2s;
-}
-
-.doc-card:hover { border-color: var(--teal-300); background: var(--teal-50); }
-
-.doc-icon  { font-size: 34px; margin-bottom: 8px; }
-.doc-name  { font-size: 13px; font-weight: 600; }
-.doc-meta  { font-size: 12px; color: var(--slate-500); margin-top: 4px; }
-
-/* ===== RAPPELS ===== */
-.rappels-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-/* ===== STATUS ===== */
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
+.medoc-name {
   font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 20px;
 }
 
-.status-pill::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.status-active   { background: var(--green-light); color: var(--green); }
-.status-active::before   { background: var(--green); }
-.status-inactive { background: var(--slate-100);    color: var(--slate-500); }
-.status-inactive::before { background: var(--slate-400); }
-
-/* ===== TABLE COMMUNE ===== */
-.table-wrap {
-  border-radius: var(--radius);
-  border: 1px solid var(--slate-200);
-  overflow: hidden;
-  background: var(--white);
-}
-
-table { width: 100%; border-collapse: collapse; }
-
-thead th {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .5px;
+.medoc-detail,
+.document-meta,
+.helper-copy {
+  font-size: 11.5px;
   color: var(--slate-500);
-  padding: 10px 14px;
-  text-align: left;
-  background: var(--slate-50);
-  border-bottom: 1px solid var(--slate-200);
 }
 
-tbody td {
-  padding: 11px 14px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--slate-100);
-  vertical-align: middle;
-}
-
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: var(--teal-50); }
-
-/* ===== VITAUX (lecture seule pour le patient) ===== */
-.vital-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.vital-card {
-  background: var(--slate-50);
-  border: 1px solid var(--slate-200);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  text-align: center;
-}
-
-.vital-card.warning {
-  border-color: var(--amber);
-  background: var(--amber-light);
-}
-
-.vital-icon { font-size: 17px; margin-bottom: 5px; }
-
-.vital-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--slate-900);
-}
-
-.vital-card.warning .vital-val { color: var(--amber-dark); }
-
-.vital-lbl {
-  font-size: 10px;
-  color: var(--slate-500);
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-}
-
-/* ===== TABS ===== */
-.tabs-nav {
+.profile-shell {
   display: flex;
-  gap: 2px;
-  border-bottom: 1.5px solid var(--slate-200);
-  margin-bottom: 16px;
+  align-items: flex-start;
+  gap: 18px;
 }
 
-.tab-btn {
-  padding: 8px 14px;
-  font-size: 12.5px;
-  font-weight: 500;
+.profile-highlights {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.profile-feedback {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--green);
+  min-height: 18px;
+}
+
+.profile-section-card {
+  padding: 18px;
+}
+
+.profile-form-grid .col-full {
+  grid-column: 1 / -1;
+}
+
+.info-stack,
+.timeline-list,
+.ordonnance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.info-stack p {
+  margin-top: 4px;
+  color: var(--slate-600);
+  font-size: 13px;
+}
+
+.timeline-entry {
+  padding-left: 16px;
+  border-left: 2px solid var(--teal-200);
+}
+
+.timeline-date {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
   color: var(--slate-500);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1.5px;
-  transition: .15s;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  background: transparent;
-  font-family: inherit;
+  margin-bottom: 4px;
 }
 
-.tab-btn.active {
+.consult-card-wide {
+  margin-bottom: 10px;
+}
+
+.filter-row,
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ordonnance-card,
+.document-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ordonnance-list {
+  padding-left: 18px;
+  color: var(--slate-700);
+}
+
+.ordo-doctor-line {
+  font-size: 12px;
   color: var(--teal-700);
-  border-bottom-color: var(--teal-700);
   font-weight: 600;
 }
 
-.tab-btn:hover:not(.active) { color: var(--slate-700); }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .dashboard-grid    { grid-template-columns: 1fr; }
-  .profil-grid       { grid-template-columns: 1fr; }
-  .carnet-grid       { grid-template-columns: 1fr; }
-  .rappels-grid      { grid-template-columns: 1fr; }
-  .docs-grid         { grid-template-columns: 1fr 1fr; }
-  .vital-grid        { grid-template-columns: 1fr 1fr; }
+.document-name {
+  font-size: 14px;
+  font-weight: 700;
 }
 
-@media (max-width: 640px) {
-  .stats-row { grid-template-columns: 1fr 1fr; }
-  .docs-grid { grid-template-columns: 1fr; }
-  .form-grid { grid-template-columns: 1fr; }
+@media (max-width: 1100px) {
+  .dashboard-grid,
+  .profil-grid,
+  .carnet-grid,
+  .documents-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .summary-grid,
+  .quick-links,
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-hero,
+  .profile-shell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .patient-hero {
+    border-radius: 22px;
+    box-shadow: 0 20px 40px rgba(6, 78, 82, .18);
+  }
+
+  .quick-link-card {
+    border-radius: 16px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.98), rgba(242,251,251,.92));
+    box-shadow: 0 14px 28px rgba(15, 23, 42, .06);
+  }
+}
+
+@media (max-width: 560px) {
+  .patient-hero {
+    padding: 18px 16px;
+    gap: 12px;
+  }
+
+  .patient-hero h1 {
+    font-size: 22px;
+  }
+
+  .patient-hero-mark {
+    font-size: 46px;
+  }
+
+  .quick-link-card,
+  .summary-item,
+  .metric-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .profile-highlights {
+    gap: 6px;
+  }
+
+  .document-card,
+  .ordonnance-card {
+    gap: 12px;
+  }
 }

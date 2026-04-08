@@ -95,6 +95,13 @@ const MEDECIN_CERTIFICATS = [
   { patientId: "CMU-2025-01277", date: "2025-03-21" }
 ];
 
+const MEDECIN_NOTIFICATION_COUNT = 3;
+const MEDECIN_NOTIFICATIONS = [
+  { title: "Resultats biologiques", body: "Le bilan du patient Kouadio Jean Baptiste est disponible.", time: "Aujourd'hui · 08:15", tag: "laboratoire" },
+  { title: "Consultation a valider", body: "La consultation d'Assi Koffi Martial attend votre validation.", time: "Aujourd'hui · 10:00", tag: "consultation" },
+  { title: "Rappel de suivi", body: "Traore Awa Mariam doit etre revue cette semaine.", time: "Demain · 09:30", tag: "suivi" }
+];
+
 function getSelectedPatient() {
   const savedPatientId = window.localStorage.getItem("medecinSelectedPatientId");
   return MEDECIN_PATIENTS.find((patient) => patient.id === savedPatientId) || MEDECIN_PATIENTS[0];
@@ -114,6 +121,28 @@ function fillHtml(selector, value) {
   document.querySelectorAll(selector).forEach((node) => {
     node.innerHTML = value;
   });
+}
+
+function sanitizeFilename(value) {
+  return String(value || "document")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function applyPatientData(patient) {
@@ -174,6 +203,22 @@ function closeAllPatientSearches() {
   });
 }
 
+function selectPatient(patient, input, selectedLabel) {
+  if (!patient) {
+    return;
+  }
+
+  saveSelectedPatient(patient.id);
+  applyPatientData(patient);
+  if (input) {
+    input.value = patient.fullName;
+  }
+  if (selectedLabel) {
+    selectedLabel.textContent = `${patient.fullName} Â· ${patient.cmu}`;
+  }
+  closeAllPatientSearches();
+}
+
 function initPatientSearch() {
   document.querySelectorAll(".patient-search-shell").forEach((shell) => {
     const input = shell.querySelector(".patient-search-input");
@@ -228,6 +273,35 @@ function initPatientSearch() {
     if (!event.target.closest(".patient-search-shell")) {
       closeAllPatientSearches();
     }
+  });
+}
+
+function initPatientPickerActions() {
+  document.querySelectorAll(".patient-picker-card").forEach((card) => {
+    const input = card.querySelector(".patient-picker-bar input");
+    const button = card.querySelector(".patient-picker-bar .btn");
+    const selectedLabel = document.querySelector("[data-search-selected]");
+
+    if (!input || !button) {
+      return;
+    }
+
+    const runSearch = () => {
+      const [patient] = filterPatients(input.value);
+      if (!patient) {
+        window.alert("Aucun patient correspondant.");
+        return;
+      }
+      selectPatient(patient, input, selectedLabel);
+    };
+
+    button.addEventListener("click", runSearch);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        runSearch();
+      }
+    });
   });
 }
 
@@ -487,6 +561,77 @@ function initCertificatActions() {
   });
 }
 
+function initConsultationActions() {
+  const consultationDraftButton = Array.from(document.querySelectorAll("#ct4 .actions-right .btn"))
+    .find((button) => button.textContent.includes("Brouillon"));
+  const consultationValidateButton = Array.from(document.querySelectorAll("#ct4 .actions-right .btn"))
+    .find((button) => button.textContent.includes("Valider consultation"));
+  const dossierPdfButton = Array.from(document.querySelectorAll("#dtab-ordo .btn"))
+    .find((button) => button.textContent.includes("PDF"));
+
+  consultationDraftButton?.addEventListener("click", () => {
+    const payload = {
+      patientId: getSelectedPatient().id,
+      motif: document.querySelector("#ct1 input[type='text']")?.value || "",
+      diagnostic: document.querySelector("#ct3 textarea")?.value || "",
+      traitement: document.querySelector("#ct4 textarea")?.value || ""
+    };
+    window.localStorage.setItem("consultationDraft", JSON.stringify(payload));
+    window.alert("Brouillon de consultation enregistre.");
+  });
+
+  consultationValidateButton?.addEventListener("click", () => {
+    const payload = {
+      patientId: getSelectedPatient().id,
+      validatedAt: new Date().toISOString()
+    };
+    window.localStorage.setItem("lastValidatedConsultation", JSON.stringify(payload));
+    window.alert("Consultation validee et prete a etre ajoutee au dossier.");
+  });
+
+  dossierPdfButton?.addEventListener("click", () => {
+    const patient = getSelectedPatient();
+    const content = [
+      "MediBook - Ordonnance du dossier patient",
+      `Patient: ${patient.fullName}`,
+      `CMU: ${patient.cmu}`,
+      `Derniere consultation: ${patient.lastConsultation}`,
+      "",
+      "Medicaments:",
+      "1. Artemether/Lumefantrine - 80/480mg - 2x/j - 3 jours",
+      "2. Paracetamol - 1000mg - 3x/j - 5 jours"
+    ].join("\n");
+
+    triggerFileDownload(`${sanitizeFilename(`ordonnance-${patient.fullName}`)}.txt`, content);
+  });
+}
+
+function renderMedecinNotificationsMenu(menu) {
+  if (!menu) return;
+
+  menu.innerHTML = `
+    <div class="notif-menu-head">
+      <strong>Notifications medecin</strong>
+      <span>${MEDECIN_NOTIFICATIONS.length} element(s) a consulter</span>
+    </div>
+    <div class="notif-menu-list">
+      ${MEDECIN_NOTIFICATIONS.map((item) => `
+        <article class="notif-item">
+          <div class="notif-item-head">
+            <div class="notif-item-title">${item.title}</div>
+            <div class="notif-item-time">${item.time}</div>
+          </div>
+          <div class="notif-item-copy">${item.body}</div>
+          <div class="notif-item-meta">
+            <span class="notif-item-tag">${item.tag}</span>
+            <span class="badge badge-amber">A traiter</span>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
 function activateConsultationStep(wrapper, step) {
   const targetStep = String(step);
   wrapper.querySelectorAll(".tab-btn").forEach((button) => {
@@ -581,15 +726,36 @@ function initSelectableChips() {
 }
 
 function initTopbarActions() {
+  document.querySelectorAll("[data-action='settings']").forEach((button) => {
+    button.remove();
+  });
+
   document.querySelectorAll("[data-action='notifications']").forEach((button) => {
+    button.classList.remove("icon-btn-badge");
+    button.classList.add("icon-btn-count");
+    button.setAttribute("data-count", String(MEDECIN_NOTIFICATION_COUNT));
+    button.setAttribute("title", "Rappels et notifications");
+    button.textContent = "🔔";
+    if (!button.parentElement?.classList.contains("notif-shell")) {
+      const shell = document.createElement("div");
+      shell.className = "notif-shell";
+      button.parentNode?.insertBefore(shell, button);
+      shell.appendChild(button);
+      const menu = document.createElement("div");
+      menu.className = "notif-menu";
+      shell.appendChild(menu);
+      renderMedecinNotificationsMenu(menu);
+    }
     button.addEventListener("click", () => {
-      window.alert("Notifications: 3 elements a consulter pour cet espace medecin.");
+      button.parentElement?.classList.toggle("open");
     });
   });
 
-  document.querySelectorAll("[data-action='settings']").forEach((button) => {
-    button.addEventListener("click", () => {
-      window.alert("Parametres: profil, notifications et preferences d'affichage.");
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".notif-shell").forEach((shell) => {
+      if (!shell.contains(event.target)) {
+        shell.classList.remove("open");
+      }
     });
   });
 
@@ -729,11 +895,13 @@ document.addEventListener("DOMContentLoaded", () => {
   initDashboardStats();
   initProfileForm();
   initPatientSearch();
+  initPatientPickerActions();
   initTabs();
   initSelectableChips();
   initTopbarActions();
   initOrdonnanceActions();
   initCertificatActions();
+  initConsultationActions();
 
   if (document.getElementById("certTypePills")) {
     updateCert();
@@ -747,3 +915,5 @@ document.addEventListener("DOMContentLoaded", () => {
     activateConsultationStep(consultationTabs, 1);
   }
 });
+
+

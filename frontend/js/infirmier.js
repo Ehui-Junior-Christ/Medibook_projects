@@ -1,11 +1,34 @@
-const mockInfirmier = {
+﻿const DEFAULT_INFIRMIER_SESSION = {
   id: 3,
-  nom: "Koné",
+  nom: "Kone",
   prenom: "Marie",
   initiales: "KM",
   service: "Urgences",
-  matricule: "MAT-INF-00087"
+  matricule: "MAT-INF-00087",
+  role: "Infirmier",
+  telephone: "+225 07 12 34 56",
+  email: "marie.kone@medibook.ci",
+  bio: "Infirmiere en charge du suivi des soins, des signes vitaux et de la coordination terrain.",
+  avatar: ""
 };
+
+function getStoredInfirmierSession() {
+  const raw = window.localStorage.getItem("infirmierSession");
+  if (!raw) return { ...DEFAULT_INFIRMIER_SESSION };
+
+  try {
+    return { ...DEFAULT_INFIRMIER_SESSION, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_INFIRMIER_SESSION };
+  }
+}
+
+let mockInfirmier = getStoredInfirmierSession();
+
+function saveInfirmierSession(updates) {
+  mockInfirmier = { ...mockInfirmier, ...updates };
+  window.localStorage.setItem("infirmierSession", JSON.stringify(mockInfirmier));
+}
 
 const mockPatients = [
   {
@@ -109,8 +132,53 @@ function logout() {
 function initSidebar() {
   const av = document.getElementById("sb-avatar");
   const nm = document.getElementById("sb-name");
-  if (av) av.textContent = mockInfirmier.initiales;
-  if (nm) nm.textContent = mockInfirmier.prenom + " " + mockInfirmier.nom.charAt(0) + ".";
+  if (av) {
+    if (mockInfirmier.avatar) {
+      av.style.backgroundImage = `url(${mockInfirmier.avatar})`;
+      av.style.backgroundSize = "cover";
+      av.style.backgroundPosition = "center";
+      av.textContent = "";
+    } else {
+      av.style.backgroundImage = "";
+      av.textContent = mockInfirmier.initiales;
+    }
+  }
+  if (nm) nm.textContent = `${mockInfirmier.prenom} ${mockInfirmier.nom}`;
+  document.querySelectorAll("[data-infirmier-name]").forEach((node) => {
+    node.textContent = `${mockInfirmier.prenom} ${mockInfirmier.nom}`;
+  });
+  document.querySelectorAll("[data-infirmier-role]").forEach((node) => {
+    node.textContent = `${mockInfirmier.role} · ${mockInfirmier.service}`;
+  });
+  document.querySelectorAll("[data-infirmier-initiales]").forEach((node) => {
+    node.textContent = mockInfirmier.initiales;
+  });
+  document.querySelectorAll("[data-infirmier-service]").forEach((node) => {
+    node.textContent = mockInfirmier.service;
+  });
+  document.querySelectorAll("[data-infirmier-matricule]").forEach((node) => {
+    node.textContent = mockInfirmier.matricule;
+  });
+  document.querySelectorAll("[data-infirmier-phone]").forEach((node) => {
+    node.textContent = mockInfirmier.telephone;
+  });
+  document.querySelectorAll("[data-infirmier-email]").forEach((node) => {
+    node.textContent = mockInfirmier.email;
+  });
+  document.querySelectorAll("[data-infirmier-bio]").forEach((node) => {
+    node.textContent = mockInfirmier.bio;
+  });
+  document.querySelectorAll("[data-infirmier-avatar]").forEach((node) => {
+    if (mockInfirmier.avatar) {
+      node.style.backgroundImage = `url(${mockInfirmier.avatar})`;
+      node.style.backgroundSize = "cover";
+      node.style.backgroundPosition = "center";
+      node.textContent = "";
+    } else {
+      node.style.backgroundImage = "";
+      node.textContent = mockInfirmier.initiales;
+    }
+  });
 }
 
 function initLogout() {
@@ -120,12 +188,180 @@ function initLogout() {
   if (b2) b2.addEventListener("click", logout);
 }
 
+function initNotifications() {
+  const topbarRight = document.querySelector(".topbar-right");
+  if (!topbarRight) return;
+
+  const notificationItems = [
+    { title: "Soin programme", body: "Injection IM prevue pour Kouadio Jean Baptiste.", time: "Aujourd'hui � 10h00", tag: "soin" },
+    { title: "Mesure a verifier", body: "La tension de Kouadio Jean Baptiste reste elevee.", time: "Aujourd'hui � 11h20", tag: "vital" },
+    { title: "Document ajoute", body: "Un nouveau bilan biologique a ete envoye pour Assi Koffi Martial.", time: "Hier � 17h45", tag: "document" }
+  ];
+
+  let notifBtn = document.getElementById("btn-notif");
+  if (!notifBtn) {
+    notifBtn = document.createElement("div");
+    notifBtn.id = "btn-notif";
+    notifBtn.className = "icon-btn";
+    notifBtn.textContent = String.fromCodePoint(128276);
+    topbarRight.prepend(notifBtn);
+  }
+
+  notifBtn.classList.add("icon-btn-count");
+  notifBtn.setAttribute("data-count", String(notificationItems.length));
+  notifBtn.setAttribute("title", "Rappels et notifications");
+  notifBtn.textContent = String.fromCodePoint(128276);
+
+  if (!notifBtn.parentElement?.classList.contains("notif-shell")) {
+    const shell = document.createElement("div");
+    shell.className = "notif-shell";
+    notifBtn.parentNode?.insertBefore(shell, notifBtn);
+    shell.appendChild(notifBtn);
+    const menu = document.createElement("div");
+    menu.className = "notif-menu";
+    menu.innerHTML = `
+      <div class="notif-menu-head">
+        <strong>Notifications infirmier</strong>
+        <span>${notificationItems.length} element(s) a consulter</span>
+      </div>
+      <div class="notif-menu-list">
+        ${notificationItems.map((item) => `
+          <article class="notif-item">
+            <div class="notif-item-head">
+              <div class="notif-item-title">${item.title}</div>
+              <div class="notif-item-time">${item.time}</div>
+            </div>
+            <div class="notif-item-copy">${item.body}</div>
+            <div class="notif-item-meta">
+              <span class="notif-item-tag">${item.tag}</span>
+              <span class="badge badge-amber">A traiter</span>
+            </div>
+          </article>
+        `).join("")}
+      </div>
+    `;
+    shell.appendChild(menu);
+  }
+
+  notifBtn.addEventListener("click", () => {
+    notifBtn.parentElement?.classList.toggle("open");
+  });
+
+  document.addEventListener("click", (event) => {
+    document.querySelectorAll(".notif-shell").forEach((shell) => {
+      if (!shell.contains(event.target)) {
+        shell.classList.remove("open");
+      }
+    });
+  });
+}
+
+function initProfileForm() {
+  const form = document.getElementById("infirmierProfileForm");
+  if (!form) return;
+
+  const fields = {
+    nomComplet: document.getElementById("ipName"),
+    service: document.getElementById("ipService"),
+    role: document.getElementById("ipRole"),
+    matricule: document.getElementById("ipMatricule"),
+    telephone: document.getElementById("ipPhone"),
+    email: document.getElementById("ipEmail"),
+    bio: document.getElementById("ipBio")
+  };
+  const avatarInput = document.getElementById("ipAvatar");
+  const preview = document.getElementById("ipAvatarPreview");
+
+  if (fields.nomComplet) fields.nomComplet.value = `${mockInfirmier.prenom} ${mockInfirmier.nom}`;
+  if (fields.service) fields.service.value = mockInfirmier.service;
+  if (fields.role) fields.role.value = mockInfirmier.role;
+  if (fields.matricule) fields.matricule.value = mockInfirmier.matricule;
+  if (fields.telephone) fields.telephone.value = mockInfirmier.telephone;
+  if (fields.email) fields.email.value = mockInfirmier.email;
+  if (fields.bio) fields.bio.value = mockInfirmier.bio;
+
+  if (preview) {
+    if (mockInfirmier.avatar) {
+      preview.style.backgroundImage = `url(${mockInfirmier.avatar})`;
+      preview.style.backgroundSize = "cover";
+      preview.style.backgroundPosition = "center";
+      preview.textContent = "";
+    } else {
+      preview.style.backgroundImage = "";
+      preview.textContent = mockInfirmier.initiales;
+    }
+  }
+
+  avatarInput?.addEventListener("change", () => {
+    const file = avatarInput.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const avatar = typeof reader.result === "string" ? reader.result : "";
+      saveInfirmierSession({ avatar });
+      initSidebar();
+      if (preview) {
+        preview.style.backgroundImage = `url(${avatar})`;
+        preview.style.backgroundSize = "cover";
+        preview.style.backgroundPosition = "center";
+        preview.textContent = "";
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    saveInfirmierSession({
+      prenom: mockInfirmier.prenom,
+      nom: mockInfirmier.nom,
+      initiales: mockInfirmier.initiales,
+      service: mockInfirmier.service,
+      role: mockInfirmier.role,
+      matricule: mockInfirmier.matricule,
+      telephone: fields.telephone?.value?.trim() || DEFAULT_INFIRMIER_SESSION.telephone,
+      email: fields.email?.value?.trim() || DEFAULT_INFIRMIER_SESSION.email,
+      bio: fields.bio?.value?.trim() || DEFAULT_INFIRMIER_SESSION.bio
+    });
+
+    initSidebar();
+    if (preview && !mockInfirmier.avatar) {
+      preview.textContent = mockInfirmier.initiales;
+    }
+    alert("Profil infirmier mis a jour.");
+  });
+}
+
 function getPatient(id) {
   return mockPatients.find(p => p.id === parseInt(id));
 }
 
 function formatDate() {
   return new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+}
+
+function sanitizeFilename(value) {
+  return String(value || "document")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /* ============================================================
@@ -755,9 +991,21 @@ function renderTableDocuments() {
 }
 
 function telechargerDoc(id) {
-  /* Quand backend prêt :
-     window.open(BASE_URL + "/documents/" + id + "/download"); */
-  alert("Téléchargement du document #" + id + " (mock)");
+  const documentItem = mockDocumentsUploades.find((item) => item.id === id);
+  if (!documentItem) return;
+
+  const content = [
+    "MediBook - Document infirmier",
+    `Nom: ${documentItem.nom}`,
+    `Patient: ${documentItem.patientNom}`,
+    `Type: ${documentItem.type}`,
+    `Date: ${documentItem.date}`,
+    `Taille: ${documentItem.taille}`,
+    "",
+    "Export de demonstration genere depuis l'espace infirmier."
+  ].join("\n");
+
+  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content);
 }
 
 function supprimerDoc(id) {
@@ -773,6 +1021,8 @@ function supprimerDoc(id) {
 document.addEventListener("DOMContentLoaded", function () {
   initSidebar();
   initLogout();
+  initNotifications();
+  initProfileForm();
 
   initDashboard();
   initListePatients();
@@ -780,3 +1030,8 @@ document.addEventListener("DOMContentLoaded", function () {
   initSoins();
   initUpload();
 });
+
+
+
+
+
