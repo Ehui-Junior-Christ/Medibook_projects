@@ -1,45 +1,52 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook - Mes ordonnances</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Ordonnances</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">&#127973;</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div></div></div>
-        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section"><span class="sb-section-label">Mon espace</span><a href="dashboard.html" class="sb-item"><span class="sb-icon">&#127968;</span>Tableau de bord</a><a href="profil.html" class="sb-item"><span class="sb-icon">&#128100;</span>Mon profil</a><a href="carnet-medical.html" class="sb-item"><span class="sb-icon">&#128203;</span>Carnet medical</a></div>
-            <div class="sb-section"><span class="sb-section-label">Historique</span><a href="consultation.html" class="sb-item"><span class="sb-icon">&#129658;</span>Consultations</a><a href="ordonnances.html" class="sb-item active"><span class="sb-icon">&#128138;</span>Ordonnances</a><a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a><a href="rappels.html" class="sb-item"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a></div>
-        </nav>
-        <div class="sb-footer"><div class="sb-user" id="btn-logout"><div class="sb-avatar" id="sb-avatar">KJ</div><div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div><span class="sb-user-link">&#8599;</span></div></div>
-    </aside>
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-title">Mes ordonnances</div>
-            <div class="topbar-tools">
-                <div class="searchbar"><span class="search-icon">&#128269;</span><input type="text" placeholder="Rechercher une ordonnance..."></div>
-                <div class="topbar-right"><button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button><button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button><button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button></div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="card">
-                <div class="card-header"><div><div class="card-title">Ordonnances medicales</div><div class="card-sub">Lecture seule - emises par vos medecins</div></div><span class="badge badge-teal" id="badge-actives">5 actives</span></div>
-                <div id="liste-ordonnances">
-                    <div class="consult-item"><div class="rappel-icon-box">&#128138;</div><div class="flex-1"><div class="consult-title">Artemether / Lumefantrine</div><div class="consult-sub">80/480 mg - 2 prises par jour pendant 3 jours</div></div><span class="badge badge-teal">En cours</span></div>
-                    <div class="consult-item"><div class="rappel-icon-box">&#128138;</div><div class="flex-1"><div class="consult-title">Paracetamol</div><div class="consult-sub">1000 mg - 3 prises par jour pendant 5 jours</div></div><span class="badge badge-slate">Archivee</span></div>
-                    <div class="consult-item"><div class="rappel-icon-box">&#128138;</div><div class="flex-1"><div class="consult-title">Amlodipine</div><div class="consult-sub">5 mg - 1 prise le matin pendant 30 jours</div></div><span class="badge badge-amber">Renouvelable</span></div>
-                </div>
-            </div>
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
-    </main>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil.html#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role">Mettre a jour mon profil</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Mes ordonnances</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="documents-grid" data-ordonnances-list></section>
+    </div>
+  </main>
 </div>
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
 </body>
 </html>

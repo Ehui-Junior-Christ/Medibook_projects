@@ -1,51 +1,83 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook - Carnet medical</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Carnet medical</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">&#127973;</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div></div></div>
-        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section"><span class="sb-section-label">Mon espace</span><a href="dashboard.html" class="sb-item"><span class="sb-icon">&#127968;</span>Tableau de bord</a><a href="profil.html" class="sb-item"><span class="sb-icon">&#128100;</span>Mon profil</a><a href="carnet-medical.html" class="sb-item active"><span class="sb-icon">&#128203;</span>Carnet medical</a></div>
-            <div class="sb-section"><span class="sb-section-label">Historique</span><a href="consultation.html" class="sb-item"><span class="sb-icon">&#129658;</span>Consultations</a><a href="ordonnances.html" class="sb-item"><span class="sb-icon">&#128138;</span>Ordonnances</a><a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a><a href="rappels.html" class="sb-item"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a></div>
-        </nav>
-        <div class="sb-footer"><div class="sb-user" id="btn-logout"><div class="sb-avatar" id="sb-avatar">KJ</div><div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div><span class="sb-user-link">&#8599;</span></div></div>
-    </aside>
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-title">Carnet medical</div>
-            <div class="topbar-tools">
-                <div class="searchbar"><span class="search-icon">&#128269;</span><input type="text" placeholder="Rechercher dans le carnet..."></div>
-                <div class="topbar-right"><button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button><button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button><button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button></div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="patient-banner">
-                <div class="patient-ava" id="banner-ava">KJ</div>
-                <div class="flex-1">
-                    <div class="patient-name" id="banner-nom">Kouadio Jean Baptiste</div>
-                    <div class="patient-meta" id="banner-meta">CMU-2024-08821 - Ne le 14/03/1987 - 37 ans - Masculin</div>
-                    <div class="badge-row" id="banner-badges"><span class="badge badge-teal">Groupe O+</span><span class="badge badge-red">Allergie penicilline</span></div>
-                </div>
-            </div>
-            <div class="grid g2 gap-14 carnet-grid">
-                <div class="card"><div class="card-title mb-8">Antecedents personnels</div><div id="antecedents-perso" style="display:flex;flex-direction:column;gap:6px;font-size:13px"><div>Paludisme en 2020</div><div>Hypertension suivie depuis 2023</div></div></div>
-                <div class="card"><div class="card-title mb-8">Antecedents familiaux</div><div id="antecedents-familiaux" style="display:flex;flex-direction:column;gap:6px;font-size:13px"><div>Pere hypertendu</div><div>Mere diabetique</div></div></div>
-                <div class="card"><div class="card-title mb-8">Allergies et precautions</div><div id="allergies-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px"><div>Penicilline</div><div>Eviter l'automedication</div></div></div>
-                <div class="card"><div class="card-title mb-8">Armoire a medicaments</div><div id="armoire-list" style="display:flex;flex-direction:column;gap:6px;font-size:13px"><div>Paracetamol 1000 mg</div><div>Amlodipine 5 mg</div><div>Serum physiologique</div></div></div>
-            </div>
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
-    </main>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil.html#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role">Mettre a jour mon dossier</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Carnet medical</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <a class="btn btn-secondary btn-sm" href="profil.html#edit-profile">Modifier mes informations</a>
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">Constantes personnelles</div>
+        </div>
+        <div class="vital-grid" data-carnet-vitals></div>
+      </section>
+
+      <section class="carnet-grid">
+        <div class="stack">
+          <article class="card profile-section-card">
+            <div class="card-header">
+              <div class="card-title">Allergies</div>
+            </div>
+            <div data-carnet-allergies></div>
+          </article>
+
+          <article class="card profile-section-card">
+            <div class="card-header">
+              <div class="card-title">Antecedents et traitements</div>
+            </div>
+            <div data-carnet-antecedents></div>
+          </article>
+        </div>
+
+        <article class="card profile-section-card">
+          <div class="card-header">
+            <div class="card-title">Historique medical</div>
+          </div>
+          <div class="timeline-list" data-carnet-history></div>
+        </article>
+      </section>
+    </div>
+  </main>
 </div>
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
 </body>
 </html>

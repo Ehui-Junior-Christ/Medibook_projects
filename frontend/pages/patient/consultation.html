@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook - Mes consultations</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Consultations</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">&#127973;</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div></div></div>
-        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section">
-                <span class="sb-section-label">Mon espace</span>
-                <a href="dashboard.html" class="sb-item"><span class="sb-icon">&#127968;</span>Tableau de bord</a>
-                <a href="profil.html" class="sb-item"><span class="sb-icon">&#128100;</span>Mon profil</a>
-                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">&#128203;</span>Carnet medical</a>
-            </div>
-            <div class="sb-section">
-                <span class="sb-section-label">Historique</span>
-                <a href="consultation.html" class="sb-item active"><span class="sb-icon">&#129658;</span>Consultations</a>
-                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">&#128138;</span>Ordonnances</a>
-                <a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a>
-                <a href="rappels.html" class="sb-item"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a>
-            </div>
-        </nav>
-        <div class="sb-footer"><div class="sb-user" id="btn-logout"><div class="sb-avatar" id="sb-avatar">KJ</div><div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div><span class="sb-user-link">&#8599;</span></div></div>
-    </aside>
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-title">Mes consultations</div>
-            <div class="topbar-tools">
-                <div class="searchbar"><span class="search-icon">&#128269;</span><input type="text" id="search-input" placeholder="Rechercher une consultation..."></div>
-                <div class="topbar-right">
-                    <button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button>
-                    <button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button>
-                    <button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button>
-                </div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="card consult-history-card">
-                <div class="card-header"><div class="card-title">Historique</div><span class="badge badge-slate">12 consultations</span></div>
-                <div class="consult-history-list">
-                    <div class="consult-item consult-item-lg">
-                        <div class="consult-date-box consult-date-box-lg"><div class="consult-date-d">12</div><div class="consult-date-m">MAR</div></div>
-                        <div class="flex-1"><div class="consult-title consult-title-lg">Fievre persistante - Paludisme P. falciparum</div><div class="consult-sub consult-sub-lg">TA: 130/85 - T: 39.2 C - CHU Treichville</div></div>
-                        <div class="consult-doctor consult-doctor-lg">Dr. Bamba A.</div>
-                    </div>
-                    <div class="consult-item consult-item-lg">
-                        <div class="consult-date-box consult-date-box-lg"><div class="consult-date-d">02</div><div class="consult-date-m">FEV</div></div>
-                        <div class="flex-1"><div class="consult-title consult-title-lg">Bilan cardiologique - Controle HTA</div><div class="consult-sub consult-sub-lg">TA: 145/92 - FC: 78 bpm</div></div>
-                        <div class="consult-doctor consult-doctor-lg">Dr. Kone M.</div>
-                    </div>
-                    <div class="consult-item consult-item-lg">
-                        <div class="consult-date-box consult-date-box-lg"><div class="consult-date-d">18</div><div class="consult-date-m">JAN</div></div>
-                        <div class="flex-1"><div class="consult-title consult-title-lg">Suivi post-traitement</div><div class="consult-sub consult-sub-lg">Controle clinique et ajustement du traitement</div></div>
-                        <div class="consult-doctor consult-doctor-lg">Dr. Diallo F.</div>
-                    </div>
-                </div>
-            </div>
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
-    </main>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil.html#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role">Mon profil</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Mes consultations</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <div class="helper-copy" data-consultation-count>0 consultation</div>
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="card">
+        <div class="filter-row">
+          <button class="chip sel" type="button" data-filter="toutes">Toutes</button>
+          <button class="chip" type="button" data-filter="terminee">Terminees</button>
+          <button class="chip" type="button" data-filter="avenir">A venir</button>
+          <div class="searchbar">
+            <span>🔎</span>
+            <input type="text" placeholder="Rechercher une consultation..." data-consultation-search>
+          </div>
+        </div>
+        <div data-consultation-list></div>
+      </section>
+    </div>
+  </main>
 </div>
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
+
+<div class="overlay" data-consultation-modal>
+  <div class="modal">
+    <div class="modal-title" data-modal-title>Consultation</div>
+    <div class="modal-sub" data-modal-date>Date</div>
+    <div class="info-stack">
+      <div>
+        <strong>Medecin</strong>
+        <p data-modal-medecin></p>
+      </div>
+      <div>
+        <strong>Symptomes</strong>
+        <p data-modal-symptomes></p>
+      </div>
+      <div>
+        <strong>Diagnostic</strong>
+        <p data-modal-diagnostic></p>
+      </div>
+      <div>
+        <strong>Traitement</strong>
+        <p data-modal-traitement></p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" type="button" data-close-consultation-modal>Fermer</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

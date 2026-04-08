@@ -1,56 +1,154 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook - Mon profil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Profil patient</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sb-logo"><div class="sb-logo-inner"><div class="sb-logo-mark">&#127973;</div><div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div></div></div>
-        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section"><span class="sb-section-label">Mon espace</span><a href="dashboard.html" class="sb-item"><span class="sb-icon">&#127968;</span>Tableau de bord</a><a href="profil.html" class="sb-item active"><span class="sb-icon">&#128100;</span>Mon profil</a><a href="carnet-medical.html" class="sb-item"><span class="sb-icon">&#128203;</span>Carnet medical</a></div>
-            <div class="sb-section"><span class="sb-section-label">Historique</span><a href="consultation.html" class="sb-item"><span class="sb-icon">&#129658;</span>Consultations</a><a href="ordonnances.html" class="sb-item"><span class="sb-icon">&#128138;</span>Ordonnances</a><a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a><a href="rappels.html" class="sb-item"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a></div>
-        </nav>
-        <div class="sb-footer"><div class="sb-user" id="btn-logout"><div class="sb-avatar" id="sb-avatar">KJ</div><div><div class="sb-user-name" id="sb-name">Kouadio J.B.</div><div class="sb-user-role">Patient</div></div><span class="sb-user-link">&#8599;</span></div></div>
-    </aside>
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-title">Mon profil</div>
-            <div class="topbar-tools">
-                <div class="searchbar"><span class="search-icon">&#128269;</span><input type="text" placeholder="Rechercher..."></div>
-                <div class="topbar-right"><button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button><button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button><button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button></div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="profil-grid">
-                <div class="card">
-                    <div class="card-header"><div class="card-title">Informations personnelles</div><button class="btn btn-secondary btn-sm" id="btn-edit" type="button">Modifier</button></div>
-                    <div class="patient-banner" style="margin-bottom:16px"><div class="patient-ava" id="profil-ava">KJ</div><div class="flex-1"><div class="patient-name" id="profil-nom">Kouadio Jean Baptiste</div><div class="patient-meta" id="profil-cmu">CMU-2024-08821</div></div><button class="btn btn-secondary btn-sm" id="btn-photo" type="button">Changer photo</button></div>
-                    <div class="grid g2 gap-12" id="form-profil">
-                        <div class="fld"><label>Nom</label><input type="text" id="inp-nom" value="Kouadio" disabled></div>
-                        <div class="fld"><label>Prenom</label><input type="text" id="inp-prenom" value="Jean Baptiste" disabled></div>
-                        <div class="fld"><label>Date de naissance</label><input type="date" id="inp-naissance" value="1987-03-14" disabled></div>
-                        <div class="fld"><label>Numero CMU</label><input type="text" id="inp-cmu" value="CMU-2024-08821" readonly disabled></div>
-                        <div class="fld"><label>Telephone</label><input type="tel" id="inp-tel" value="+225 07 12 34 56" disabled></div>
-                        <div class="fld"><label>Email</label><input type="email" id="inp-email" value="jb.kouadio@email.ci" disabled></div>
-                    </div>
-                    <div class="actions-bar" id="actions-profil" style="display:none"><button class="btn btn-secondary" id="btn-annuler" type="button">Annuler</button><button class="btn btn-primary" id="btn-sauvegarder" type="button">Enregistrer</button></div>
-                </div>
-                <div>
-                    <div class="card card-sm"><div class="card-title mb-8">Conditions medicales</div><div class="badge-row" id="conditions-list"><span class="badge badge-amber">Hypertension</span><span class="badge badge-red">Allergie penicilline</span></div></div>
-                    <div class="card"><div class="card-title mb-8">Etablissements frequentes</div><div id="etablissements-list" style="display:flex;flex-direction:column;gap:8px;font-size:13px"><div>CHU Treichville</div><div>Centre cardio Abidjan</div><div>Laboratoire central</div></div></div>
-                </div>
-            </div>
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
-    </main>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role">Modifier mon profil</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Mon profil</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" type="button" data-enable-edit>Activer la modification</button>
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="card profile-section-card">
+        <div class="profile-shell">
+          <div class="profile-avatar-xl" data-patient-initials>BS</div>
+          <div class="flex-1">
+            <h1 class="font-display" data-profile-fullname>Nom prenom</h1>
+            <div class="profile-meta">Patient <span data-patient-id>MB-2026-0042</span> · <span data-profile-age>24 ans</span></div>
+            <div class="profile-highlights">
+              <span class="badge badge-teal" data-profile-groupe>O+</span>
+              <span class="badge badge-blue" data-profile-assurance>CNAM / CMU</span>
+              <span class="badge badge-amber" data-profile-profession>Profession</span>
+              <span class="badge badge-green" data-profile-doctor>Medecin traitant</span>
+            </div>
+            <div class="profile-feedback" data-profile-feedback></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="profil-grid">
+        <form class="card profile-section-card" data-profile-form>
+          <div class="card-header">
+            <div class="card-title">Informations civiles et medicales modifiables</div>
+            <div class="helper-copy" data-profile-imc>IMC</div>
+          </div>
+
+          <div class="profile-section-title">Etat civil</div>
+          <div class="profile-form-grid">
+            <div class="fld"><label for="nom">Nom</label><input id="nom" name="nom" type="text"></div>
+            <div class="fld"><label for="prenoms">Prenoms</label><input id="prenoms" name="prenoms" type="text"></div>
+            <div class="fld"><label for="dateNaissance">Date de naissance</label><input id="dateNaissance" name="dateNaissance" type="date"></div>
+            <div class="fld"><label for="sexe">Sexe</label><select id="sexe" name="sexe"><option>Feminin</option><option>Masculin</option><option>Autre</option></select></div>
+            <div class="fld"><label for="telephone">Telephone</label><input id="telephone" name="telephone" type="tel"></div>
+            <div class="fld"><label for="email">Email</label><input id="email" name="email" type="email"></div>
+            <div class="fld"><label for="adresse">Adresse</label><input id="adresse" name="adresse" type="text"></div>
+            <div class="fld"><label for="profession">Profession</label><input id="profession" name="profession" type="text"></div>
+            <div class="fld"><label for="situationFamiliale">Situation familiale</label><input id="situationFamiliale" name="situationFamiliale" type="text"></div>
+            <div class="fld"><label for="assurance">Assurance</label><input id="assurance" name="assurance" type="text"></div>
+            <div class="fld"><label for="numeroAssure">Numero assure / CMU</label><input id="numeroAssure" name="numeroAssure" type="text"></div>
+            <div class="fld"><label for="personneUrgence">Personne a prevenir</label><input id="personneUrgence" name="personneUrgence" type="text"></div>
+            <div class="fld"><label for="lienUrgence">Lien</label><input id="lienUrgence" name="lienUrgence" type="text"></div>
+            <div class="fld"><label for="numeroUrgence">Numero urgence</label><input id="numeroUrgence" name="numeroUrgence" type="tel"></div>
+          </div>
+
+          <div class="profile-section-title" style="margin-top:18px;">Sante et contexte medical declaratif</div>
+          <div class="profile-form-grid">
+            <div class="fld"><label for="poids">Poids (kg)</label><input id="poids" name="poids" type="number" min="1" step="0.1"></div>
+            <div class="fld"><label for="taille">Taille (cm)</label><input id="taille" name="taille" type="number" min="1"></div>
+            <div class="fld"><label for="groupeSanguin">Groupe sanguin</label><input id="groupeSanguin" name="groupeSanguin" type="text"></div>
+            <div class="fld"><label for="handicap">Handicap / specificite</label><input id="handicap" name="handicap" type="text"></div>
+            <div class="fld col-full"><label for="allergies">Allergies</label><textarea id="allergies" name="allergies" rows="2"></textarea></div>
+            <div class="fld col-full"><label for="antecedents">Antecedents medicaux</label><textarea id="antecedents" name="antecedents" rows="2"></textarea></div>
+            <div class="fld col-full"><label for="maladiesChroniques">Maladies chroniques</label><textarea id="maladiesChroniques" name="maladiesChroniques" rows="2"></textarea></div>
+            <div class="fld col-full"><label for="traitements">Traitements en cours</label><textarea id="traitements" name="traitements" rows="2"></textarea></div>
+            <div class="fld col-full"><label for="notesPatient">Notes personnelles utiles a l'equipe soignante</label><textarea id="notesPatient" name="notesPatient" rows="3"></textarea></div>
+          </div>
+
+          <div class="actions-bar">
+            <div class="helper-copy" data-view-only>Le bloc bas-gauche de la barre laterale ouvre directement ce mode d'edition.</div>
+            <div class="actions-right">
+              <button class="btn btn-secondary" type="button" data-cancel-edit data-edit-only hidden>Annuler</button>
+              <button class="btn btn-primary" type="submit" data-edit-only hidden>Enregistrer les modifications</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="stack">
+          <article class="card profile-section-card">
+            <div class="card-header">
+              <div class="card-title">Informations non modifiables ici</div>
+            </div>
+            <div class="info-stack">
+              <div>
+                <strong>Identifiant patient</strong>
+                <p data-patient-id>MB-2026-0042</p>
+              </div>
+              <div>
+                <strong>Medecin traitant</strong>
+                <p data-profile-doctor>Dr. Ange Kouassi</p>
+              </div>
+              <div>
+                <strong>Telephone du medecin</strong>
+                <p>+225 07 00 00 01</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card profile-section-card">
+            <div class="card-header">
+              <div class="card-title">Securite</div>
+            </div>
+            <div class="info-stack">
+              <div>
+                <strong>Mot de passe</strong>
+                <p>La modification du mot de passe pourra etre reliee a l'authentification backend. Le champ n'est pas encore connecte.</p>
+              </div>
+              <div>
+                <strong>Confidentialite</strong>
+                <p>Seules les informations declaratives et civiles editables par le patient sont modifiables depuis cet ecran.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
 </div>
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
 </body>
 </html>

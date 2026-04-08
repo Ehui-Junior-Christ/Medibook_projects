@@ -1,158 +1,146 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBook - Tableau de bord patient</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Tableau de bord patient</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
 </head>
 <body>
 <div class="app-shell">
-    <aside class="sidebar">
-        <div class="sb-logo">
-            <div class="sb-logo-inner">
-                <div class="sb-logo-mark">&#127973;</div>
-                <div>
-                    <div class="sb-logo-text">MediBook</div>
-                    <div class="sb-logo-sub">Portail medical</div>
-                </div>
-            </div>
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
-        <div class="sb-role-badge sb-role-patient"><span>&#129489;</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section">
-                <span class="sb-section-label">Mon espace</span>
-                <a href="dashboard.html" class="sb-item active"><span class="sb-icon">&#127968;</span>Tableau de bord</a>
-                <a href="profil.html" class="sb-item"><span class="sb-icon">&#128100;</span>Mon profil</a>
-                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">&#128203;</span>Carnet medical</a>
-            </div>
-            <div class="sb-section">
-                <span class="sb-section-label">Historique</span>
-                <a href="consultation.html" class="sb-item"><span class="sb-icon">&#129658;</span>Consultations</a>
-                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">&#128138;</span>Ordonnances</a>
-                <a href="documents.html" class="sb-item"><span class="sb-icon">&#128193;</span>Documents</a>
-                <a href="rappels.html" class="sb-item"><span class="sb-icon">&#128276;</span>Rappels<span class="sb-badge">3</span></a>
-            </div>
-        </nav>
-        <div class="sb-footer">
-            <div class="sb-user" id="btn-logout">
-                <div class="sb-avatar" id="sb-avatar">KJ</div>
-                <div>
-                    <div class="sb-user-name" id="sb-name">Kouadio J.B.</div>
-                    <div class="sb-user-role">Patient</div>
-                </div>
-                <span class="sb-user-link">&#8599;</span>
-            </div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil.html#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role" data-patient-role>Patient</div>
         </div>
-    </aside>
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-title">Tableau de bord</div>
-            <div class="topbar-tools">
-                <div class="searchbar">
-                    <span class="search-icon">&#128269;</span>
-                    <input type="text" id="search-input" placeholder="Rechercher...">
-                </div>
-                <div class="topbar-right">
-                    <button class="icon-btn icon-btn-badge" id="btn-notif" type="button" title="Notifications">&#128276;</button>
-                    <button class="icon-btn" id="btn-settings" type="button" title="Parametres">&#9881;&#65039;</button>
-                    <button class="icon-btn logout" id="btn-logout-top" type="button" title="Deconnexion">&#128682;</button>
-                </div>
-            </div>
-        </header>
-        <div class="content-area">
-            <div class="stats-row">
-                <div class="stat-card" data-emoji="&#129658;">
-                    <div class="stat-accent" style="background:#10ADAF"></div>
-                    <div class="stat-val" id="stat-consultations">12</div>
-                    <div class="stat-label">Consultations totales</div>
-                    <div class="stat-trend trend-up">+2 ce mois</div>
-                </div>
-                <div class="stat-card" data-emoji="&#128138;">
-                    <div class="stat-accent" style="background:#F59E0B"></div>
-                    <div class="stat-val" id="stat-ordonnances">5</div>
-                    <div class="stat-label">Ordonnances actives</div>
-                    <div class="stat-trend trend-amber">1 renouvelable</div>
-                </div>
-                <div class="stat-card" data-emoji="&#128193;">
-                    <div class="stat-accent" style="background:#059669"></div>
-                    <div class="stat-val" id="stat-documents">8</div>
-                    <div class="stat-label">Documents medicaux</div>
-                    <div class="stat-trend stat-neutral">2 nouveaux ce mois</div>
-                </div>
-                <div class="stat-card" data-emoji="&#128197;">
-                    <div class="stat-accent" style="background:#DC2626"></div>
-                    <div class="stat-val" id="stat-rdv">1</div>
-                    <div class="stat-label">RDV a venir</div>
-                    <div class="stat-trend trend-amber">28 mars 2025</div>
-                </div>
-            </div>
-            <div class="dashboard-grid">
-                <div class="col-left">
-                    <div class="card">
-                        <div class="card-header">
-                            <div>
-                                <div class="card-title">Dernieres consultations</div>
-                                <div class="card-sub">Historique recent</div>
-                            </div>
-                            <a href="consultation.html" class="btn btn-secondary btn-sm">Tout voir</a>
-                        </div>
-                        <div id="liste-consultations">
-                            <div class="consult-item">
-                                <div class="consult-date-box"><div class="consult-date-d">12</div><div class="consult-date-m">MAR</div></div>
-                                <div class="flex-1"><div class="consult-title">Fievre persistante - Paludisme P. falciparum</div><div class="consult-sub">TA: 130/85 - T: 39.2 C - CHU Treichville</div></div>
-                            </div>
-                            <div class="consult-item">
-                                <div class="consult-date-box"><div class="consult-date-d">02</div><div class="consult-date-m">FEV</div></div>
-                                <div class="flex-1"><div class="consult-title">Bilan cardiologique - Controle HTA</div><div class="consult-sub">TA: 145/92 - FC: 78 bpm</div></div>
-                            </div>
-                            <div class="consult-item">
-                                <div class="consult-date-box"><div class="consult-date-d">18</div><div class="consult-date-m">JAN</div></div>
-                                <div class="flex-1"><div class="consult-title">Suivi post-traitement</div><div class="consult-sub">Controle general - evolution favorable</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-right">
-                    <div class="card card-sm">
-                        <div class="card-title">Mes conditions</div>
-                        <div class="badge-row" id="conditions-badges">
-                            <span class="badge badge-amber">Hypertension</span>
-                            <span class="badge badge-red">Allergie penicilline</span>
-                            <span class="badge badge-teal">Groupe O+</span>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Rappels du jour</div>
-                            <span class="badge badge-amber" id="rappels-count">3</span>
-                        </div>
-                        <div id="liste-rappels">
-                            <div class="rappel-item">
-                                <div class="rappel-time">08h00</div>
-                                <div class="rappel-icon-box">&#128138;</div>
-                                <div><div class="consult-title">Paracetamol 1000 mg</div><div class="consult-sub">1 comprime apres le petit-dejeuner</div></div>
-                            </div>
-                            <div class="rappel-item">
-                                <div class="rappel-time">14h30</div>
-                                <div class="rappel-icon-box">&#128197;</div>
-                                <div><div class="consult-title">Rendez-vous de controle</div><div class="consult-sub">Cardiologie - salle 2</div></div>
-                            </div>
-                            <div class="rappel-item">
-                                <div class="rappel-time">20h00</div>
-                                <div class="rappel-icon-box">&#128138;</div>
-                                <div><div class="consult-title">Amoxicilline 500 mg</div><div class="consult-sub">1 gelule le soir</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Tableau de bord</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <button class="icon-btn icon-btn-badge" type="button" title="Notifications">🔔</button>
+        <a class="icon-btn" href="profil.html#edit-profile" title="Modifier le profil">✏️</a>
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="patient-hero">
+        <div class="patient-hero-copy">
+          <h1 data-dashboard-greeting>Bonjour</h1>
+          <p>Retrouvez vos rendez-vous, vos documents et les informations medicales utiles dans une interface harmonisee avec le reste de la plateforme.</p>
         </div>
-    </main>
+        <div class="patient-hero-mark">🩺</div>
+      </section>
+
+      <div class="stats-row" data-patient-stats></div>
+
+      <section class="dashboard-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title">Dernieres consultations</div>
+              <a class="btn btn-secondary btn-sm" href="consultation.html">Voir tout</a>
+            </div>
+            <div data-dashboard-consultations></div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title">Ordonnances en cours</div>
+              <a class="btn btn-secondary btn-sm" href="ordonnances.html">Toutes les ordonnances</a>
+            </div>
+            <div data-dashboard-ordonnances></div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title">Prochain rendez-vous</div>
+            </div>
+            <div class="metric-card">
+              <strong data-next-appointment-date>Lundi 20 avril 2026</strong>
+              <div class="helper-copy" data-next-appointment-copy>Dr. Ange Kouassi · 09:30 · Medecine generale</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title">Actions rapides</div>
+            </div>
+            <div class="quick-links">
+              <a class="quick-link-card" href="profil.html#edit-profile">
+                <span class="quick-link-icon">👤</span>
+                <strong>Mettre a jour mon profil</strong>
+                <span class="helper-copy">Coordonnees civiles et informations de sante.</span>
+              </a>
+              <a class="quick-link-card" href="documents.html">
+                <span class="quick-link-icon">📄</span>
+                <strong>Mes documents</strong>
+                <span class="helper-copy">Ordonnances, certificats et resultats.</span>
+              </a>
+              <a class="quick-link-card" href="carnet-medical.html">
+                <span class="quick-link-icon">📋</span>
+                <strong>Carnet medical</strong>
+                <span class="helper-copy">Antecedents, allergies et constantes.</span>
+              </a>
+              <a class="quick-link-card" href="rappels.html">
+                <span class="quick-link-icon">🔔</span>
+                <strong>Rappels</strong>
+                <span class="helper-copy">Medicaments et suivi de rendez-vous.</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title">Profil resume</div>
+            </div>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-label">Patient</div>
+                <div class="summary-value" data-patient-name>Nom prenom</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Identifiant</div>
+                <div class="summary-value" data-patient-id>MB-2026-0042</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Age</div>
+                <div class="summary-value" data-profile-age>24 ans</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Groupe sanguin</div>
+                <div class="summary-value" data-profile-groupe>O+</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
 </div>
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
 </body>
 </html>
