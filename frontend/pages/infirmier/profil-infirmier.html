@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Profil infirmier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/infirmier.css">
+  <script defer src="../../js/infirmier.js"></script>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
+    <nav>
+      <div class="sb-section">
+        <span class="sb-section-label">Soins</span>
+        <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+        <a href="liste-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
+        <a href="signes-vitaux.html" class="sb-item"><span class="sb-icon">❤️</span>Signes vitaux</a>
+        <a href="soins-infirmiers.html" class="sb-item"><span class="sb-icon">🩹</span>Soins infirmiers</a>
+        <a href="upload-documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil-infirmier.html">
+        <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
+        <div>
+          <div class="sb-user-name" id="sb-name" data-infirmier-name>Marie Kone</div>
+          <div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Profil infirmier</div>
+      <div class="topbar-right">
+        <div class="icon-btn" id="btn-logout-top">🚪</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="card mb-16">
+        <div class="profile-hero">
+          <div class="profile-avatar-xl" id="ipAvatarPreview" data-infirmier-avatar data-infirmier-initiales>KM</div>
+          <div>
+            <div class="card-title" style="font-size:22px" data-infirmier-name>Marie Kone</div>
+            <div class="profile-meta"><span data-infirmier-role>Infirmier · Urgences</span> · <span data-infirmier-matricule>MAT-INF-00087</span></div>
+            <div class="profile-meta"><span data-infirmier-phone>+225 07 12 34 56</span> · <span data-infirmier-email>marie.kone@medibook.ci</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title mb-16">Modifier le profil</div>
+        <form id="infirmierProfileForm">
+          <div class="grid g2">
+            <div class="fld">
+              <label>Nom complet</label>
+              <input id="ipName" type="text" placeholder="Marie Kone" readonly>
+            </div>
+            <div class="fld">
+              <label>Service</label>
+              <input id="ipService" type="text" placeholder="Urgences" readonly>
+            </div>
+            <div class="fld">
+              <label>Role</label>
+              <input id="ipRole" type="text" placeholder="Infirmier" readonly>
+            </div>
+            <div class="fld">
+              <label>Matricule</label>
+              <input id="ipMatricule" type="text" placeholder="MAT-INF-00087" readonly>
+            </div>
+            <div class="fld">
+              <label>Telephone</label>
+              <input id="ipPhone" type="text" placeholder="+225 07 12 34 56">
+            </div>
+            <div class="fld">
+              <label>Email</label>
+              <input id="ipEmail" type="email" placeholder="marie.kone@medibook.ci">
+            </div>
+            <div class="fld col-full">
+              <label>Photo de profil</label>
+              <input id="ipAvatar" type="file" accept="image/*">
+            </div>
+            <div class="fld col-full">
+              <label>Biographie</label>
+              <textarea id="ipBio" rows="4" placeholder="Presentation de l'infirmier, service, disponibilite..."></textarea>
+            </div>
+          </div>
+          <div class="actions-bar">
+            <a class="btn btn-secondary" href="dashboard.html">Retour</a>
+            <button class="btn btn-primary" type="submit">Enregistrer le profil</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+

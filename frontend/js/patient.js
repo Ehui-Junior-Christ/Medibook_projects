@@ -32,6 +32,17 @@ const defaultPatientProfile = {
 
 const patientStats = { consultations: 12, ordonnances: 5, documents: 8, rappels: 3 };
 
+const patientGlobalSearchItems = [
+  { href: "dashboard.html", title: "Tableau de bord", meta: "Vue generale de votre espace patient" },
+  { href: "profil.html", title: "Mon profil", meta: "Consulter vos informations personnelles" },
+  { href: "profil.html#edit-profile", title: "Modifier mon profil", meta: "Mettre a jour vos informations declaratives" },
+  { href: "carnet-medical.html", title: "Carnet medical", meta: "Allergies, antecedents et constantes" },
+  { href: "consultation.html", title: "Consultations", meta: "Historique et rendez-vous medicaux" },
+  { href: "ordonnances.html", title: "Ordonnances", meta: "Prescriptions et traitements en cours" },
+  { href: "documents.html", title: "Documents", meta: "Certificats, analyses et fichiers medicaux" },
+  { href: "rappels.html", title: "Rappels", meta: "Medicaments, alertes et suivi" }
+];
+
 const consultations = [
   { id: 1, date: "2026-04-20", heure: "09:30", titre: "Consultation de suivi", etablissement: "Clinique Sainte Marie", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "avenir", symptomes: "Toux persistante et fatigue moderee.", diagnostic: "Controle post-bronchite.", traitement: "Poursuite de l'hydratation et bilan complementaire." },
   { id: 2, date: "2026-04-02", heure: "10:00", titre: "Bronchite aigue", etablissement: "CHU de Treichville", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "terminee", symptomes: "Toux, gene respiratoire, fievre legere.", diagnostic: "Bronchite aigue sans complication.", traitement: "Amoxicilline 500 mg, ibuprofene 400 mg, repos." },
@@ -115,6 +126,140 @@ function setText(selector, value) {
   });
 }
 
+function sanitizeFilename(value) {
+  return String(value || "document")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function openPreviewWindow(title, content) {
+  const preview = window.open("", "_blank", "noopener,noreferrer,width=860,height=720");
+  if (!preview) return;
+
+  preview.document.write(`<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0; padding:32px; color:#10213a; }
+    .sheet { max-width:780px; margin:0 auto; background:#fff; border-radius:20px; padding:32px; box-shadow:0 24px 70px rgba(16,33,58,.12); }
+    h1 { margin:0 0 12px; font-size:28px; }
+    .meta { color:#5b6b84; margin-bottom:24px; }
+    ul { padding-left:20px; }
+    li { margin-bottom:8px; }
+    p { line-height:1.6; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    ${content}
+  </div>
+</body>
+</html>`);
+  preview.document.close();
+}
+
+function downloadPatientOrdonnance(ordonnanceId) {
+  const ordonnance = ordonnances.find((item) => item.id === ordonnanceId);
+  if (!ordonnance) return;
+
+  const content = [
+    "MediBook - Ordonnance",
+    `Reference: ${ordonnance.id}`,
+    `Date: ${formatLongDate(ordonnance.date)}`,
+    `Statut: ${ordonnance.statut}`,
+    `Medecin: ${ordonnance.medecin}`,
+    `Specialite: ${ordonnance.specialite}`,
+    "",
+    "Medicaments:",
+    ...ordonnance.medicaments.map((line, index) => `${index + 1}. ${line}`)
+  ].join("\n");
+
+  triggerFileDownload(`${sanitizeFilename(ordonnance.id)}.txt`, content);
+}
+
+function downloadPatientDocument(documentId) {
+  const documentItem = documents.find((item) => item.id === Number(documentId));
+  if (!documentItem) return;
+
+  const content = [
+    "MediBook - Document medical",
+    `Nom: ${documentItem.nom}`,
+    `Categorie: ${documentItem.categorie}`,
+    `Date: ${formatLongDate(documentItem.date)}`,
+    `Source: ${documentItem.source}`,
+    `Format indique: ${documentItem.format}`,
+    "",
+    "Export de demonstration du document selectionne."
+  ].join("\n");
+
+  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content);
+}
+
+function viewPatientOrdonnance(ordonnanceId) {
+  const ordonnance = ordonnances.find((item) => item.id === ordonnanceId);
+  if (!ordonnance) return;
+
+  const medicines = ordonnance.medicaments.map((line) => `<li>${line}</li>`).join("");
+  openPreviewWindow(
+    `Ordonnance ${ordonnance.id}`,
+    `
+      <h1>Ordonnance ${ordonnance.id}</h1>
+      <div class="meta">Emise le ${formatLongDate(ordonnance.date)} · ${ordonnance.medecin} · ${ordonnance.specialite}</div>
+      <p><strong>Statut :</strong> ${ordonnance.statut}</p>
+      <h2>Prescription</h2>
+      <ul>${medicines}</ul>
+    `
+  );
+}
+
+function viewPatientDocument(documentId) {
+  const documentItem = documents.find((item) => item.id === Number(documentId));
+  if (!documentItem) return;
+
+  openPreviewWindow(
+    documentItem.nom,
+    `
+      <h1>${documentItem.nom}</h1>
+      <div class="meta">${documentItem.source} · ${formatLongDate(documentItem.date)} · ${documentItem.format}</div>
+      <p><strong>Categorie :</strong> ${documentItem.categorie}</p>
+      <p>Visualisation de demonstration du document selectionne depuis l'espace patient.</p>
+    `
+  );
+}
+
+function getPendingRappelsCount() {
+  return rappels.filter((item) => !item.fait).length;
+}
+
+function getPatientNotificationItems() {
+  return rappels.map((item) => ({
+    title: item.titre,
+    body: item.description,
+    time: item.moment,
+    tag: item.type,
+    status: item.fait ? "Traite" : "A suivre"
+  }));
+}
+
 function buildSidebar(profile, currentPage) {
   const navItems = [
     { href: "dashboard.html", label: "Tableau de bord", icon: "🏠", section: "Espace", key: "dashboard.html" },
@@ -138,7 +283,10 @@ function buildSidebar(profile, currentPage) {
   navRoot.innerHTML = Object.entries(grouped).map(([section, items]) => {
     const links = items.map((item) => {
       const active = item.key === currentPage ? "active" : "";
-      return `<a class="sb-item ${active}" href="${item.href}"><span class="sb-icon">${item.icon}</span><span>${item.label}</span></a>`;
+      const badge = item.key === "rappels.html" && getPendingRappelsCount() > 0
+        ? `<span class="sb-badge">${getPendingRappelsCount()}</span>`
+        : "";
+      return `<a class="sb-item ${active}" href="${item.href}"><span class="sb-icon">${item.icon}</span><span>${item.label}</span>${badge}</a>`;
     }).join("");
     return `<div class="sb-section"><span class="sb-section-label">${section}</span>${links}</div>`;
   }).join("");
@@ -149,7 +297,132 @@ function buildSidebar(profile, currentPage) {
   setText("[data-patient-id]", profile.id);
 }
 
-function renderTopbar() {}
+function renderTopbar(profile, currentPage) {
+  const topbarRight = document.querySelector(".topbar-right");
+  if (!topbarRight) return;
+
+  const pendingRappels = getPendingRappelsCount();
+  const currentLabel = patientGlobalSearchItems.find((item) => item.href === currentPage)?.title || "ce dossier";
+
+  topbarRight.innerHTML = `
+    <div class="patient-search-shell topbar-search-shell" data-patient-global-search>
+      <label class="searchbar" aria-label="Recherche globale">
+        <span>🔎</span>
+        <input
+          class="patient-global-search-input"
+          type="search"
+          placeholder="Rechercher dans ${currentLabel.toLowerCase()}..."
+          autocomplete="off"
+        >
+      </label>
+      <div class="patient-search-results" data-patient-global-results></div>
+    </div>
+    <div class="notif-shell" data-notif-shell>
+      <button class="icon-btn icon-btn-count" type="button" title="Notifications et rappels" aria-label="Notifications et rappels" data-count="${pendingRappels}" data-patient-notifications>
+        🔔
+      </button>
+      <div class="notif-menu" data-notif-menu></div>
+    </div>
+    <a class="icon-btn logout" href="../login.html" title="Deconnexion" aria-label="Deconnexion">🚪</a>
+  `;
+}
+
+function renderPatientGlobalSearchResults(query) {
+  const resultsRoot = document.querySelector("[data-patient-global-results]");
+  const searchShell = document.querySelector("[data-patient-global-search]");
+  if (!resultsRoot || !searchShell) return;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    resultsRoot.innerHTML = "";
+    searchShell.classList.remove("open");
+    return;
+  }
+
+  const matches = patientGlobalSearchItems.filter((item) => {
+    return `${item.title} ${item.meta}`.toLowerCase().includes(normalizedQuery);
+  }).slice(0, 6);
+
+  if (!matches.length) {
+    resultsRoot.innerHTML = `<div class="patient-search-empty">Aucun resultat trouve.</div>`;
+    searchShell.classList.add("open");
+    return;
+  }
+
+  resultsRoot.innerHTML = matches.map((item) => {
+    return `<a class="patient-search-item" href="${item.href}"><span class="patient-search-avatar">MB</span><span class="patient-search-copy"><strong>${item.title}</strong><small>${item.meta}</small></span></a>`;
+  }).join("");
+  searchShell.classList.add("open");
+}
+
+function bindPatientGlobalSearch() {
+  const searchShell = document.querySelector("[data-patient-global-search]");
+  const input = document.querySelector(".patient-global-search-input");
+  if (!searchShell || !input) return;
+
+  input.addEventListener("input", () => {
+    renderPatientGlobalSearchResults(input.value);
+  });
+
+  input.addEventListener("focus", () => {
+    renderPatientGlobalSearchResults(input.value);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-patient-global-search]")) {
+      searchShell.classList.remove("open");
+    }
+  });
+}
+
+function renderPatientNotificationsMenu() {
+  const menu = document.querySelector("[data-notif-menu]");
+  if (!menu) return;
+
+  const items = getPatientNotificationItems();
+  menu.innerHTML = `
+    <div class="notif-menu-head">
+      <strong>Notifications patient</strong>
+      <span>${items.length} element(s) disponibles</span>
+    </div>
+    <div class="notif-menu-list">
+      ${items.length ? items.map((item) => `
+        <article class="notif-item">
+          <div class="notif-item-head">
+            <div class="notif-item-title">${item.title}</div>
+            <div class="notif-item-time">${item.time}</div>
+          </div>
+          <div class="notif-item-copy">${item.body}</div>
+          <div class="notif-item-meta">
+            <span class="notif-item-tag">${item.tag}</span>
+            <span class="badge ${item.status === "Traite" ? "badge-green" : "badge-amber"}">${item.status}</span>
+          </div>
+        </article>
+      `).join("") : `<div class="notif-empty">Aucune notification pour le moment.</div>`}
+    </div>
+  `;
+}
+
+function bindPatientNotifications() {
+  const shell = document.querySelector("[data-notif-shell]");
+  const button = document.querySelector("[data-patient-notifications]");
+  if (!shell || !button) return;
+
+  renderPatientNotificationsMenu();
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    renderPatientNotificationsMenu();
+    shell.classList.toggle("open");
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-notif-shell]")) {
+      shell.classList.remove("open");
+    }
+  });
+}
 
 function renderDashboard(profile) {
   const statsRoot = document.querySelector("[data-patient-stats]");
@@ -220,7 +493,7 @@ function renderOrdonnances() {
     const badgeClass = item.statut === "active" ? "badge-green" : "badge-amber";
     const badgeLabel = item.statut === "active" ? "Active" : "Expiree";
     const meds = item.medicaments.map((medicament) => `<li>${medicament}</li>`).join("");
-    return `<article class="card ordonnance-card"><div class="card-header"><div><div class="card-title">${item.id}</div><div class="consult-sub">Emise le ${formatLongDate(item.date)}</div></div><span class="badge ${badgeClass}">${badgeLabel}</span></div><div class="ordo-doctor-line">${item.medecin} · ${item.specialite}</div><ul class="ordonnance-list">${meds}</ul><div class="card-actions"><button class="btn btn-primary btn-sm" type="button">Telecharger</button><button class="btn btn-secondary btn-sm" type="button">Voir</button></div></article>`;
+    return `<article class="card ordonnance-card"><div class="card-header"><div><div class="card-title">${item.id}</div><div class="consult-sub">Emise le ${formatLongDate(item.date)}</div></div><span class="badge ${badgeClass}">${badgeLabel}</span></div><div class="ordo-doctor-line">${item.medecin} · ${item.specialite}</div><ul class="ordonnance-list">${meds}</ul><div class="card-actions"><button class="btn btn-primary btn-sm" type="button" data-download-ordonnance="${item.id}">Telecharger</button><button class="btn btn-secondary btn-sm" type="button" data-view-ordonnance="${item.id}">Voir</button></div></article>`;
   }).join("");
 }
 
@@ -232,7 +505,7 @@ function renderDocuments() {
 
   root.innerHTML = items.map((item) => {
     const icon = item.categorie === "analyse" ? "🧪" : item.categorie === "ordonnance" ? "💊" : "📋";
-    return `<article class="card document-card"><div class="document-icon">${icon}</div><div class="document-name">${item.nom}</div><div class="document-meta">${item.source} · ${formatLongDate(item.date)} · ${item.format}</div><div class="card-actions"><button class="btn btn-primary btn-sm" type="button">Telecharger</button><button class="btn btn-secondary btn-sm" type="button">Voir</button></div></article>`;
+    return `<article class="card document-card"><div class="document-icon">${icon}</div><div class="document-name">${item.nom}</div><div class="document-meta">${item.source} · ${formatLongDate(item.date)} · ${item.format}</div><div class="card-actions"><button class="btn btn-primary btn-sm" type="button" data-download-document="${item.id}">Telecharger</button><button class="btn btn-secondary btn-sm" type="button" data-view-document="${item.id}">Voir</button></div></article>`;
   }).join("");
 }
 
@@ -294,10 +567,14 @@ function applyProfileState(editing) {
   document.querySelectorAll("[data-view-only]").forEach((node) => { node.hidden = editing; });
 }
 
+function syncProfileStateWithHash() {
+  applyProfileState(window.location.hash === "#edit-profile");
+}
+
 function renderProfile(profile) {
   fillProfileSummary(profile);
   fillProfileForm(profile);
-  applyProfileState(window.location.hash === "#edit-profile");
+  syncProfileStateWithHash();
 }
 
 function bindProfileForm(profile) {
@@ -348,6 +625,13 @@ function bindProfileForm(profile) {
     applyProfileState(false);
     history.replaceState(null, "", "profil.html");
     setText("[data-profile-feedback]", "Profil mis a jour avec succes.");
+  });
+
+  window.addEventListener("hashchange", () => {
+    syncProfileStateWithHash();
+    if (window.location.hash === "#edit-profile") {
+      form.querySelector("input:not([disabled]), textarea:not([disabled]), select:not([disabled])")?.focus();
+    }
   });
 }
 
@@ -405,6 +689,39 @@ function bindRappels() {
     if (!rappel) return;
     rappel.fait = !rappel.fait;
     renderRappels();
+    buildSidebar(loadProfile(), "rappels.html");
+    document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getPendingRappelsCount()));
+    renderPatientNotificationsMenu();
+  });
+}
+
+function bindPatientDownloads() {
+  document.addEventListener("click", (event) => {
+    const ordonnanceButton = event.target.closest("[data-download-ordonnance]");
+    if (ordonnanceButton) {
+      downloadPatientOrdonnance(ordonnanceButton.dataset.downloadOrdonnance);
+      return;
+    }
+
+    const documentButton = event.target.closest("[data-download-document]");
+    if (documentButton) {
+      downloadPatientDocument(documentButton.dataset.downloadDocument);
+    }
+  });
+}
+
+function bindPatientViews() {
+  document.addEventListener("click", (event) => {
+    const ordonnanceButton = event.target.closest("[data-view-ordonnance]");
+    if (ordonnanceButton) {
+      viewPatientOrdonnance(ordonnanceButton.dataset.viewOrdonnance);
+      return;
+    }
+
+    const documentButton = event.target.closest("[data-view-document]");
+    if (documentButton) {
+      viewPatientDocument(documentButton.dataset.viewDocument);
+    }
   });
 }
 
@@ -412,7 +729,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const profile = loadProfile();
   const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
   buildSidebar(profile, currentPage);
-  renderTopbar(profile);
+  renderTopbar(profile, currentPage);
+  bindPatientGlobalSearch();
+  bindPatientNotifications();
+  bindPatientDownloads();
+  bindPatientViews();
   fillProfileSummary(profile);
 
   if (currentPage === "dashboard.html") renderDashboard(profile);
@@ -423,3 +744,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (currentPage === "carnet-medical.html") renderCarnet(profile);
   if (currentPage === "profil.html") { renderProfile(profile); bindProfileForm(profile); }
 });
+
+
+
+
+
