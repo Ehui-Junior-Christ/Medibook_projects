@@ -1,4 +1,5 @@
 const STORAGE_KEY = "medibook.patient.profile";
+const SHARED_RECORDS_KEY = "medibook.shared.records";
 
 const defaultPatientProfile = {
   id: "MB-2026-0042",
@@ -76,6 +77,72 @@ const historiqueMedical = [
   { date: "2025-12", titre: "Grippe saisonniere", detail: "Traitement symptomatique et repos." },
   { date: "2025-06", titre: "Hypertension legere detectee", detail: "Suivi regulier et hygiene de vie." }
 ];
+
+function loadSharedRecords() {
+  const fallback = { consultations: [], ordonnances: [], documents: [], vitals: [], timeline: [] };
+  const raw = window.localStorage.getItem(SHARED_RECORDS_KEY);
+  if (!raw) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      consultations: Array.isArray(parsed.consultations) ? parsed.consultations : [],
+      ordonnances: Array.isArray(parsed.ordonnances) ? parsed.ordonnances : [],
+      documents: Array.isArray(parsed.documents) ? parsed.documents : [],
+      vitals: Array.isArray(parsed.vitals) ? parsed.vitals : [],
+      timeline: Array.isArray(parsed.timeline) ? parsed.timeline : []
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function getCurrentPatientId(profile = loadProfile()) {
+  return profile.numeroAssure || defaultPatientProfile.numeroAssure;
+}
+
+function getSharedPatientData(profile = loadProfile()) {
+  const patientId = getCurrentPatientId(profile);
+  const shared = loadSharedRecords();
+  return {
+    consultations: shared.consultations.filter((item) => item.patientId === patientId),
+    ordonnances: shared.ordonnances.filter((item) => item.patientId === patientId),
+    documents: shared.documents.filter((item) => item.patientId === patientId),
+    vitals: shared.vitals.filter((item) => item.patientId === patientId),
+    timeline: shared.timeline.filter((item) => item.patientId === patientId)
+  };
+}
+
+function sortByDateDesc(items, getDateValue) {
+  return items.slice().sort((a, b) => new Date(getDateValue(b)) - new Date(getDateValue(a)));
+}
+
+function getAllConsultations(profile = loadProfile()) {
+  const shared = getSharedPatientData(profile).consultations;
+  return sortByDateDesc([...shared, ...consultations], (item) => `${item.date}T${item.heure || "00:00"}`);
+}
+
+function getAllOrdonnances(profile = loadProfile()) {
+  const shared = getSharedPatientData(profile).ordonnances;
+  return sortByDateDesc([...shared, ...ordonnances], (item) => item.date);
+}
+
+function getAllDocuments(profile = loadProfile()) {
+  const shared = getSharedPatientData(profile).documents;
+  return sortByDateDesc([...shared, ...documents], (item) => item.date);
+}
+
+function getAllTimelineEntries(profile = loadProfile()) {
+  const shared = getSharedPatientData(profile).timeline.map((item) => ({
+    date: item.date.slice(0, 7),
+    titre: item.titre,
+    detail: item.detail
+  }));
+  return sortByDateDesc([...shared, ...historiqueMedical], (item) => `${item.date}-01`);
+}
+
+function getLatestVital(profile = loadProfile()) {
+  return sortByDateDesc(getSharedPatientData(profile).vitals, (item) => `${item.date}T${item.heure || "00:00"}`)[0] || null;
+}
 
 function loadProfile() {
   const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -178,7 +245,7 @@ function openPreviewWindow(title, content) {
 }
 
 function downloadPatientOrdonnance(ordonnanceId) {
-  const ordonnance = ordonnances.find((item) => item.id === ordonnanceId);
+  const ordonnance = getAllOrdonnances().find((item) => item.id === ordonnanceId);
   if (!ordonnance) return;
 
   const content = [
@@ -197,7 +264,7 @@ function downloadPatientOrdonnance(ordonnanceId) {
 }
 
 function downloadPatientDocument(documentId) {
-  const documentItem = documents.find((item) => item.id === Number(documentId));
+  const documentItem = getAllDocuments().find((item) => String(item.id) === String(documentId));
   if (!documentItem) return;
 
   const content = [
@@ -215,7 +282,7 @@ function downloadPatientDocument(documentId) {
 }
 
 function viewPatientOrdonnance(ordonnanceId) {
-  const ordonnance = ordonnances.find((item) => item.id === ordonnanceId);
+  const ordonnance = getAllOrdonnances().find((item) => item.id === ordonnanceId);
   if (!ordonnance) return;
 
   const medicines = ordonnance.medicaments.map((line) => `<li>${line}</li>`).join("");
@@ -232,7 +299,7 @@ function viewPatientOrdonnance(ordonnanceId) {
 }
 
 function viewPatientDocument(documentId) {
-  const documentItem = documents.find((item) => item.id === Number(documentId));
+  const documentItem = getAllDocuments().find((item) => String(item.id) === String(documentId));
   if (!documentItem) return;
 
   openPreviewWindow(
@@ -425,19 +492,23 @@ function bindPatientNotifications() {
 }
 
 function renderDashboard(profile) {
+  const consultationItems = getAllConsultations(profile);
+  const ordonnanceItems = getAllOrdonnances(profile);
+  const documentItems = getAllDocuments(profile);
+
   const statsRoot = document.querySelector("[data-patient-stats]");
   if (statsRoot) {
     statsRoot.innerHTML = `
-      <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">${patientStats.consultations}</div><div class="stat-label">Consultations</div><div class="stat-trend trend-up">Historique complet</div></div>
-      <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">${patientStats.ordonnances}</div><div class="stat-label">Ordonnances actives</div><div class="stat-trend trend-up">Suivi a jour</div></div>
-      <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">${patientStats.documents}</div><div class="stat-label">Documents disponibles</div><div class="stat-trend">Derniere mise a jour 02 avril</div></div>
+      <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">${consultationItems.length}</div><div class="stat-label">Consultations</div><div class="stat-trend trend-up">Historique complet</div></div>
+      <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">${ordonnanceItems.filter((item) => item.statut === "active").length}</div><div class="stat-label">Ordonnances actives</div><div class="stat-trend trend-up">Suivi a jour</div></div>
+      <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">${documentItems.length}</div><div class="stat-label">Documents disponibles</div><div class="stat-trend">Mises a jour automatiques</div></div>
       <div class="stat-card" data-emoji="🔔"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">${patientStats.rappels}</div><div class="stat-label">Rappels actifs</div><div class="stat-trend trend-amber">2 a traiter aujourd'hui</div></div>
     `;
   }
 
   const consultationsRoot = document.querySelector("[data-dashboard-consultations]");
   if (consultationsRoot) {
-    consultationsRoot.innerHTML = consultations.slice(0, 3).map((item) => {
+    consultationsRoot.innerHTML = consultationItems.slice(0, 3).map((item) => {
       const [day, month] = formatShortDate(item.date).split(" ");
       const badgeClass = item.statut === "avenir" ? "badge-amber" : "badge-green";
       const badgeLabel = item.statut === "avenir" ? "A venir" : "Terminee";
@@ -447,12 +518,12 @@ function renderDashboard(profile) {
 
   const medsRoot = document.querySelector("[data-dashboard-ordonnances]");
   if (medsRoot) {
-    medsRoot.innerHTML = ordonnances.filter((item) => item.statut === "active").map((item) => {
+    medsRoot.innerHTML = ordonnanceItems.filter((item) => item.statut === "active").map((item) => {
       return `<div class="medoc-item"><div class="patient-ava sm">💊</div><div class="flex-1"><div class="medoc-name">${item.id}</div><div class="medoc-detail">${item.medicaments.join(" · ")}</div></div></div>`;
     }).join("");
   }
 
-  const nextAppointment = consultations.find((item) => item.statut === "avenir");
+  const nextAppointment = consultationItems.find((item) => item.statut === "avenir");
   if (nextAppointment) {
     setText("[data-next-appointment-date]", formatLongDate(nextAppointment.date));
     setText("[data-next-appointment-copy]", `${nextAppointment.medecin} · ${nextAppointment.heure} · ${nextAppointment.specialite}`);
@@ -469,7 +540,7 @@ function renderConsultations() {
 
   const query = (document.querySelector("[data-consultation-search]")?.value || "").toLowerCase();
   const activeFilter = document.querySelector(".chip.sel")?.dataset.filter || "toutes";
-  const items = consultations.filter((item) => {
+  const items = getAllConsultations().filter((item) => {
     const matchFilter = activeFilter === "toutes" || item.statut === activeFilter;
     const haystack = `${item.titre} ${item.medecin} ${item.specialite} ${item.etablissement}`.toLowerCase();
     return matchFilter && haystack.includes(query);
@@ -489,7 +560,7 @@ function renderOrdonnances() {
   const root = document.querySelector("[data-ordonnances-list]");
   if (!root) return;
 
-  root.innerHTML = ordonnances.map((item) => {
+  root.innerHTML = getAllOrdonnances().map((item) => {
     const badgeClass = item.statut === "active" ? "badge-green" : "badge-amber";
     const badgeLabel = item.statut === "active" ? "Active" : "Expiree";
     const meds = item.medicaments.map((medicament) => `<li>${medicament}</li>`).join("");
@@ -501,7 +572,7 @@ function renderDocuments() {
   const root = document.querySelector("[data-documents-list]");
   if (!root) return;
   const activeFilter = document.querySelector(".dpill.sel")?.dataset.category || "tous";
-  const items = documents.filter((item) => activeFilter === "tous" || item.categorie === activeFilter);
+  const items = getAllDocuments().filter((item) => activeFilter === "tous" || item.categorie === activeFilter);
 
   root.innerHTML = items.map((item) => {
     const icon = item.categorie === "analyse" ? "🧪" : item.categorie === "ordonnance" ? "💊" : "📋";
@@ -521,10 +592,15 @@ function renderRappels() {
 }
 
 function renderCarnet(profile) {
+  const latestVital = getLatestVital(profile);
+  const effectivePoids = latestVital?.poids || profile.poids;
+  const effectiveTaille = latestVital?.taille || profile.taille;
+  const effectiveProfile = { ...profile, poids: effectivePoids, taille: effectiveTaille };
   const vitalsRoot = document.querySelector("[data-carnet-vitals]");
   if (vitalsRoot) {
-    const imc = getImc(profile);
-    vitalsRoot.innerHTML = `<div class="vital-card"><div class="vital-icon">📏</div><div class="vital-val">${profile.taille} cm</div><div class="vital-lbl">Taille</div></div><div class="vital-card"><div class="vital-icon">⚖️</div><div class="vital-val">${profile.poids} kg</div><div class="vital-lbl">Poids</div></div><div class="vital-card"><div class="vital-icon">🫀</div><div class="vital-val">${imc || "--"}</div><div class="vital-lbl">IMC</div></div><div class="vital-card"><div class="vital-icon">🩸</div><div class="vital-val">${profile.groupeSanguin}</div><div class="vital-lbl">Groupe sanguin</div></div>`;
+    const imc = getImc(effectiveProfile);
+    const extraCards = latestVital ? `<div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">${latestVital.temp}°C</div><div class="vital-lbl">Temperature</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">${latestVital.fc} bpm</div><div class="vital-lbl">Frequence cardiaque</div></div><div class="vital-card"><div class="vital-icon">🫁</div><div class="vital-val">${latestVital.spo2}%</div><div class="vital-lbl">SpO2</div></div><div class="vital-card"><div class="vital-icon">🩺</div><div class="vital-val">${latestVital.taSys}/${latestVital.taDia}</div><div class="vital-lbl">Tension</div></div>` : "";
+    vitalsRoot.innerHTML = `<div class="vital-card"><div class="vital-icon">📏</div><div class="vital-val">${effectiveTaille} cm</div><div class="vital-lbl">Taille</div></div><div class="vital-card"><div class="vital-icon">⚖️</div><div class="vital-val">${effectivePoids} kg</div><div class="vital-lbl">Poids</div></div><div class="vital-card"><div class="vital-icon">🫀</div><div class="vital-val">${imc || "--"}</div><div class="vital-lbl">IMC</div></div><div class="vital-card"><div class="vital-icon">🩸</div><div class="vital-val">${profile.groupeSanguin}</div><div class="vital-lbl">Groupe sanguin</div></div>${extraCards}`;
   }
 
   const allergiesRoot = document.querySelector("[data-carnet-allergies]");
@@ -534,7 +610,7 @@ function renderCarnet(profile) {
   if (antecedentsRoot) antecedentsRoot.innerHTML = `<div class="info-stack"><div><strong>Antecedents</strong><p>${profile.antecedents}</p></div><div><strong>Maladies chroniques</strong><p>${profile.maladiesChroniques}</p></div><div><strong>Traitements en cours</strong><p>${profile.traitements}</p></div></div>`;
 
   const historyRoot = document.querySelector("[data-carnet-history]");
-  if (historyRoot) historyRoot.innerHTML = historiqueMedical.map((item) => `<div class="timeline-entry"><div class="timeline-date">${item.date}</div><div class="timeline-title">${item.titre}</div><div class="consult-sub">${item.detail}</div></div>`).join("");
+  if (historyRoot) historyRoot.innerHTML = getAllTimelineEntries(profile).map((item) => `<div class="timeline-entry"><div class="timeline-date">${item.date}</div><div class="timeline-title">${item.titre}</div><div class="consult-sub">${item.detail}</div></div>`).join("");
 }
 
 function fillProfileSummary(profile) {
@@ -659,7 +735,7 @@ function bindConsultationFilters() {
   document.addEventListener("click", (event) => {
     const button = event.target.closest("[data-open-consultation]");
     if (!button) return;
-    const consultation = consultations.find((item) => String(item.id) === button.dataset.openConsultation);
+    const consultation = getAllConsultations().find((item) => String(item.id) === button.dataset.openConsultation);
     if (!consultation) return;
     setText("[data-modal-title]", consultation.titre);
     setText("[data-modal-date]", `${formatLongDate(consultation.date)} a ${consultation.heure}`);
@@ -743,6 +819,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (currentPage === "rappels.html") { renderRappels(); bindRappels(); }
   if (currentPage === "carnet-medical.html") renderCarnet(profile);
   if (currentPage === "profil.html") { renderProfile(profile); bindProfileForm(profile); }
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== SHARED_RECORDS_KEY) return;
+    const nextProfile = loadProfile();
+    fillProfileSummary(nextProfile);
+    if (currentPage === "dashboard.html") renderDashboard(nextProfile);
+    if (currentPage === "consultation.html") renderConsultations();
+    if (currentPage === "ordonnances.html") renderOrdonnances();
+    if (currentPage === "documents.html") renderDocuments();
+    if (currentPage === "carnet-medical.html") renderCarnet(nextProfile);
+    buildSidebar(nextProfile, currentPage);
+  });
 });
 
 

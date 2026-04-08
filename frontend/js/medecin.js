@@ -10,6 +10,8 @@ const DEFAULT_MEDECIN_SESSION = {
   avatar: ""
 };
 
+const SHARED_RECORDS_KEY = "medibook.shared.records";
+
 function getStoredMedecinSession() {
   const raw = window.localStorage.getItem("medecinSession");
   if (!raw) {
@@ -133,6 +135,71 @@ function sanitizeFilename(value) {
     .toLowerCase();
 }
 
+function loadSharedRecords() {
+  const fallback = {
+    consultations: [],
+    ordonnances: [],
+    documents: [],
+    vitals: [],
+    timeline: []
+  };
+  const raw = window.localStorage.getItem(SHARED_RECORDS_KEY);
+  if (!raw) {
+    return fallback;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      consultations: Array.isArray(parsed.consultations) ? parsed.consultations : [],
+      ordonnances: Array.isArray(parsed.ordonnances) ? parsed.ordonnances : [],
+      documents: Array.isArray(parsed.documents) ? parsed.documents : [],
+      vitals: Array.isArray(parsed.vitals) ? parsed.vitals : [],
+      timeline: Array.isArray(parsed.timeline) ? parsed.timeline : []
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveSharedRecords(records) {
+  window.localStorage.setItem(SHARED_RECORDS_KEY, JSON.stringify(records));
+}
+
+function appendSharedRecord(collection, record) {
+  const records = loadSharedRecords();
+  records[collection] = [record, ...(records[collection] || []).filter((item) => item.id !== record.id)];
+  saveSharedRecords(records);
+}
+
+function createRecordId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getTodayIsoDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getCurrentTimeLabel() {
+  return new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+}
+
+function getSharedPatientRecords(patientId) {
+  const records = loadSharedRecords();
+  return {
+    consultations: records.consultations.filter((item) => item.patientId === patientId),
+    ordonnances: records.ordonnances.filter((item) => item.patientId === patientId),
+    vitals: records.vitals.filter((item) => item.patientId === patientId),
+    timeline: records.timeline.filter((item) => item.patientId === patientId)
+  };
+}
+
+function getLatestSharedConsultation(patientId) {
+  return getSharedPatientRecords(patientId).consultations
+    .slice()
+    .sort((a, b) => new Date(`${b.date}T${b.heure || "00:00"}`) - new Date(`${a.date}T${a.heure || "00:00"}`))[0];
+}
+
 function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -150,6 +217,12 @@ function applyPatientData(patient) {
     return;
   }
 
+  const latestSharedConsultation = getLatestSharedConsultation(patient.id);
+  const lastConsultation = latestSharedConsultation
+    ? new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(latestSharedConsultation.date))
+    : patient.lastConsultation;
+  const summary = latestSharedConsultation?.titre || latestSharedConsultation?.diagnostic || patient.summary;
+
   fillText("[data-patient-name]", patient.fullName);
   fillText("[data-patient-cmu]", patient.cmu);
   fillText("[data-patient-age]", patient.age);
@@ -159,11 +232,12 @@ function applyPatientData(patient) {
   fillText("[data-patient-allergy]", patient.allergy);
   fillText("[data-patient-condition]", patient.condition);
   fillText("[data-patient-blood]", patient.blood);
-  fillText("[data-patient-summary]", patient.summary);
-  fillText("[data-patient-last-consultation]", patient.lastConsultation);
-  fillText("[data-search-selected]", `${patient.fullName} · ${patient.cmu}`);
-  fillHtml("[data-patient-meta-short]", `${patient.cmu} · ${patient.age}`);
-  fillHtml("[data-patient-meta-long]", `${patient.cmu} · Ne le ${patient.birthDate} · ${patient.phone}`);
+  fillText("[data-patient-summary]", summary);
+  fillText("[data-patient-last-consultation]", lastConsultation);
+  fillText("[data-search-selected]", patient.fullName + " · " + patient.cmu);
+  fillHtml("[data-patient-meta-short]", patient.cmu + " · " + patient.age);
+  fillHtml("[data-patient-meta-long]", patient.cmu + " · Ne le " + patient.birthDate + " · " + patient.phone);
+  renderDossierPatientRecords(patient);
 }
 
 function createPatientSearchItem(patient) {
@@ -505,6 +579,7 @@ function initOrdonnanceActions() {
   validateButton?.addEventListener("click", () => {
     const payload = collectOrdonnanceData();
     window.localStorage.setItem("lastValidatedOrdonnance", JSON.stringify(payload));
+    saveValidatedOrdonnance(payload);
     window.alert("Ordonnance validee et prete a etre envoyee.");
   });
 }
@@ -520,6 +595,121 @@ function collectCertificatData() {
     debutArret: document.getElementById("arretD")?.value || "",
     finArret: document.getElementById("arretF")?.value || ""
   };
+}
+
+function collectConsultationData() {
+  const patient = getSelectedPatient();
+  const symptomTextareas = document.querySelectorAll("#ct1 textarea");
+  const diagnosticTextareas = document.querySelectorAll("#ct3 textarea");
+  const treatmentTextareas = document.querySelectorAll("#ct4 textarea");
+  const taValue = document.getElementById("consult-ta")?.value?.trim() || "145/92";
+  const [taSys, taDia] = taValue.split("/").map((part) => Number.parseInt(part?.trim() || "", 10));
+  const temperature = Number.parseFloat(document.getElementById("consult-temperature")?.value || "38.7");
+  const fc = Number.parseInt(document.getElementById("consult-fc")?.value || "96", 10);
+  const spo2 = Number.parseInt(document.getElementById("consult-spo2")?.value || "97", 10);
+  const date = getTodayIsoDate();
+
+  return {
+    id: createRecordId("consult"),
+    patientId: patient.id,
+    date,
+    heure: getCurrentTimeLabel(),
+    titre: document.querySelector("#ct1 input[type='text']")?.value?.trim() || "Consultation medicale",
+    etablissement: "MediBook",
+    medecin: MEDECIN_SESSION.name,
+    specialite: MEDECIN_SESSION.specialty,
+    statut: "terminee",
+    symptomes: symptomTextareas[0]?.value?.trim() || "Symptomes saisis pendant la consultation.",
+    diagnostic: diagnosticTextareas[0]?.value?.trim() || "Diagnostic clinique enregistre.",
+    traitement: treatmentTextareas[0]?.value?.trim() || "Traitement et suivi renseignes.",
+    observations: diagnosticTextareas[1]?.value?.trim() || "",
+    vitals: {
+      taSys: Number.isFinite(taSys) ? taSys : 145,
+      taDia: Number.isFinite(taDia) ? taDia : 92,
+      temp: Number.isFinite(temperature) ? temperature : 38.7,
+      fc: Number.isFinite(fc) ? fc : 96,
+      spo2: Number.isFinite(spo2) ? spo2 : 97
+    }
+  };
+}
+
+function saveValidatedConsultation(payload) {
+  appendSharedRecord("consultations", payload);
+  appendSharedRecord("vitals", {
+    id: `vital-${payload.id}`,
+    patientId: payload.patientId,
+    date: payload.date,
+    heure: payload.heure,
+    taSys: payload.vitals.taSys,
+    taDia: payload.vitals.taDia,
+    temp: payload.vitals.temp,
+    fc: payload.vitals.fc,
+    spo2: payload.vitals.spo2,
+    poids: 0,
+    taille: 0,
+    glycemie: 0,
+    fr: 0,
+    source: "medecin",
+    auteur: MEDECIN_SESSION.name
+  });
+  appendSharedRecord("timeline", {
+    id: `timeline-${payload.id}`,
+    patientId: payload.patientId,
+    date: payload.date,
+    titre: payload.titre,
+    detail: payload.diagnostic,
+    source: "medecin"
+  });
+}
+
+function saveValidatedOrdonnance(payload) {
+  const patient = getSelectedPatient();
+  const ordonnance = {
+    id: createRecordId("ordo").toUpperCase(),
+    patientId: patient.id,
+    date: payload.date || getTodayIsoDate(),
+    statut: "active",
+    medecin: MEDECIN_SESSION.name,
+    specialite: MEDECIN_SESSION.specialty,
+    medicaments: payload.rows
+      .filter((row) => row.medicament)
+      .map((row) => `${row.medicament} ${row.dosage} - ${row.prises}x/j - ${row.duree} jours${row.instructions ? ` - ${row.instructions}` : ""}`),
+    recommandations: payload.recommandations,
+    consultation: payload.consultation
+  };
+
+  appendSharedRecord("ordonnances", ordonnance);
+  appendSharedRecord("documents", {
+    id: `doc-${ordonnance.id}`,
+    patientId: patient.id,
+    categorie: "ordonnance",
+    nom: `Ordonnance ${ordonnance.id}`,
+    date: ordonnance.date,
+    source: MEDECIN_SESSION.name,
+    format: "PDF"
+  });
+}
+
+function saveValidatedCertificat(payload) {
+  const patient = getSelectedPatient();
+  appendSharedRecord("documents", {
+    id: createRecordId("cert"),
+    patientId: patient.id,
+    categorie: "certificat",
+    nom: `Certificat ${payload.type}`,
+    date: payload.date || getTodayIsoDate(),
+    source: MEDECIN_SESSION.name,
+    format: "PDF",
+    consultation: payload.consultation
+  });
+  appendSharedRecord("timeline", {
+    id: createRecordId("timeline-cert"),
+    patientId: patient.id,
+    date: payload.date || getTodayIsoDate(),
+    titre: "Certificat medical",
+    detail: `${payload.type} - ${payload.motif || "Document valide"}`,
+    source: "medecin"
+  });
 }
 
 function initCertificatActions() {
@@ -556,7 +746,9 @@ function initCertificatActions() {
   });
 
   validateButton?.addEventListener("click", () => {
-    window.localStorage.setItem("lastValidatedCertificat", JSON.stringify(collectCertificatData()));
+    const payload = collectCertificatData();
+    window.localStorage.setItem("lastValidatedCertificat", JSON.stringify(payload));
+    saveValidatedCertificat(payload);
     window.alert("Certificat valide et pret a etre transmis.");
   });
 }
@@ -582,10 +774,11 @@ function initConsultationActions() {
 
   consultationValidateButton?.addEventListener("click", () => {
     const payload = {
-      patientId: getSelectedPatient().id,
+      ...collectConsultationData(),
       validatedAt: new Date().toISOString()
     };
     window.localStorage.setItem("lastValidatedConsultation", JSON.stringify(payload));
+    saveValidatedConsultation(payload);
     window.alert("Consultation validee et prete a etre ajoutee au dossier.");
   });
 
@@ -604,6 +797,179 @@ function initConsultationActions() {
 
     triggerFileDownload(`${sanitizeFilename(`ordonnance-${patient.fullName}`)}.txt`, content);
   });
+}
+
+function renderDossierPatientRecords(patient = getSelectedPatient()) {
+  const consultRoot = document.getElementById("dtab-consult");
+  const ordonnanceRoot = document.getElementById("dtab-ordo");
+  const vitalsRoot = document.getElementById("dtab-vit");
+  if (!consultRoot && !ordonnanceRoot && !vitalsRoot) {
+    return;
+  }
+
+  const shared = getSharedPatientRecords(patient.id);
+  const consultationItems = shared.consultations.length
+    ? shared.consultations
+    : [{
+        id: "fallback-consultation",
+        date: "2025-03-12",
+        titre: `${patient.summary} - Suivi`,
+        diagnostic: "Consultation precedente du dossier.",
+        vitals: { taSys: 130, taDia: 85, temp: 39.2, fc: 98, spo2: 97 }
+      }];
+  const latestVital = shared.vitals[0] || consultationItems[0]?.vitals;
+  const ordonnanceItems = shared.ordonnances.length
+    ? shared.ordonnances
+    : [{
+        id: "ORD-STATIC",
+        date: "2025-03-12",
+        medicaments: [
+          "Artemether/Lumefantrine - 80/480mg - 2x/j - 3 jours",
+          "Paracetamol - 1000mg - 3x/j - 5 jours"
+        ],
+        medecin: MEDECIN_SESSION.name,
+        specialite: MEDECIN_SESSION.specialty
+      }];
+
+  if (consultRoot) {
+    consultRoot.innerHTML = consultationItems.map((item) => {
+      const date = new Date(item.date);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(date);
+      const vitals = item.vitals || latestVital || {};
+      return `
+        <div class="consult-item">
+          <div class="consult-date-box">
+            <div class="consult-date-d">${day}</div>
+            <div class="consult-date-m">${month}</div>
+          </div>
+          <div class="flex-1">
+            <div class="consult-title">${item.titre}</div>
+            <div class="consult-sub">TA: ${vitals.taSys || "--"}/${vitals.taDia || "--"} · T°: ${vitals.temp || "--"}°C · FC: ${vitals.fc || "--"} bpm</div>
+            <div class="consult-sub">${item.diagnostic || ""}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  if (ordonnanceRoot) {
+    const latestOrdonnance = ordonnanceItems[0];
+    ordonnanceRoot.innerHTML = `
+      <div class="card">
+        <div class="card-title mb-16">Ordonnance - ${latestOrdonnance.date}</div>
+        <div class="table-wrap" style="border:none">
+          <table>
+            <thead>
+              <tr>
+                <th>Médicament</th>
+                <th>Détail</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${latestOrdonnance.medicaments.map((line) => `<tr><td>${line.split(" - ")[0]}</td><td>${line.split(" - ").slice(1).join(" - ")}</td></tr>`).join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-8">
+          <button class="btn btn-secondary btn-sm" type="button">PDF</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (vitalsRoot) {
+    const vital = latestVital || { taSys: 145, taDia: 92, temp: 37.1, fc: 78, spo2: 97 };
+    const warnTA = Number(vital.taSys) > 140 || Number(vital.taDia) > 90;
+    vitalsRoot.innerHTML = `
+      <div class="vital-grid">
+        <div class="vital-card ${warnTA ? "warning" : ""}">
+          <div class="vital-icon">🩸</div>
+          <div class="vital-val">${vital.taSys}/${vital.taDia}</div>
+          <div class="vital-lbl">Tension (mmHg)</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-icon">🌡️</div>
+          <div class="vital-val">${vital.temp}°C</div>
+          <div class="vital-lbl">Température</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-icon">❤️</div>
+          <div class="vital-val">${vital.fc} bpm</div>
+          <div class="vital-lbl">Fréq. cardiaque</div>
+        </div>
+        <div class="vital-card">
+          <div class="vital-icon">🫁</div>
+          <div class="vital-val">${vital.spo2}%</div>
+          <div class="vital-lbl">SpO₂</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function initConsultationVitalsSync() {
+  const taInput = document.getElementById("consult-ta");
+  const temperatureInput = document.getElementById("consult-temperature");
+  const fcInput = document.getElementById("consult-fc");
+  const spo2Input = document.getElementById("consult-spo2");
+
+  if (!taInput || !temperatureInput || !fcInput || !spo2Input) {
+    return;
+  }
+
+  const tensionValue = document.querySelector("[data-consult-vital='tension']");
+  const tensionLabel = document.querySelector("[data-consult-vital-label='tension']");
+  const tensionCard = document.querySelector("[data-vital-card='tension']");
+  const temperatureValue = document.querySelector("[data-consult-vital='temperature']");
+  const temperatureCard = document.querySelector("[data-vital-card='temperature']");
+  const fcValue = document.querySelector("[data-consult-vital='fc']");
+  const fcCard = document.querySelector("[data-vital-card='fc']");
+  const spo2Value = document.querySelector("[data-consult-vital='spo2']");
+  const spo2Card = document.querySelector("[data-vital-card='spo2']");
+
+  const updateVitalsPreview = () => {
+    const taValue = taInput.value.trim() || taInput.placeholder || "--/--";
+    const temperature = temperatureInput.value.trim() || temperatureInput.placeholder || "--.-";
+    const fc = fcInput.value.trim() || fcInput.placeholder || "--";
+    const spo2 = spo2Input.value.trim() || spo2Input.placeholder || "--";
+
+    if (tensionValue) {
+      tensionValue.textContent = taValue;
+    }
+    if (temperatureValue) {
+      temperatureValue.textContent = `${temperature}°C`;
+    }
+    if (fcValue) {
+      fcValue.textContent = `${fc} bpm`;
+    }
+    if (spo2Value) {
+      spo2Value.textContent = `${spo2}%`;
+    }
+
+    const [taSys, taDia] = taValue.split("/").map((part) => Number.parseInt(part?.trim() || "", 10));
+    const tensionWarning = Number.isFinite(taSys) && Number.isFinite(taDia) && (taSys > 140 || taDia > 90);
+    tensionCard?.classList.toggle("warning", tensionWarning);
+    if (tensionLabel) {
+      tensionLabel.textContent = tensionWarning ? "Tension ⚠️" : "Tension";
+    }
+
+    const temperatureWarning = Number.parseFloat(temperature) >= 38;
+    temperatureCard?.classList.toggle("warning", temperatureWarning);
+
+    const fcWarning = Number.parseInt(fc, 10) > 100;
+    fcCard?.classList.toggle("warning", fcWarning);
+
+    const spo2Warning = Number.parseInt(spo2, 10) < 95;
+    spo2Card?.classList.toggle("warning", spo2Warning);
+  };
+
+  [taInput, temperatureInput, fcInput, spo2Input].forEach((input) => {
+    input.addEventListener("input", updateVitalsPreview);
+    input.addEventListener("change", updateVitalsPreview);
+  });
+
+  updateVitalsPreview();
 }
 
 function renderMedecinNotificationsMenu(menu) {
@@ -902,6 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initOrdonnanceActions();
   initCertificatActions();
   initConsultationActions();
+  initConsultationVitalsSync();
 
   if (document.getElementById("certTypePills")) {
     updateCert();
@@ -915,5 +1282,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activateConsultationStep(consultationTabs, 1);
   }
 });
+
+
 
 
