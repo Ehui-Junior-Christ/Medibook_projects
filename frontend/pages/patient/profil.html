@@ -4,129 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediBook – Mon Profil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/patient.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#0a2540;--accent:#1a6bff;--accent-light:#e8f0ff;--white:#ffffff;--gray:#f4f7fb;--text:#1a2535;--text-light:#6b7a8d;--border:#e0e8f0;--success:#00b37e;--sidebar-w:250px;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'DM Sans',sans-serif;background:var(--gray);color:var(--text);display:flex;min-height:100vh;}
+        .sidebar{width:var(--sidebar-w);background:var(--primary);color:var(--white);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;}
+        .sidebar-logo{padding:28px 24px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;}
+        .logo-icon{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+        .logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+        .logo-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;}
+        .sidebar-nav{flex:1;padding:20px 0;overflow-y:auto;}
+        .nav-section{padding:8px 24px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.35);margin-top:12px;}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:12px 24px;color:rgba(255,255,255,0.7);text-decoration:none;font-size:14px;transition:all 0.2s;border-left:3px solid transparent;}
+        .nav-item:hover{background:rgba(255,255,255,0.08);color:var(--white);}
+        .nav-item.active{background:rgba(26,107,255,0.2);color:var(--white);border-left-color:var(--accent);}
+        .nav-icon{width:20px;text-align:center;font-size:16px;}
+        .sidebar-footer{padding:20px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:12px;}
+        .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+        .user-name{font-size:13px;font-weight:500;}
+        .user-role{font-size:11px;color:rgba(255,255,255,0.5);}
+        .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+        .topbar{background:var(--white);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+        .page-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--primary);}
+        .content{padding:32px;}
+
+        /* PROFIL */
+        .profile-header{background:linear-gradient(135deg,var(--primary),#1a3a6b);border-radius:16px;padding:32px;color:var(--white);display:flex;align-items:center;gap:28px;margin-bottom:28px;}
+        .profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;border:4px solid rgba(255,255,255,0.3);flex-shrink:0;}
+        .profile-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;}
+        .profile-id{font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px;}
+        .profile-badges{display:flex;gap:10px;margin-top:12px;}
+        .badge-chip{background:rgba(255,255,255,0.15);border-radius:20px;padding:5px 14px;font-size:12px;}
+
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+        .card{background:var(--white);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
+        .card-header{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+        .card-title{font-size:15px;font-weight:600;color:var(--primary);}
+        .btn-edit{background:var(--accent-light);color:var(--accent);border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500;}
+        .card-body{padding:24px;}
+
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        .info-item label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);display:block;margin-bottom:5px;}
+        .info-item .value{font-size:14px;font-weight:500;color:var(--text);}
+        .divider{height:1px;background:var(--border);margin:20px 0;}
+
+        .form-group{margin-bottom:16px;}
+        .form-group label{font-size:12px;font-weight:500;color:var(--text-light);display:block;margin-bottom:6px;}
+        .form-control{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border 0.2s;}
+        .form-control:focus{border-color:var(--accent);}
+        .btn-save{background:var(--accent);color:var(--white);border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;}
+
+        .alert-card{background:#fff7e6;border:1px solid #f59e0b;border-radius:12px;padding:16px;display:flex;gap:12px;margin-bottom:16px;}
+        .alert-icon{font-size:20px;}
+        .alert-text{font-size:13px;color:#92400e;}
+    </style>
 </head>
 <body>
-<div class="app">
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🏥</div>
+        <div><div class="logo-text">MediBook</div><div class="logo-sub">Espace Patient</div></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Principal</div>
+        <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Tableau de bord</a>
+        <a class="nav-item active" href="profil.html"><span class="nav-icon">👤</span> Mon Profil</a>
+        <a class="nav-item" href="carnet-medical.html"><span class="nav-icon">📋</span> Carnet Médical</a>
+        <div class="nav-section">Soins</div>
+        <a class="nav-item" href="consultation.html"><span class="nav-icon">🩺</span> Consultation</a>
+        <a class="nav-item" href="ordonnances.html"><span class="nav-icon">💊</span> Ordonnances</a>
+        <a class="nav-item" href="documents.html"><span class="nav-icon">📄</span> Documents</a>
+        <div class="nav-section">Autres</div>
+        <a class="nav-item" href="rappels.html"><span class="nav-icon">🔔</span> Rappels</a>
+        <a class="nav-item" href="../login.html"><span class="nav-icon">🚪</span> Déconnexion</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="avatar">BS</div>
+        <div><div class="user-name">Bié Sergine</div><div class="user-role">Patient</div></div>
+    </div>
+</aside>
 
-    <aside class="sidebar">
-        <div class="sb-logo">
-            <div class="sb-logo-inner">
-                <div class="sb-logo-mark">🏥</div>
-                <div>
-                    <div class="sb-logo-text">MediBook</div>
-                    <div class="sb-logo-sub">Portail médical</div>
+<main class="main">
+    <div class="topbar">
+        <div class="page-title">Mon Profil</div>
+        <button class="btn-edit">✏️ Modifier</button>
+    </div>
+    <div class="content">
+
+        <div class="profile-header">
+            <div class="profile-avatar">BS</div>
+            <div>
+                <div class="profile-name">Bié Jacquy Sergine</div>
+                <div class="profile-id">N° Patient : MB-2026-0042</div>
+                <div class="profile-badges">
+                    <span class="badge-chip">🩸 O+</span>
+                    <span class="badge-chip">👤 Patient actif</span>
+                    <span class="badge-chip">📅 Depuis 2024</span>
                 </div>
             </div>
         </div>
-        <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
-        <nav>
-            <div class="sb-section">
-                <span class="sb-section-label">Mon espace</span>
-                <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
-                <a href="profil.html" class="sb-item active"><span class="sb-icon">👤</span>Mon profil</a>
-                <a href="carnet-medical.html" class="sb-item"><span class="sb-icon">📋</span>Carnet médical</a>
-            </div>
-            <div class="sb-section">
-                <span class="sb-section-label">Historique</span>
-                <a href="consultations.html" class="sb-item"><span class="sb-icon">🩺</span>Consultations</a>
-                <a href="ordonnances.html" class="sb-item"><span class="sb-icon">💊</span>Ordonnances</a>
-                <a href="documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
-                <a href="rappels.html" class="sb-item"><span class="sb-icon">🔔</span>Rappels<span class="sb-badge">3</span></a>
-            </div>
-        </nav>
-        <div class="sb-footer">
-            <div class="sb-user" id="btn-logout">
-                <div class="sb-avatar" id="sb-avatar">KJ</div>
-                <div>
-                    <div class="sb-user-name" id="sb-name">Kouadio J.B.</div>
-                    <div class="sb-user-role">Patient</div>
-                </div>
-                <span class="sb-logout-icon">↗</span>
-            </div>
-        </div>
-    </aside>
 
-    <div class="main">
-        <header class="topbar">
-            <div class="topbar-title">Mon profil</div>
-            <div class="topbar-right">
-                <div class="icon-btn" id="btn-logout-top">🚪</div>
-            </div>
-        </header>
-
-        <div class="content-area">
-            <div class="profil-grid">
-
-                <!-- Infos personnelles -->
+        <div class="two-col">
+            <!-- INFOS PERSONNELLES -->
+            <div>
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Informations personnelles</div>
-                        <button class="btn btn-secondary btn-sm" id="btn-edit">✏️ Modifier</button>
+                        <span class="card-title">👤 Informations personnelles</span>
+                        <button class="btn-edit">✏️ Modifier</button>
                     </div>
-
-                    <div class="profil-ava-row">
-                        <div class="profil-ava" id="profil-ava">KJ</div>
-                        <div>
-                            <div class="profil-nom" id="profil-nom">Kouadio Jean Baptiste</div>
-                            <div class="profil-cmu" id="profil-cmu">CMU-2024-08821</div>
-                            <button class="btn btn-secondary btn-sm" style="margin-top:8px" id="btn-photo">📷 Changer photo</button>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item"><label>Nom</label><div class="value">Bié</div></div>
+                            <div class="info-item"><label>Prénom</label><div class="value">Jacquy Sergine</div></div>
+                            <div class="info-item"><label>Date de naissance</label><div class="value">15 Mars 2002</div></div>
+                            <div class="info-item"><label>Sexe</label><div class="value">Féminin</div></div>
+                            <div class="info-item"><label>Téléphone</label><div class="value">+225 07 00 00 42</div></div>
+                            <div class="info-item"><label>Email</label><div class="value">sergine@medibook.ci</div></div>
+                            <div class="info-item"><label>Groupe sanguin</label><div class="value">O+</div></div>
+                            <div class="info-item"><label>Adresse</label><div class="value">Bingerville, Abidjan</div></div>
                         </div>
-                    </div>
-
-                    <div class="form-grid" id="form-profil">
-                        <div class="fld">
-                            <label>Nom</label>
-                            <input type="text" id="inp-nom" value="Kouadio" disabled>
-                        </div>
-                        <div class="fld">
-                            <label>Prénom</label>
-                            <input type="text" id="inp-prenom" value="Jean Baptiste" disabled>
-                        </div>
-                        <div class="fld">
-                            <label>Date de naissance</label>
-                            <input type="date" id="inp-naissance" value="1987-03-14" disabled>
-                        </div>
-                        <div class="fld">
-                            <label>Numéro CMU</label>
-                            <input type="text" id="inp-cmu" value="CMU-2024-08821" disabled readonly>
-                        </div>
-                        <div class="fld">
-                            <label>Téléphone</label>
-                            <input type="tel" id="inp-tel" value="+225 07 12 34 56" disabled>
-                        </div>
-                        <div class="fld">
-                            <label>Email</label>
-                            <input type="email" id="inp-email" value="jb.kouadio@email.ci" disabled>
-                        </div>
-                    </div>
-
-                    <div class="actions-bar" id="actions-profil" style="display:none">
-                        <button class="btn btn-secondary" id="btn-annuler">Annuler</button>
-                        <button class="btn btn-primary" id="btn-sauvegarder">Enregistrer</button>
                     </div>
                 </div>
 
-                <!-- Colonne droite -->
-                <div>
-                    <div class="card card-sm">
-                        <div class="card-title" style="margin-bottom:10px">Conditions médicales</div>
-                        <div class="badge-row" id="conditions-list"></div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">🔒 Sécurité</span></div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Mot de passe actuel</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>Nouveau mot de passe</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <button class="btn-save">Mettre à jour le mot de passe</button>
                     </div>
-                    <div class="card">
-                        <div class="card-title" style="margin-bottom:10px">Établissements fréquentés</div>
-                        <div id="etablissements-list" style="font-size:13px;display:flex;flex-direction:column;gap:8px"></div>
+                </div>
+            </div>
+
+            <!-- MÉDICAL -->
+            <div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">🏥 Informations médicales</span></div>
+                    <div class="card-body">
+                        <div class="alert-card">
+                            <div class="alert-icon">⚠️</div>
+                            <div class="alert-text"><strong>Allergie :</strong> Pénicilline — Signaler à tout médecin.</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-item"><label>Taille</label><div class="value">165 cm</div></div>
+                            <div class="info-item"><label>Poids</label><div class="value">58 kg</div></div>
+                            <div class="info-item"><label>IMC</label><div class="value">21.3 (Normal)</div></div>
+                            <div class="info-item"><label>Tension</label><div class="value">120/80 mmHg</div></div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="info-item" style="margin-bottom:12px;"><label>Antécédents</label><div class="value">Hypertension légère</div></div>
+                        <div class="info-item"><label>Allergies</label><div class="value">Pénicilline</div></div>
                     </div>
                 </div>
 
+                <div class="card">
+                    <div class="card-header"><span class="card-title">👨‍⚕️ Médecin traitant</span></div>
+                    <div class="card-body">
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <div style="width:50px;height:50px;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">👨‍⚕️</div>
+                            <div>
+                                <div style="font-weight:600;">Dr. Ange KOUASSI</div>
+                                <div style="font-size:12px;color:var(--text-light);">Médecine générale</div>
+                                <div style="font-size:12px;color:var(--accent);margin-top:4px;">+225 07 00 00 01</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<script src="../../js/api.js"></script>
-<script src="../../js/patient.js"></script>
+</main>
 </body>
 </html>
