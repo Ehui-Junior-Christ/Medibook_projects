@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @NoArgsConstructor
-public abstract class Utilisateur {
+public  class Utilisateur {
 
     // ======================
     // ID

@@ -106,18 +106,45 @@ function goLogin() {
 }
 
 function goApp() {
-  const activeRole =
-    document.querySelector(".role-btn.active")?.dataset.role ||
-    document.querySelector(".role-card.selected")?.dataset.role ||
-    selectedRole;
 
-  const dashboardByRole = {
-    patient: "./patient/dashboard.html",
-    medecin: "./medecin/dashboard.html",
-    infirmier: "./infirmier/dashboard.html"
-  };
+  const identifiant = document.getElementById("identifiant")?.value;
+  const motDePasse = document.getElementById("motDePasse")?.value;
 
-  window.location.href = dashboardByRole[activeRole] || dashboardByRole.patient;
+  fetch("http://localhost:8080/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      identifiant: identifiant,
+      motDePasse: motDePasse
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Erreur login");
+    }
+    return res.json();
+  })
+  .then(data => {
+    console.log(data);
+
+    // sauvegarde utilisateur
+    localStorage.setItem("user", JSON.stringify(data));
+
+    const dashboardByRole = {
+      PATIENT: "./patient/dashboard.html",
+      MEDECIN: "./medecin/dashboard.html",
+      INFIRMIER: "./infirmier/dashboard.html"
+    };
+
+    // redirection selon rôle backend
+    window.location.href = dashboardByRole[data.role] || dashboardByRole.PATIENT;
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Identifiants incorrects ❌");
+  });
 }
 
 function checkPw() {
