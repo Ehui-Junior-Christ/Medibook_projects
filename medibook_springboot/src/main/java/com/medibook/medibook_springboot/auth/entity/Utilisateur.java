@@ -1,4 +1,5 @@
 package com.medibook.medibook_springboot.auth.entity;
+import com.medibook.medibook_springboot.auth.entity.Role;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -78,10 +79,5 @@ public  class Utilisateur {
     // ======================
     // Enum Role
     // ======================
-    public enum Role {
-        PATIENT,
-        MEDECIN,
-        INFIRMIER,
-        ADMIN
-    }
+
 }

@@ -1,7 +1,9 @@
 package com.medibook.medibook_springboot.auth.service;
 
 import com.medibook.medibook_springboot.auth.dto.LoginResponseDto;
+import com.medibook.medibook_springboot.auth.dto.RegisterDto;
 import com.medibook.medibook_springboot.auth.entity.Utilisateur;
+import com.medibook.medibook_springboot.auth.entity.Role;
 import com.medibook.medibook_springboot.auth.repository.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +36,32 @@ public class AuthService {
                 utilisateur.getPrenom(),
                 utilisateur.getRole().name()
         );
+    }
+
+    // ✅ METTRE ICI (dans la classe)
+    public void register(RegisterDto request) {
+
+        if (utilisateurRepository.existsByCmu(request.getCmu())) {
+            throw new RuntimeException("CMU déjà utilisé");
+        }
+
+        if (utilisateurRepository.existsByTelephone(request.getTelephone())) {
+            throw new RuntimeException("Téléphone déjà utilisé");
+        }
+
+        Utilisateur user = new Utilisateur();
+        user.setNom(request.getNom());
+        user.setPrenom(request.getPrenom());
+        user.setCmu(request.getCmu());
+        user.setTelephone(request.getTelephone());
+        user.setEmail(request.getEmail());
+        user.setMotDePasse(request.getMotDePasse());
+        user.setRole(Role.valueOf(request.getRole()));
+        user.setActif(true);
+
+        // 👉 photo
+        user.setPhotoProfil(request.getPhotoProfil());
+
+        utilisateurRepository.save(user);
     }
 }

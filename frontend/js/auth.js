@@ -209,3 +209,44 @@ document.addEventListener("DOMContentLoaded", () => {
     setStep(1);
   }
 });
+function register() {
+
+  const nom = document.getElementById("nom")?.value;
+  const prenom = document.getElementById("prenom")?.value;
+  const cmu = document.getElementById("cmu")?.value;
+  const telephone = document.getElementById("telephone")?.value;
+  const email = document.getElementById("email")?.value;
+  const motDePasse = document.getElementById("motDePasse")?.value;
+  const photo = document.getElementById("photoProfil")?.files[0];
+
+  fetch("http://localhost:8080/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nom,
+      prenom,
+      cmu,
+      telephone,
+      email,
+      motDePasse,
+      role: selectedRole.toUpperCase(),
+      photoProfil: photo ? photo.name : "default.jpg"
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Erreur inscription");
+    }
+    return res.text();
+  })
+  .then(data => {
+    alert("Compte créé ✅");
+    window.location.href = "./login.html";
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Erreur lors de l'inscription ❌");
+  });
+}
