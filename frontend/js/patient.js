@@ -1,8 +1,11 @@
+const API_BASE_URL = "http://localhost:8080/api";
 const STORAGE_KEY = "medibook.patient.profile";
 const SHARED_RECORDS_KEY = "medibook.shared.records";
+const USER_STORAGE_KEY = "user";
 
 const defaultPatientProfile = {
   id: "MB-2026-0042",
+  backendId: null,
   nom: "Bie",
   prenoms: "Jacquy Sergine",
   dateNaissance: "2002-03-15",
@@ -31,7 +34,39 @@ const defaultPatientProfile = {
   notesPatient: "Prefere les rendez-vous du matin."
 };
 
-const patientStats = { consultations: 12, ordonnances: 5, documents: 8, rappels: 3 };
+const defaultConsultations = [
+  { id: 1, date: "2026-04-20", heure: "09:30", titre: "Consultation de suivi", etablissement: "Clinique Sainte Marie", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "avenir", symptomes: "Toux persistante et fatigue moderee.", diagnostic: "Controle post-bronchite.", traitement: "Poursuite de l'hydratation et bilan complementaire." },
+  { id: 2, date: "2026-04-02", heure: "10:00", titre: "Bronchite aigue", etablissement: "CHU de Treichville", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "terminee", symptomes: "Toux, gene respiratoire, fievre legere.", diagnostic: "Bronchite aigue sans complication.", traitement: "Amoxicilline 500 mg, ibuprofene 400 mg, repos." },
+  { id: 3, date: "2026-03-15", heure: "14:30", titre: "Controle annuel", etablissement: "Polyclinique Internationale", medecin: "Dr. Fatoumata Diallo", specialite: "Pediatrie", statut: "terminee", symptomes: "Bilan systematique.", diagnostic: "Etat general satisfaisant.", traitement: "Surveillance tensionnelle trimestrielle." }
+];
+
+const defaultOrdonnances = [
+  { id: "ORD-2026-0021", date: "2026-04-02", statut: "active", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", medicaments: ["Amoxicilline 500 mg - 1 gelule matin et soir pendant 7 jours", "Ibuprofene 400 mg - 1 comprime le soir pendant 5 jours"] },
+  { id: "ORD-2026-0018", date: "2026-03-15", statut: "expiree", medecin: "Dr. Fatoumata Diallo", specialite: "Pediatrie", medicaments: ["Paracetamol 500 mg - 1 comprime toutes les 8h pendant 5 jours"] }
+];
+
+const defaultDocuments = [
+  { id: 1, categorie: "certificat", nom: "Certificat medical - Bronchite", date: "2026-04-02", source: "Dr. Ange Kouassi", format: "PDF" },
+  { id: 2, categorie: "certificat", nom: "Certificat de bonne sante", date: "2026-03-15", source: "Dr. Fatoumata Diallo", format: "PDF" },
+  { id: 3, categorie: "ordonnance", nom: "Ordonnance ORD-2026-0021", date: "2026-04-02", source: "Dr. Ange Kouassi", format: "PDF" },
+  { id: 4, categorie: "ordonnance", nom: "Ordonnance ORD-2026-0018", date: "2026-03-15", source: "Dr. Fatoumata Diallo", format: "PDF" },
+  { id: 5, categorie: "analyse", nom: "Bilan sanguin complet", date: "2026-03-10", source: "Laboratoire Central", format: "PDF" },
+  { id: 6, categorie: "analyse", nom: "Radiographie thorax", date: "2026-02-02", source: "Imagerie Sainte Marie", format: "JPEG" }
+];
+
+const defaultRappels = [
+  { id: 1, type: "medicament", titre: "Amoxicilline 500 mg", description: "1 gelule matin et soir.", moment: "Aujourd'hui a 08h00 et 20h00", urgence: "urgent", fait: false },
+  { id: 2, type: "alerte", titre: "Renouveler ordonnance", description: "L'ordonnance ORD-2026-0021 expire dans 2 jours.", moment: "Dans 2 jours", urgence: "bientot", fait: false },
+  { id: 3, type: "rdv", titre: "Rendez-vous de suivi", description: "Dr. Ange Kouassi - Consultation de suivi.", moment: "Lundi 20 Avril 2026 a 09h30", urgence: "confirme", fait: false },
+  { id: 4, type: "medicament", titre: "Ibuprofene 400 mg", description: "1 comprime le soir.", moment: "Ce soir a 21h00", urgence: "soir", fait: false }
+];
+
+const defaultHistoriqueMedical = [
+  { date: "2026-04", titre: "Bronchite aigue", detail: "Traitement antibiotique de 7 jours avec repos." },
+  { date: "2026-03", titre: "Controle annuel", detail: "Bilan complet, surveillance tensionnelle recommandee." },
+  { date: "2025-12", titre: "Grippe saisonniere", detail: "Traitement symptomatique et repos." },
+  { date: "2025-06", titre: "Hypertension legere detectee", detail: "Suivi regulier et hygiene de vie." }
+];
 
 const patientGlobalSearchItems = [
   { href: "dashboard.html", title: "Tableau de bord", meta: "Vue generale de votre espace patient" },
@@ -44,39 +79,16 @@ const patientGlobalSearchItems = [
   { href: "rappels.html", title: "Rappels", meta: "Medicaments, alertes et suivi" }
 ];
 
-const consultations = [
-  { id: 1, date: "2026-04-20", heure: "09:30", titre: "Consultation de suivi", etablissement: "Clinique Sainte Marie", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "avenir", symptomes: "Toux persistante et fatigue moderee.", diagnostic: "Controle post-bronchite.", traitement: "Poursuite de l'hydratation et bilan complementaire." },
-  { id: 2, date: "2026-04-02", heure: "10:00", titre: "Bronchite aigue", etablissement: "CHU de Treichville", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", statut: "terminee", symptomes: "Toux, gene respiratoire, fievre legere.", diagnostic: "Bronchite aigue sans complication.", traitement: "Amoxicilline 500 mg, ibuprofene 400 mg, repos." },
-  { id: 3, date: "2026-03-15", heure: "14:30", titre: "Controle annuel", etablissement: "Polyclinique Internationale", medecin: "Dr. Fatoumata Diallo", specialite: "Pediatrie", statut: "terminee", symptomes: "Bilan systematique.", diagnostic: "Etat general satisfaisant.", traitement: "Surveillance tensionnelle trimestrielle." }
-];
-
-const ordonnances = [
-  { id: "ORD-2026-0021", date: "2026-04-02", statut: "active", medecin: "Dr. Ange Kouassi", specialite: "Medecine generale", medicaments: ["Amoxicilline 500 mg - 1 gelule matin et soir pendant 7 jours", "Ibuprofene 400 mg - 1 comprime le soir pendant 5 jours"] },
-  { id: "ORD-2026-0018", date: "2026-03-15", statut: "expiree", medecin: "Dr. Fatoumata Diallo", specialite: "Pediatrie", medicaments: ["Paracetamol 500 mg - 1 comprime toutes les 8h pendant 5 jours"] }
-];
-
-const documents = [
-  { id: 1, categorie: "certificat", nom: "Certificat medical - Bronchite", date: "2026-04-02", source: "Dr. Ange Kouassi", format: "PDF" },
-  { id: 2, categorie: "certificat", nom: "Certificat de bonne sante", date: "2026-03-15", source: "Dr. Fatoumata Diallo", format: "PDF" },
-  { id: 3, categorie: "ordonnance", nom: "Ordonnance ORD-2026-0021", date: "2026-04-02", source: "Dr. Ange Kouassi", format: "PDF" },
-  { id: 4, categorie: "ordonnance", nom: "Ordonnance ORD-2026-0018", date: "2026-03-15", source: "Dr. Fatoumata Diallo", format: "PDF" },
-  { id: 5, categorie: "analyse", nom: "Bilan sanguin complet", date: "2026-03-10", source: "Laboratoire Central", format: "PDF" },
-  { id: 6, categorie: "analyse", nom: "Radiographie thorax", date: "2026-02-02", source: "Imagerie Sainte Marie", format: "JPEG" }
-];
-
-const rappels = [
-  { id: 1, type: "medicament", titre: "Amoxicilline 500 mg", description: "1 gelule matin et soir.", moment: "Aujourd'hui a 08h00 et 20h00", urgence: "urgent", fait: false },
-  { id: 2, type: "alerte", titre: "Renouveler ordonnance", description: "L'ordonnance ORD-2026-0021 expire dans 2 jours.", moment: "Dans 2 jours", urgence: "bientot", fait: false },
-  { id: 3, type: "rdv", titre: "Rendez-vous de suivi", description: "Dr. Ange Kouassi - Consultation de suivi.", moment: "Lundi 20 Avril 2026 a 09h30", urgence: "confirme", fait: false },
-  { id: 4, type: "medicament", titre: "Ibuprofene 400 mg", description: "1 comprime le soir.", moment: "Ce soir a 21h00", urgence: "soir", fait: false }
-];
-
-const historiqueMedical = [
-  { date: "2026-04", titre: "Bronchite aigue", detail: "Traitement antibiotique de 7 jours avec repos." },
-  { date: "2026-03", titre: "Controle annuel", detail: "Bilan complet, surveillance tensionnelle recommandee." },
-  { date: "2025-12", titre: "Grippe saisonniere", detail: "Traitement symptomatique et repos." },
-  { date: "2025-06", titre: "Hypertension legere detectee", detail: "Suivi regulier et hygiene de vie." }
-];
+const state = {
+  apiEnabled: false,
+  profile: loadProfile(),
+  carnetMedical: null,
+  consultations: [...defaultConsultations],
+  ordonnances: [...defaultOrdonnances],
+  documents: [...defaultDocuments],
+  rappels: [...defaultRappels],
+  historiqueMedical: [...defaultHistoriqueMedical]
+};
 
 function loadSharedRecords() {
   const fallback = { consultations: [], ordonnances: [], documents: [], vitals: [], timeline: [] };
@@ -96,11 +108,186 @@ function loadSharedRecords() {
   }
 }
 
-function getCurrentPatientId(profile = loadProfile()) {
+function loadProfile() {
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (!raw) return { ...defaultPatientProfile };
+  try {
+    const parsed = JSON.parse(raw);
+    return { ...defaultPatientProfile, ...parsed, prenoms: parsed.prenoms || parsed.prenom || defaultPatientProfile.prenoms };
+  } catch {
+    return { ...defaultPatientProfile };
+  }
+}
+
+function saveProfile(profile) {
+  state.profile = { ...defaultPatientProfile, ...profile, prenoms: profile.prenoms || profile.prenom || defaultPatientProfile.prenoms };
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.profile));
+}
+
+function getStoredUser() {
+  try {
+    return JSON.parse(window.localStorage.getItem(USER_STORAGE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function getCurrentPatientBackendId() {
+  return state.profile.backendId || getStoredUser()?.id || null;
+}
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+  return response.text();
+}
+
+function normalizePatientProfile(apiProfile = {}, carnet = null) {
+  const antecedentsText = apiProfile.antecedents
+    || carnet?.antecedents?.map((item) => item.details || item.libelle).filter(Boolean).join("\n")
+    || defaultPatientProfile.antecedents;
+
+  return {
+    ...defaultPatientProfile,
+    ...state.profile,
+    backendId: apiProfile.id || state.profile.backendId || getStoredUser()?.id || null,
+    id: apiProfile.numeroAssure || state.profile.id,
+    nom: apiProfile.nom || state.profile.nom,
+    prenoms: apiProfile.prenom || apiProfile.prenoms || state.profile.prenoms,
+    dateNaissance: apiProfile.dateNaissance || state.profile.dateNaissance,
+    sexe: apiProfile.sexe || state.profile.sexe,
+    telephone: apiProfile.telephone || state.profile.telephone,
+    email: apiProfile.email || state.profile.email,
+    adresse: apiProfile.adresse || state.profile.adresse,
+    profession: apiProfile.profession || state.profile.profession,
+    situationFamiliale: apiProfile.situationFamiliale || state.profile.situationFamiliale,
+    numeroUrgence: apiProfile.numeroUrgence || state.profile.numeroUrgence,
+    personneUrgence: apiProfile.personneUrgence || state.profile.personneUrgence,
+    lienUrgence: apiProfile.lienUrgence || state.profile.lienUrgence,
+    assurance: apiProfile.assurance || state.profile.assurance,
+    numeroAssure: apiProfile.numeroAssure || state.profile.numeroAssure,
+    poids: apiProfile.poids ?? state.profile.poids,
+    taille: apiProfile.taille ?? state.profile.taille,
+    groupeSanguin: apiProfile.groupeSanguin || state.profile.groupeSanguin,
+    allergies: apiProfile.allergies || carnet?.allergies || state.profile.allergies,
+    antecedents: antecedentsText,
+    maladiesChroniques: apiProfile.maladiesChroniques || carnet?.maladiesChroniques || state.profile.maladiesChroniques,
+    traitements: apiProfile.traitements || carnet?.traitementsEnCours || state.profile.traitements,
+    handicap: apiProfile.handicap || state.profile.handicap,
+    medecinTraitant: apiProfile.medecinTraitant || state.profile.medecinTraitant,
+    specialiteMedecin: apiProfile.specialiteMedecin || state.profile.specialiteMedecin,
+    telephoneMedecin: apiProfile.telephoneMedecin || state.profile.telephoneMedecin,
+    notesPatient: apiProfile.notesPatient || state.profile.notesPatient
+  };
+}
+
+function normalizeRappels(rappels = []) {
+  if (!rappels.length) return [...defaultRappels];
+  return rappels.map((item, index) => ({
+    id: item.id ?? `r-${index + 1}`,
+    type: item.type || "rappel",
+    titre: item.titre || "Rappel patient",
+    description: item.description || "",
+    moment: item.dateHeure ? formatLongDateTime(item.dateHeure) : "A programmer",
+    urgence: item.urgence || "bientot",
+    fait: Boolean(item.fait),
+    dateHeure: item.dateHeure || null
+  }));
+}
+
+function normalizeHistoriqueFromCarnet(carnet) {
+  const entries = [
+    ...(carnet?.antecedents || []).map((item) => ({
+      date: (item.dateDebut || "").slice(0, 7) || "Date inconnue",
+      titre: item.libelle || "Antecedent medical",
+      detail: item.details || "Aucun detail renseigne."
+    })),
+    ...(carnet?.conditions || []).map((item) => ({
+      date: (item.dateDiagnostic || "").slice(0, 7) || "Date inconnue",
+      titre: item.libelle || "Condition medicale",
+      detail: item.traitement || item.details || "Aucun detail renseigne."
+    }))
+  ].filter((item) => item.titre);
+
+  return entries.length ? entries : [...defaultHistoriqueMedical];
+}
+
+function buildPatientPayload(profile) {
+  return {
+    nom: profile.nom,
+    prenom: profile.prenoms,
+    email: profile.email,
+    telephone: profile.telephone,
+    numeroAssure: profile.numeroAssure,
+    dateNaissance: profile.dateNaissance || null,
+    sexe: profile.sexe,
+    adresse: profile.adresse,
+    profession: profile.profession,
+    situationFamiliale: profile.situationFamiliale,
+    numeroUrgence: profile.numeroUrgence,
+    personneUrgence: profile.personneUrgence,
+    lienUrgence: profile.lienUrgence,
+    assurance: profile.assurance,
+    poids: profile.poids ? Number(profile.poids) : null,
+    taille: profile.taille ? Number(profile.taille) : null,
+    groupeSanguin: profile.groupeSanguin,
+    handicap: profile.handicap,
+    notesPatient: profile.notesPatient,
+    medecinTraitant: profile.medecinTraitant,
+    specialiteMedecin: profile.specialiteMedecin,
+    telephoneMedecin: profile.telephoneMedecin,
+    allergies: profile.allergies,
+    antecedents: profile.antecedents,
+    maladiesChroniques: profile.maladiesChroniques,
+    traitements: profile.traitements
+  };
+}
+
+function buildCarnetPayload(profile = state.profile) {
+  return {
+    id: state.carnetMedical?.id || null,
+    allergies: profile.allergies || "",
+    maladiesChroniques: profile.maladiesChroniques || "",
+    traitementsEnCours: profile.traitements || "",
+    antecedents: profile.antecedents
+      ? [{ id: state.carnetMedical?.antecedents?.[0]?.id || null, libelle: "Antecedents medicaux", details: profile.antecedents, actif: true }]
+      : [],
+    conditions: Array.isArray(state.carnetMedical?.conditions) ? state.carnetMedical.conditions : [],
+    rappels: state.rappels.map((item) => ({
+      id: typeof item.id === "number" ? item.id : null,
+      type: item.type,
+      titre: item.titre,
+      description: item.description,
+      dateHeure: item.dateHeure || null,
+      urgence: item.urgence,
+      fait: Boolean(item.fait)
+    }))
+  };
+}
+
+function getCurrentPatientId(profile = state.profile) {
   return profile.numeroAssure || defaultPatientProfile.numeroAssure;
 }
 
-function getSharedPatientData(profile = loadProfile()) {
+function getSharedPatientData(profile = state.profile) {
   const patientId = getCurrentPatientId(profile);
   const shared = loadSharedRecords();
   return {
@@ -116,55 +303,44 @@ function sortByDateDesc(items, getDateValue) {
   return items.slice().sort((a, b) => new Date(getDateValue(b)) - new Date(getDateValue(a)));
 }
 
-function getAllConsultations(profile = loadProfile()) {
+function getAllConsultations(profile = state.profile) {
   const shared = getSharedPatientData(profile).consultations;
-  return sortByDateDesc([...shared, ...consultations], (item) => `${item.date}T${item.heure || "00:00"}`);
+  return sortByDateDesc([...shared, ...state.consultations], (item) => `${item.date}T${item.heure || "00:00"}`);
 }
 
-function getAllOrdonnances(profile = loadProfile()) {
+function getAllOrdonnances(profile = state.profile) {
   const shared = getSharedPatientData(profile).ordonnances;
-  return sortByDateDesc([...shared, ...ordonnances], (item) => item.date);
+  return sortByDateDesc([...shared, ...state.ordonnances], (item) => item.date);
 }
 
-function getAllDocuments(profile = loadProfile()) {
+function getAllDocuments(profile = state.profile) {
   const shared = getSharedPatientData(profile).documents;
-  return sortByDateDesc([...shared, ...documents], (item) => item.date);
+  return sortByDateDesc([...shared, ...state.documents], (item) => item.date);
 }
 
-function getAllTimelineEntries(profile = loadProfile()) {
+function getAllTimelineEntries(profile = state.profile) {
   const shared = getSharedPatientData(profile).timeline.map((item) => ({
     date: item.date.slice(0, 7),
     titre: item.titre,
     detail: item.detail
   }));
-  return sortByDateDesc([...shared, ...historiqueMedical], (item) => `${item.date}-01`);
+  return sortByDateDesc([...shared, ...state.historiqueMedical], (item) => `${item.date}-01`);
 }
 
-function getLatestVital(profile = loadProfile()) {
+function getLatestVital(profile = state.profile) {
   return sortByDateDesc(getSharedPatientData(profile).vitals, (item) => `${item.date}T${item.heure || "00:00"}`)[0] || null;
 }
 
-function loadProfile() {
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return { ...defaultPatientProfile };
-  try {
-    return { ...defaultPatientProfile, ...JSON.parse(raw) };
-  } catch {
-    return { ...defaultPatientProfile };
-  }
-}
-
-function saveProfile(profile) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-}
-
 function getInitials(profile) {
-  return `${profile.nom.charAt(0)}${profile.prenoms.charAt(0)}`.toUpperCase();
+  const nom = profile.nom || "";
+  const prenoms = profile.prenoms || "";
+  return `${nom.charAt(0)}${prenoms.charAt(0)}`.toUpperCase() || "MB";
 }
 
 function getAge(profile) {
+  if (!profile.dateNaissance) return "--";
   const birthDate = new Date(profile.dateNaissance);
-  const now = new Date("2026-04-08T12:00:00");
+  const now = new Date();
   let age = now.getFullYear() - birthDate.getFullYear();
   const notBirthday =
     now.getMonth() < birthDate.getMonth() ||
@@ -187,9 +363,19 @@ function formatLongDate(dateValue) {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(dateValue));
 }
 
+function formatLongDateTime(dateValue) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(dateValue));
+}
+
 function setText(selector, value) {
   document.querySelectorAll(selector).forEach((node) => {
-    node.textContent = value;
+    node.textContent = value ?? "";
   });
 }
 
@@ -314,11 +500,11 @@ function viewPatientDocument(documentId) {
 }
 
 function getPendingRappelsCount() {
-  return rappels.filter((item) => !item.fait).length;
+  return state.rappels.filter((item) => !item.fait).length;
 }
 
 function getPatientNotificationItems() {
-  return rappels.map((item) => ({
+  return state.rappels.map((item) => ({
     title: item.titre,
     body: item.description,
     time: item.moment,
@@ -361,7 +547,7 @@ function buildSidebar(profile, currentPage) {
   setText("[data-patient-name]", `${profile.nom} ${profile.prenoms}`);
   setText("[data-patient-role]", "Patient");
   setText("[data-patient-initials]", getInitials(profile));
-  setText("[data-patient-id]", profile.id);
+  setText("[data-patient-id]", profile.numeroAssure || profile.id);
 }
 
 function renderTopbar(profile, currentPage) {
@@ -502,7 +688,7 @@ function renderDashboard(profile) {
       <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">${consultationItems.length}</div><div class="stat-label">Consultations</div><div class="stat-trend trend-up">Historique complet</div></div>
       <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">${ordonnanceItems.filter((item) => item.statut === "active").length}</div><div class="stat-label">Ordonnances actives</div><div class="stat-trend trend-up">Suivi a jour</div></div>
       <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">${documentItems.length}</div><div class="stat-label">Documents disponibles</div><div class="stat-trend">Mises a jour automatiques</div></div>
-      <div class="stat-card" data-emoji="🔔"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">${patientStats.rappels}</div><div class="stat-label">Rappels actifs</div><div class="stat-trend trend-amber">2 a traiter aujourd'hui</div></div>
+      <div class="stat-card" data-emoji="🔔"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">${getPendingRappelsCount()}</div><div class="stat-label">Rappels actifs</div><div class="stat-trend trend-amber">Suivi du carnet medical</div></div>
     `;
   }
 
@@ -527,11 +713,14 @@ function renderDashboard(profile) {
   if (nextAppointment) {
     setText("[data-next-appointment-date]", formatLongDate(nextAppointment.date));
     setText("[data-next-appointment-copy]", `${nextAppointment.medecin} · ${nextAppointment.heure} · ${nextAppointment.specialite}`);
+  } else {
+    setText("[data-next-appointment-date]", "Aucun rendez-vous programme");
+    setText("[data-next-appointment-copy]", "Votre prochain rendez-vous apparaitra ici.");
   }
 
-  setText("[data-dashboard-greeting]", `Bonjour, ${profile.prenoms.split(" ")[0]}`);
+  setText("[data-dashboard-greeting]", `Bonjour, ${(profile.prenoms || "").split(" ")[0] || "Patient"}`);
   setText("[data-profile-age]", `${getAge(profile)} ans`);
-  setText("[data-profile-groupe]", profile.groupeSanguin);
+  setText("[data-profile-groupe]", profile.groupeSanguin || "--");
 }
 
 function renderConsultations() {
@@ -583,7 +772,7 @@ function renderDocuments() {
 function renderRappels() {
   const root = document.querySelector("[data-rappels-list]");
   if (!root) return;
-  root.innerHTML = rappels.map((item) => {
+  root.innerHTML = state.rappels.map((item) => {
     const badgeClass = item.urgence === "urgent" ? "badge-red" : item.urgence === "confirme" ? "badge-green" : "badge-amber";
     const badgeLabel = item.urgence === "urgent" ? "Urgent" : item.urgence === "confirme" ? "Confirme" : "A suivre";
     const icon = item.type === "medicament" ? "💊" : item.type === "rdv" ? "🗓️" : "🔔";
@@ -599,15 +788,17 @@ function renderCarnet(profile) {
   const vitalsRoot = document.querySelector("[data-carnet-vitals]");
   if (vitalsRoot) {
     const imc = getImc(effectiveProfile);
-    const extraCards = latestVital ? `<div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">${latestVital.temp}°C</div><div class="vital-lbl">Temperature</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">${latestVital.fc} bpm</div><div class="vital-lbl">Frequence cardiaque</div></div><div class="vital-card"><div class="vital-icon">🫁</div><div class="vital-val">${latestVital.spo2}%</div><div class="vital-lbl">SpO2</div></div><div class="vital-card"><div class="vital-icon">🩺</div><div class="vital-val">${latestVital.taSys}/${latestVital.taDia}</div><div class="vital-lbl">Tension</div></div>` : "";
-    vitalsRoot.innerHTML = `<div class="vital-card"><div class="vital-icon">📏</div><div class="vital-val">${effectiveTaille} cm</div><div class="vital-lbl">Taille</div></div><div class="vital-card"><div class="vital-icon">⚖️</div><div class="vital-val">${effectivePoids} kg</div><div class="vital-lbl">Poids</div></div><div class="vital-card"><div class="vital-icon">🫀</div><div class="vital-val">${imc || "--"}</div><div class="vital-lbl">IMC</div></div><div class="vital-card"><div class="vital-icon">🩸</div><div class="vital-val">${profile.groupeSanguin}</div><div class="vital-lbl">Groupe sanguin</div></div>${extraCards}`;
+    const extraCards = latestVital
+      ? `<div class="vital-card"><div class="vital-icon">🌡️</div><div class="vital-val">${latestVital.temp}°C</div><div class="vital-lbl">Temperature</div></div><div class="vital-card"><div class="vital-icon">❤️</div><div class="vital-val">${latestVital.fc} bpm</div><div class="vital-lbl">Frequence cardiaque</div></div><div class="vital-card"><div class="vital-icon">🫁</div><div class="vital-val">${latestVital.spo2}%</div><div class="vital-lbl">SpO2</div></div><div class="vital-card"><div class="vital-icon">🩺</div><div class="vital-val">${latestVital.taSys}/${latestVital.taDia}</div><div class="vital-lbl">Tension</div></div>`
+      : "";
+    vitalsRoot.innerHTML = `<div class="vital-card"><div class="vital-icon">📏</div><div class="vital-val">${effectiveTaille || "--"} cm</div><div class="vital-lbl">Taille</div></div><div class="vital-card"><div class="vital-icon">⚖️</div><div class="vital-val">${effectivePoids || "--"} kg</div><div class="vital-lbl">Poids</div></div><div class="vital-card"><div class="vital-icon">🫀</div><div class="vital-val">${imc || "--"}</div><div class="vital-lbl">IMC</div></div><div class="vital-card"><div class="vital-icon">🩸</div><div class="vital-val">${profile.groupeSanguin || "--"}</div><div class="vital-lbl">Groupe sanguin</div></div>${extraCards}`;
   }
 
   const allergiesRoot = document.querySelector("[data-carnet-allergies]");
   if (allergiesRoot) allergiesRoot.innerHTML = `<span class="badge badge-red">${profile.allergies || "Aucune allergie declaree"}</span>`;
 
   const antecedentsRoot = document.querySelector("[data-carnet-antecedents]");
-  if (antecedentsRoot) antecedentsRoot.innerHTML = `<div class="info-stack"><div><strong>Antecedents</strong><p>${profile.antecedents}</p></div><div><strong>Maladies chroniques</strong><p>${profile.maladiesChroniques}</p></div><div><strong>Traitements en cours</strong><p>${profile.traitements}</p></div></div>`;
+  if (antecedentsRoot) antecedentsRoot.innerHTML = `<div class="info-stack"><div><strong>Antecedents</strong><p>${profile.antecedents || "Aucun antecedent declare."}</p></div><div><strong>Maladies chroniques</strong><p>${profile.maladiesChroniques || "Aucune maladie chronique declaree."}</p></div><div><strong>Traitements en cours</strong><p>${profile.traitements || "Aucun traitement renseigne."}</p></div></div>`;
 
   const historyRoot = document.querySelector("[data-carnet-history]");
   if (historyRoot) historyRoot.innerHTML = getAllTimelineEntries(profile).map((item) => `<div class="timeline-entry"><div class="timeline-date">${item.date}</div><div class="timeline-title">${item.titre}</div><div class="consult-sub">${item.detail}</div></div>`).join("");
@@ -615,11 +806,11 @@ function renderCarnet(profile) {
 
 function fillProfileSummary(profile) {
   setText("[data-profile-fullname]", `${profile.nom} ${profile.prenoms}`);
-  setText("[data-profile-profession]", profile.profession);
-  setText("[data-profile-assurance]", `${profile.assurance} · ${profile.numeroAssure}`);
+  setText("[data-profile-profession]", profile.profession || "Profession non renseignee");
+  setText("[data-profile-assurance]", `${profile.assurance || "Assurance non renseignee"} · ${profile.numeroAssure || "--"}`);
   setText("[data-profile-age]", `${getAge(profile)} ans`);
-  setText("[data-profile-groupe]", profile.groupeSanguin);
-  setText("[data-profile-doctor]", `${profile.medecinTraitant} · ${profile.specialiteMedecin}`);
+  setText("[data-profile-groupe]", profile.groupeSanguin || "--");
+  setText("[data-profile-doctor]", `${profile.medecinTraitant || "Medecin non renseigne"} · ${profile.specialiteMedecin || "Specialite non renseignee"}`);
 }
 
 function fillProfileForm(profile) {
@@ -627,7 +818,7 @@ function fillProfileForm(profile) {
   if (!form) return;
   Object.entries(profile).forEach(([key, value]) => {
     const field = form.elements.namedItem(key);
-    if (field) field.value = value;
+    if (field) field.value = value ?? "";
   });
   const imc = getImc(profile);
   setText("[data-profile-imc]", imc ? `${imc} IMC` : "IMC indisponible");
@@ -653,6 +844,31 @@ function renderProfile(profile) {
   syncProfileStateWithHash();
 }
 
+async function saveProfileToApi(profile) {
+  const backendId = getCurrentPatientBackendId();
+  if (!backendId) return false;
+
+  const updated = await apiRequest(`/patients/${backendId}`, {
+    method: "PUT",
+    body: JSON.stringify(buildPatientPayload(profile))
+  });
+
+  let carnet = state.carnetMedical;
+  try {
+    carnet = await apiRequest(`/patients/${backendId}/carnet-medical`);
+  } catch {
+    carnet = state.carnetMedical;
+  }
+
+  state.apiEnabled = true;
+  state.carnetMedical = carnet;
+  state.profile = normalizePatientProfile(updated, carnet);
+  state.rappels = normalizeRappels(carnet?.rappels || []);
+  state.historiqueMedical = normalizeHistoriqueFromCarnet(carnet);
+  saveProfile(state.profile);
+  return true;
+}
+
 function bindProfileForm(profile) {
   const form = document.querySelector("[data-profile-form]");
   if (!form) return;
@@ -667,7 +883,7 @@ function bindProfileForm(profile) {
 
   document.querySelectorAll("[data-cancel-edit]").forEach((button) => {
     button.addEventListener("click", () => {
-      fillProfileForm(profile);
+      fillProfileForm(state.profile);
       applyProfileState(false);
       history.replaceState(null, "", "profil.html");
     });
@@ -677,30 +893,45 @@ function bindProfileForm(profile) {
     const target = event.target;
     if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement)) return;
     if (target.name === "poids" || target.name === "taille") {
-      const draft = { ...profile, poids: Number(form.elements.namedItem("poids").value), taille: Number(form.elements.namedItem("taille").value) };
+      const draft = {
+        ...state.profile,
+        poids: Number(form.elements.namedItem("poids").value),
+        taille: Number(form.elements.namedItem("taille").value)
+      };
       const imc = getImc(draft);
       setText("[data-profile-imc]", imc ? `${imc} IMC` : "IMC indisponible");
     }
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const nextProfile = { ...profile };
+    const nextProfile = { ...state.profile };
     Array.from(form.elements).forEach((element) => {
       if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
         if (element.name) nextProfile[element.name] = element.value;
       }
     });
-    nextProfile.poids = Number(nextProfile.poids);
-    nextProfile.taille = Number(nextProfile.taille);
-    saveProfile(nextProfile);
-    Object.assign(profile, nextProfile);
-    fillProfileSummary(profile);
-    fillProfileForm(profile);
-    buildSidebar(profile, "profil.html");
-    applyProfileState(false);
-    history.replaceState(null, "", "profil.html");
-    setText("[data-profile-feedback]", "Profil mis a jour avec succes.");
+    nextProfile.poids = nextProfile.poids ? Number(nextProfile.poids) : null;
+    nextProfile.taille = nextProfile.taille ? Number(nextProfile.taille) : null;
+
+    try {
+      if (state.apiEnabled) {
+        await saveProfileToApi(nextProfile);
+      } else {
+        saveProfile(nextProfile);
+      }
+
+      fillProfileSummary(state.profile);
+      fillProfileForm(state.profile);
+      buildSidebar(state.profile, "profil.html");
+      renderPatientNotificationsMenu();
+      applyProfileState(false);
+      history.replaceState(null, "", "profil.html");
+      setText("[data-profile-feedback]", "Profil mis a jour avec succes.");
+    } catch (error) {
+      console.error(error);
+      setText("[data-profile-feedback]", "Impossible de sauvegarder le profil pour le moment.");
+    }
   });
 
   window.addEventListener("hashchange", () => {
@@ -757,17 +988,32 @@ function bindConsultationFilters() {
   });
 }
 
+async function persistRappelsIfPossible() {
+  if (!state.apiEnabled || !getCurrentPatientBackendId()) return;
+  try {
+    const carnet = await apiRequest(`/patients/${getCurrentPatientBackendId()}/carnet-medical`, {
+      method: "PUT",
+      body: JSON.stringify(buildCarnetPayload())
+    });
+    state.carnetMedical = carnet;
+    state.rappels = normalizeRappels(carnet?.rappels || []);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function bindRappels() {
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-rappel-done]");
     if (!button) return;
-    const rappel = rappels.find((item) => String(item.id) === button.dataset.rappelDone);
+    const rappel = state.rappels.find((item) => String(item.id) === button.dataset.rappelDone);
     if (!rappel) return;
     rappel.fait = !rappel.fait;
     renderRappels();
-    buildSidebar(loadProfile(), "rappels.html");
+    buildSidebar(state.profile, "rappels.html");
     document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getPendingRappelsCount()));
     renderPatientNotificationsMenu();
+    await persistRappelsIfPossible();
   });
 }
 
@@ -801,39 +1047,67 @@ function bindPatientViews() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const profile = loadProfile();
+async function hydratePatientStateFromApi() {
+  const backendId = getCurrentPatientBackendId();
+  if (!backendId) return;
+
+  try {
+    const [apiProfile, carnet] = await Promise.all([
+      apiRequest(`/patients/${backendId}`),
+      apiRequest(`/patients/${backendId}/carnet-medical`).catch(() => null)
+    ]);
+
+    state.apiEnabled = true;
+    state.carnetMedical = carnet;
+    state.profile = normalizePatientProfile(apiProfile, carnet);
+    state.rappels = normalizeRappels(carnet?.rappels || []);
+    state.historiqueMedical = normalizeHistoriqueFromCarnet(carnet);
+    saveProfile(state.profile);
+  } catch (error) {
+    console.error("Chargement backend patient impossible, fallback local conserve.", error);
+    state.apiEnabled = false;
+  }
+}
+
+function rerenderCurrentPage(currentPage) {
+  fillProfileSummary(state.profile);
+  buildSidebar(state.profile, currentPage);
+  document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getPendingRappelsCount()));
+  renderPatientNotificationsMenu();
+
+  if (currentPage === "dashboard.html") renderDashboard(state.profile);
+  if (currentPage === "consultation.html") renderConsultations();
+  if (currentPage === "ordonnances.html") renderOrdonnances();
+  if (currentPage === "documents.html") renderDocuments();
+  if (currentPage === "rappels.html") renderRappels();
+  if (currentPage === "carnet-medical.html") renderCarnet(state.profile);
+  if (currentPage === "profil.html") renderProfile(state.profile);
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
   const currentPage = window.location.pathname.split("/").pop() || "dashboard.html";
-  buildSidebar(profile, currentPage);
-  renderTopbar(profile, currentPage);
+
+  await hydratePatientStateFromApi();
+  buildSidebar(state.profile, currentPage);
+  renderTopbar(state.profile, currentPage);
   bindPatientGlobalSearch();
   bindPatientNotifications();
   bindPatientDownloads();
   bindPatientViews();
-  fillProfileSummary(profile);
 
-  if (currentPage === "dashboard.html") renderDashboard(profile);
-  if (currentPage === "consultation.html") { renderConsultations(); bindConsultationFilters(); }
-  if (currentPage === "ordonnances.html") renderOrdonnances();
-  if (currentPage === "documents.html") { renderDocuments(); bindDocumentsFilters(); }
-  if (currentPage === "rappels.html") { renderRappels(); bindRappels(); }
-  if (currentPage === "carnet-medical.html") renderCarnet(profile);
-  if (currentPage === "profil.html") { renderProfile(profile); bindProfileForm(profile); }
+  rerenderCurrentPage(currentPage);
 
-  window.addEventListener("storage", (event) => {
-    if (event.key !== SHARED_RECORDS_KEY) return;
-    const nextProfile = loadProfile();
-    fillProfileSummary(nextProfile);
-    if (currentPage === "dashboard.html") renderDashboard(nextProfile);
-    if (currentPage === "consultation.html") renderConsultations();
-    if (currentPage === "ordonnances.html") renderOrdonnances();
-    if (currentPage === "documents.html") renderDocuments();
-    if (currentPage === "carnet-medical.html") renderCarnet(nextProfile);
-    buildSidebar(nextProfile, currentPage);
+  if (currentPage === "consultation.html") bindConsultationFilters();
+  if (currentPage === "documents.html") bindDocumentsFilters();
+  if (currentPage === "rappels.html") bindRappels();
+  if (currentPage === "profil.html") bindProfileForm(state.profile);
+
+  window.addEventListener("storage", async (event) => {
+    if (event.key !== SHARED_RECORDS_KEY && event.key !== STORAGE_KEY) return;
+    state.profile = loadProfile();
+    if (state.apiEnabled) {
+      await hydratePatientStateFromApi();
+    }
+    rerenderCurrentPage(currentPage);
   });
 });
-
-
-
-
-
