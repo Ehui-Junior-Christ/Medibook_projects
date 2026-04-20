@@ -217,6 +217,9 @@ function register() {
   const telephone = document.getElementById("telephone")?.value;
   const email = document.getElementById("email")?.value;
   const motDePasse = document.getElementById("motDePasse")?.value;
+  const groupeSanguin = document.getElementById("groupeSanguin")?.value;
+  const allergie = document.getElementById("allergie")?.value;
+  const dateNaissance = document.getElementById("dateNaissance")?.value;
   const photo = document.getElementById("photoProfil")?.files[0];
 
   fetch("http://localhost:8080/api/auth/register", {
@@ -229,7 +232,10 @@ function register() {
       prenom,
       cmu,
       telephone,
+      groupeSanguin,
+      allergie,
       email,
+      dateNaissance,
       motDePasse,
       role: selectedRole.toUpperCase(),
       photoProfil: photo ? photo.name : "default.jpg"

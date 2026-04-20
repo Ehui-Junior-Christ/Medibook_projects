@@ -57,7 +57,7 @@
         <div class="grid g2" style="gap:12px">
           <div class="fld"><label>Nom</label><input type="text" id="nom" placeholder="Kouadio"></div>
           <div class="fld"><label>Prenom</label><input type="text" id="prenom" placeholder="Jean Baptiste"></div>
-          <div class="fld"><label>Date de naissance</label><input type="date"></div>
+          <div class="fld"><label>Date de naissance</label><input type="date" id="dateNaissance"></div>
           <div class="fld"><label>Sexe</label><select><option value="">Selectionner</option><option>Masculin</option><option>Feminin</option></select></div>
           <div class="fld col-full"><label>Numero CMU</label><input type="text" id="cmu" placeholder="CMU-XXXX-XXXXX"></div>
           <div class="fld"><label>Telephone</label><input type="tel" id="telephone" placeholder="+225 07 XX XX XX"></div>
@@ -79,7 +79,7 @@
         <h3>Creer vos identifiants</h3>
         <p class="step-sub">Choisissez un mot de passe securise.</p>
         <div class="grid" style="gap:12px">
-          <div class="fld"><label>Mot de passe</label><input type="password" id="pw1" placeholder="Au moins 8 caracteres" oninput="checkPw()"></div>
+          <div class="fld"><label>Mot de passe</label><input type="password" id="motDePasse" placeholder="Au moins 8 caracteres" oninput="checkPw()"></div>
           <div class="pw-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
           <div id="pw-msg" style="font-size:11.5px;color:var(--slate-400);margin-top:-6px"></div>
           <div class="fld"><label>Confirmer le mot de passe</label><input type="password" id="pw2" placeholder="Repetez le mot de passe" oninput="checkPw()"></div>

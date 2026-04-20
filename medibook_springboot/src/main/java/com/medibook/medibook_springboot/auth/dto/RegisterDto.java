@@ -13,6 +13,10 @@ public class RegisterDto {
     private String motDePasse;
     private String role;
     private String photoProfil;
+    private String groupeSanguin;
+    private String allergie;
+    private String dateNaissance;
+
 
 
 
