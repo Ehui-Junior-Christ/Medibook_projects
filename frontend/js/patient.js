@@ -6,6 +6,7 @@ const USER_STORAGE_KEY = "user";
 const defaultPatientProfile = {
   id: "MB-2026-0042",
   backendId: null,
+  avatar: "",
   nom: "Bie",
   prenoms: "Jacquy Sergine",
   dateNaissance: "2002-03-15",
@@ -120,7 +121,11 @@ function loadProfile() {
 }
 
 function saveProfile(profile) {
-  state.profile = { ...defaultPatientProfile, ...profile, prenoms: profile.prenoms || profile.prenom || defaultPatientProfile.prenoms };
+  state.profile = {
+    ...defaultPatientProfile,
+    ...profile,
+    prenoms: profile.prenoms || profile.prenom || defaultPatientProfile.prenoms
+  };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.profile));
 }
 
@@ -168,6 +173,7 @@ function normalizePatientProfile(apiProfile = {}, carnet = null) {
   return {
     ...defaultPatientProfile,
     ...state.profile,
+    avatar: state.profile.avatar || apiProfile.photoProfil || defaultPatientProfile.avatar,
     backendId: apiProfile.id || state.profile.backendId || getStoredUser()?.id || null,
     id: apiProfile.numeroAssure || state.profile.id,
     nom: apiProfile.nom || state.profile.nom,
@@ -237,6 +243,7 @@ function buildPatientPayload(profile) {
     email: profile.email,
     telephone: profile.telephone,
     numeroAssure: profile.numeroAssure,
+    photoProfil: profile.avatar || "",
     dateNaissance: profile.dateNaissance || null,
     sexe: profile.sexe,
     adresse: profile.adresse,
@@ -335,6 +342,74 @@ function getInitials(profile) {
   const nom = profile.nom || "";
   const prenoms = profile.prenoms || "";
   return `${nom.charAt(0)}${prenoms.charAt(0)}`.toUpperCase() || "MB";
+}
+
+function applyPatientAvatar(profile = state.profile) {
+  document.querySelectorAll("[data-patient-avatar], .sb-avatar[data-patient-initials], .profile-avatar-xl[data-patient-initials]").forEach((node) => {
+    if (profile.avatar) {
+      node.style.backgroundImage = `url(${profile.avatar})`;
+      node.style.backgroundSize = "cover";
+      node.style.backgroundPosition = "center";
+      node.textContent = "";
+      return;
+    }
+    node.style.backgroundImage = "";
+    node.style.backgroundSize = "";
+    node.style.backgroundPosition = "";
+    node.textContent = getInitials(profile);
+  });
+}
+
+async function persistPatientAvatar(avatar) {
+  const nextProfile = { ...state.profile, avatar };
+  try {
+    if (state.apiEnabled) {
+      await saveProfileToApi(nextProfile);
+    } else {
+      saveProfile(nextProfile);
+    }
+    applyPatientAvatar(state.profile);
+    fillProfileSummary(state.profile);
+    fillProfileForm(state.profile);
+    buildSidebar(state.profile, window.location.pathname.split("/").pop() || "dashboard.html");
+    setText("[data-profile-feedback]", "Photo de profil mise a jour.");
+  } catch (error) {
+    console.error(error);
+    setText("[data-profile-feedback]", "Impossible d'enregistrer la photo pour le moment.");
+  }
+}
+
+function initGlobalPatientPhotoShortcut() {
+  const footer = document.querySelector(".sb-footer");
+  if (!footer || footer.querySelector("[data-patient-photo-shortcut]")) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-secondary btn-sm sidebar-photo-btn";
+  button.dataset.patientPhotoShortcut = "true";
+  button.textContent = "Changer photo";
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.hidden = true;
+
+  button.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const avatar = typeof reader.result === "string" ? reader.result : "";
+      if (!avatar) return;
+      await persistPatientAvatar(avatar);
+      input.value = "";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  footer.appendChild(button);
+  footer.appendChild(input);
 }
 
 function getAge(profile) {
@@ -548,6 +623,7 @@ function buildSidebar(profile, currentPage) {
   setText("[data-patient-role]", "Patient");
   setText("[data-patient-initials]", getInitials(profile));
   setText("[data-patient-id]", profile.numeroAssure || profile.id);
+  applyPatientAvatar(profile);
 }
 
 function renderTopbar(profile, currentPage) {
@@ -811,6 +887,8 @@ function fillProfileSummary(profile) {
   setText("[data-profile-age]", `${getAge(profile)} ans`);
   setText("[data-profile-groupe]", profile.groupeSanguin || "--");
   setText("[data-profile-doctor]", `${profile.medecinTraitant || "Medecin non renseigne"} · ${profile.specialiteMedecin || "Specialite non renseignee"}`);
+  setText("[data-profile-doctor-phone]", profile.telephoneMedecin || "Non renseigne");
+  applyPatientAvatar(profile);
 }
 
 function fillProfileForm(profile) {
@@ -872,6 +950,7 @@ async function saveProfileToApi(profile) {
 function bindProfileForm(profile) {
   const form = document.querySelector("[data-profile-form]");
   if (!form) return;
+  const photoInput = document.getElementById("profilePhotoInput");
 
   document.querySelectorAll("[data-enable-edit]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -884,9 +963,26 @@ function bindProfileForm(profile) {
   document.querySelectorAll("[data-cancel-edit]").forEach((button) => {
     button.addEventListener("click", () => {
       fillProfileForm(state.profile);
+      applyPatientAvatar(state.profile);
+      if (photoInput) {
+        photoInput.value = "";
+      }
       applyProfileState(false);
       history.replaceState(null, "", "profil.html");
     });
+  });
+
+  photoInput?.addEventListener("change", () => {
+    const file = photoInput.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const avatar = typeof reader.result === "string" ? reader.result : "";
+      state.profile = { ...state.profile, avatar };
+      applyPatientAvatar(state.profile);
+      setText("[data-profile-feedback]", "Nouvelle photo prete a etre enregistree.");
+    };
+    reader.readAsDataURL(file);
   });
 
   form.addEventListener("input", (event) => {
@@ -925,6 +1021,7 @@ function bindProfileForm(profile) {
       fillProfileForm(state.profile);
       buildSidebar(state.profile, "profil.html");
       renderPatientNotificationsMenu();
+      applyPatientAvatar(state.profile);
       applyProfileState(false);
       history.replaceState(null, "", "profil.html");
       setText("[data-profile-feedback]", "Profil mis a jour avec succes.");
@@ -1089,6 +1186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await hydratePatientStateFromApi();
   buildSidebar(state.profile, currentPage);
+  initGlobalPatientPhotoShortcut();
   renderTopbar(state.profile, currentPage);
   bindPatientGlobalSearch();
   bindPatientNotifications();

@@ -16,4 +16,5 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
     // 🔍 Vérification pour inscription
     boolean existsByCmu(String cmu);
     boolean existsByTelephone(String telephone);
+    boolean existsByEmail(String email);
 }

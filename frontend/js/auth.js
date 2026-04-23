@@ -38,16 +38,14 @@ function pickRole(role, card) {
   const isInf = role === "infirmier";
   const isPat = role === "patient";
 
-  const map = [
+  [
     ["f-mat", isMed],
     ["f-spe", isMed],
     ["f-mat-inf", isInf],
     ["f-srv", isInf],
     ["f-sang", isPat],
     ["f-allergie", isPat]
-  ];
-
-  map.forEach(([id, visible]) => {
+  ].forEach(([id, visible]) => {
     const node = document.getElementById(id);
     if (node) {
       node.style.display = visible ? "flex" : "none";
@@ -71,11 +69,11 @@ function setStep(step) {
     item.classList.remove("active", "done");
     if (current < step) {
       item.classList.add("done");
-      dot.textContent = "✓";
+      if (dot) dot.textContent = "✓";
     } else if (current === step) {
       item.classList.add("active");
-      dot.textContent = String(current);
-    } else {
+      if (dot) dot.textContent = String(current);
+    } else if (dot) {
       dot.textContent = String(current);
     }
   });
@@ -106,9 +104,13 @@ function goLogin() {
 }
 
 function goApp() {
-
-  const identifiant = document.getElementById("identifiant")?.value;
-  const motDePasse = document.getElementById("motDePasse")?.value;
+  const isPro = selectedRole === "medecin" || selectedRole === "infirmier";
+  const identifiant = isPro
+    ? document.getElementById("identifiant-pro")?.value
+    : document.getElementById("identifiant")?.value;
+  const motDePasse = isPro
+    ? document.getElementById("motDePasse-pro")?.value
+    : document.getElementById("motDePasse")?.value;
 
   fetch("http://localhost:8080/api/auth/login", {
     method: "POST",
@@ -116,35 +118,29 @@ function goApp() {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      identifiant: identifiant,
-      motDePasse: motDePasse
+      identifiant,
+      motDePasse
     })
   })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error("Erreur login");
-    }
-    return res.json();
-  })
-  .then(data => {
-    console.log(data);
-
-    // sauvegarde utilisateur
-    localStorage.setItem("user", JSON.stringify(data));
-
-    const dashboardByRole = {
-      PATIENT: "./patient/dashboard.html",
-      MEDECIN: "./medecin/dashboard.html",
-      INFIRMIER: "./infirmier/dashboard.html"
-    };
-
-    // redirection selon rôle backend
-    window.location.href = dashboardByRole[data.role] || dashboardByRole.PATIENT;
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Identifiants incorrects ❌");
-  });
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Erreur login");
+      }
+      return res.json();
+    })
+    .then((data) => {
+      localStorage.setItem("user", JSON.stringify(data));
+      const dashboardByRole = {
+        PATIENT: "./patient/dashboard.html",
+        MEDECIN: "./medecin/dashboard.html",
+        INFIRMIER: "./infirmier/dashboard.html"
+      };
+      window.location.href = dashboardByRole[data.role] || dashboardByRole.PATIENT;
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Identifiants incorrects.");
+    });
 }
 
 function checkPw() {
@@ -158,12 +154,16 @@ function checkPw() {
   };
   const score = Object.values(rules).filter(Boolean).length;
   const colors = ["", "var(--red)", "var(--amber)", "var(--amber)", "var(--green)"];
-  const labels = ["", "Très faible", "Faible", "Moyen", "Fort"];
+  const labels = ["", "Tres faible", "Faible", "Moyen", "Fort"];
 
   for (let i = 1; i <= 4; i += 1) {
     const seg = document.getElementById(`ps${i}`);
     if (seg) {
-      seg.style.background = i <= score ? colors[score] : "var(--slate-200)";
+      const active = i <= score;
+      seg.classList.toggle("filled", active);
+      seg.style.setProperty("--pw-color", active ? colors[score] : "var(--slate-200)");
+      seg.style.background = active ? colors[score] : "var(--slate-200)";
+      seg.style.transform = active ? "scaleY(1.15)" : "scaleY(1)";
     }
   }
 
@@ -179,6 +179,7 @@ function checkPw() {
     if (icon) {
       icon.textContent = ok ? "✓" : "○";
     }
+    rule.classList.toggle("ok", Boolean(ok));
     rule.style.color = ok ? "var(--green)" : "var(--slate-500)";
   });
 
@@ -190,10 +191,88 @@ function checkPw() {
       match.textContent = "✓ Les mots de passe correspondent";
       match.style.color = "var(--green)";
     } else {
-      match.textContent = "✗ Ne correspondent pas";
+      match.textContent = "✕ Ne correspondent pas";
       match.style.color = "var(--red)";
     }
   }
+}
+
+function register() {
+  const nom = document.getElementById("nom")?.value?.trim();
+  const prenom = document.getElementById("prenom")?.value?.trim();
+  const cmu = document.getElementById("cmu")?.value?.trim();
+  const telephone = document.getElementById("telephone")?.value?.trim();
+  const email = document.getElementById("email")?.value?.trim();
+  const dateNaissance = document.getElementById("dateNaissance")?.value;
+  const sexe = document.getElementById("sexe")?.value;
+  const motDePasse = document.getElementById("pw1")?.value;
+  const confirmation = document.getElementById("pw2")?.value;
+  const groupeSanguin = document.getElementById("groupeSanguin")?.value;
+  const allergie = document.getElementById("allergie")?.value?.trim();
+  const matricule = document.getElementById("matricule")?.value?.trim() || document.getElementById("matriculeInfirmier")?.value?.trim();
+  const specialiteMedicale = document.getElementById("specialiteMedicale")?.value;
+  const service = document.getElementById("service")?.value;
+  const cgu = document.getElementById("cgu")?.checked;
+  const photo = document.getElementById("photoProfil")?.files?.[0];
+
+  if (!nom || !prenom || !cmu || !telephone || !email || !motDePasse) {
+    alert("Veuillez renseigner les informations obligatoires.");
+    return;
+  }
+
+  if (motDePasse !== confirmation) {
+    alert("Les mots de passe ne correspondent pas.");
+    return;
+  }
+
+  if (!cgu) {
+    alert("Veuillez accepter les CGU et la politique de confidentialite.");
+    return;
+  }
+
+  fetch("http://localhost:8080/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nom,
+      prenom,
+      cmu,
+      telephone,
+      email,
+      dateNaissance,
+      sexe,
+      motDePasse,
+      role: selectedRole.toUpperCase(),
+      photoProfil: photo ? photo.name : "default.jpg",
+      groupeSanguin,
+      allergie,
+      matricule,
+      specialiteMedicale,
+      service
+    })
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const message = await res.text();
+        throw new Error(message || "Erreur inscription");
+      }
+      return res.text();
+    })
+    .then(() => {
+      const recapNom = document.getElementById("rc-nom");
+      const recapCmu = document.getElementById("rc-cmu");
+      const recapRole = document.getElementById("rc-role");
+      if (recapNom) recapNom.textContent = `${prenom} ${nom}`;
+      if (recapCmu) recapCmu.textContent = cmu;
+      if (recapRole) recapRole.textContent = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1);
+      setStep(4);
+    })
+    .catch((err) => {
+      console.error(err);
+      alert(err.message || "Erreur lors de l'inscription.");
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -207,52 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (document.querySelector(".inscrip-step")) {
     setStep(1);
+    checkPw();
   }
 });
-function register() {
-
-  const nom = document.getElementById("nom")?.value;
-  const prenom = document.getElementById("prenom")?.value;
-  const cmu = document.getElementById("cmu")?.value;
-  const telephone = document.getElementById("telephone")?.value;
-  const email = document.getElementById("email")?.value;
-  const motDePasse = document.getElementById("motDePasse")?.value;
-  const groupeSanguin = document.getElementById("groupeSanguin")?.value;
-  const allergie = document.getElementById("allergie")?.value;
-  const dateNaissance = document.getElementById("dateNaissance")?.value;
-  const photo = document.getElementById("photoProfil")?.files[0];
-
-  fetch("http://localhost:8080/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      nom,
-      prenom,
-      cmu,
-      telephone,
-      groupeSanguin,
-      allergie,
-      email,
-      dateNaissance,
-      motDePasse,
-      role: selectedRole.toUpperCase(),
-      photoProfil: photo ? photo.name : "default.jpg"
-    })
-  })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error("Erreur inscription");
-    }
-    return res.text();
-  })
-  .then(data => {
-    alert("Compte créé ✅");
-    window.location.href = "./login.html";
-  })
-  .catch(err => {
-    console.error(err);
-    alert("Erreur lors de l'inscription ❌");
-  });
-}

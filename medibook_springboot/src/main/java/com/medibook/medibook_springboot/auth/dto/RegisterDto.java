@@ -16,6 +16,10 @@ public class RegisterDto {
     private String groupeSanguin;
     private String allergie;
     private String dateNaissance;
+    private String sexe;
+    private String matricule;
+    private String specialiteMedicale;
+    private String service;
 
 
 
