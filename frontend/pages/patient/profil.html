@@ -24,7 +24,7 @@
     <nav data-patient-nav></nav>
     <div class="sb-footer">
       <a class="sb-user" href="profil.html#edit-profile">
-        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div class="sb-avatar" data-patient-avatar data-patient-initials>BS</div>
         <div>
           <div class="sb-user-name" data-patient-name>Patient</div>
           <div class="sb-user-role">Modifier mon profil</div>
@@ -46,29 +46,38 @@
     <div class="content-area">
       <section class="card profile-section-card">
         <div class="profile-shell">
-          <div class="profile-avatar-xl" data-patient-initials>BS</div>
+          <div class="profile-avatar-panel">
+            <div class="profile-avatar-xl" data-patient-avatar data-patient-initials>BS</div>
+            <div class="profile-avatar-actions" data-edit-only hidden>
+              <label class="btn btn-secondary btn-sm profile-upload-btn" for="profilePhotoInput">Changer la photo</label>
+              <input id="profilePhotoInput" type="file" accept="image/*" hidden>
+            </div>
+          </div>
           <div class="flex-1">
             <h1 class="font-display" data-profile-fullname>Nom prenom</h1>
             <div class="profile-meta">Patient <span data-patient-id>MB-2026-0042</span> · <span data-profile-age>24 ans</span></div>
             <div class="profile-highlights">
               <span class="badge badge-teal" data-profile-groupe>O+</span>
               <span class="badge badge-blue" data-profile-assurance>CNAM / CMU</span>
-              <span class="badge badge-amber" data-profile-profession>Profession</span>
               <span class="badge badge-green" data-profile-doctor>Medecin traitant</span>
             </div>
+            <p class="profile-summary-copy">Cet espace affiche seulement les informations utiles a votre suivi. Vous pouvez mettre a jour vos coordonnees et votre photo si besoin.</p>
             <div class="profile-feedback" data-profile-feedback></div>
+          </div>
+          <div class="profile-shell-actions">
+            <button class="btn btn-primary" type="button" data-enable-edit>Modifier mon profil</button>
           </div>
         </div>
       </section>
 
-      <section class="profil-grid">
+      <section class="profil-grid profile-grid-simple">
         <form class="card profile-section-card" data-profile-form>
           <div class="card-header">
-            <div class="card-title">Informations civiles et medicales modifiables</div>
+            <div class="card-title">Informations essentielles</div>
             <div class="helper-copy" data-profile-imc>IMC</div>
           </div>
 
-          <div class="profile-section-title">Etat civil</div>
+          <div class="profile-section-title">Identite et contact</div>
           <div class="profile-form-grid">
             <div class="fld"><label for="nom">Nom</label><input id="nom" name="nom" type="text"></div>
             <div class="fld"><label for="prenoms">Prenoms</label><input id="prenoms" name="prenoms" type="text"></div>
@@ -76,31 +85,26 @@
             <div class="fld"><label for="sexe">Sexe</label><select id="sexe" name="sexe"><option>Feminin</option><option>Masculin</option><option>Autre</option></select></div>
             <div class="fld"><label for="telephone">Telephone</label><input id="telephone" name="telephone" type="tel"></div>
             <div class="fld"><label for="email">Email</label><input id="email" name="email" type="email"></div>
-            <div class="fld"><label for="adresse">Adresse</label><input id="adresse" name="adresse" type="text"></div>
-            <div class="fld"><label for="profession">Profession</label><input id="profession" name="profession" type="text"></div>
-            <div class="fld"><label for="situationFamiliale">Situation familiale</label><input id="situationFamiliale" name="situationFamiliale" type="text"></div>
-            <div class="fld"><label for="assurance">Assurance</label><input id="assurance" name="assurance" type="text"></div>
-            <div class="fld"><label for="numeroAssure">Numero assure / CMU</label><input id="numeroAssure" name="numeroAssure" type="text"></div>
+            <div class="fld col-full"><label for="adresse">Adresse</label><input id="adresse" name="adresse" type="text"></div>
             <div class="fld"><label for="personneUrgence">Personne a prevenir</label><input id="personneUrgence" name="personneUrgence" type="text"></div>
-            <div class="fld"><label for="lienUrgence">Lien</label><input id="lienUrgence" name="lienUrgence" type="text"></div>
             <div class="fld"><label for="numeroUrgence">Numero urgence</label><input id="numeroUrgence" name="numeroUrgence" type="tel"></div>
           </div>
 
-          <div class="profile-section-title" style="margin-top:18px;">Sante et contexte medical declaratif</div>
+          <div class="profile-section-title" style="margin-top:18px;">Informations de sante utiles</div>
           <div class="profile-form-grid">
             <div class="fld"><label for="poids">Poids (kg)</label><input id="poids" name="poids" type="number" min="1" step="0.1"></div>
             <div class="fld"><label for="taille">Taille (cm)</label><input id="taille" name="taille" type="number" min="1"></div>
             <div class="fld"><label for="groupeSanguin">Groupe sanguin</label><input id="groupeSanguin" name="groupeSanguin" type="text"></div>
-            <div class="fld"><label for="handicap">Handicap / specificite</label><input id="handicap" name="handicap" type="text"></div>
+            <div class="fld"><label for="assurance">Assurance</label><input id="assurance" name="assurance" type="text"></div>
             <div class="fld col-full"><label for="allergies">Allergies</label><textarea id="allergies" name="allergies" rows="2"></textarea></div>
             <div class="fld col-full"><label for="antecedents">Antecedents medicaux</label><textarea id="antecedents" name="antecedents" rows="2"></textarea></div>
             <div class="fld col-full"><label for="maladiesChroniques">Maladies chroniques</label><textarea id="maladiesChroniques" name="maladiesChroniques" rows="2"></textarea></div>
             <div class="fld col-full"><label for="traitements">Traitements en cours</label><textarea id="traitements" name="traitements" rows="2"></textarea></div>
-            <div class="fld col-full"><label for="notesPatient">Notes personnelles utiles a l'equipe soignante</label><textarea id="notesPatient" name="notesPatient" rows="3"></textarea></div>
+            <div class="fld col-full"><label for="notesPatient">Notes utiles pour l'equipe soignante</label><textarea id="notesPatient" name="notesPatient" rows="3"></textarea></div>
           </div>
 
           <div class="actions-bar">
-            <div class="helper-copy" data-view-only>L'onglet Mon profil sert uniquement a consulter vos informations. Utilisez le bloc en bas a gauche pour activer la modification.</div>
+            <div class="helper-copy" data-view-only>Vous consultez ici une version simple de votre profil. Activez la modification pour mettre a jour vos informations et votre photo.</div>
             <div class="actions-right">
               <button class="btn btn-secondary" type="button" data-cancel-edit data-edit-only hidden>Annuler</button>
               <button class="btn btn-primary" type="submit" data-edit-only hidden>Enregistrer les modifications</button>
@@ -111,36 +115,44 @@
         <div class="stack">
           <article class="card profile-section-card">
             <div class="card-header">
-              <div class="card-title">Informations non modifiables ici</div>
+              <div class="card-title">Resume patient</div>
             </div>
-            <div class="info-stack">
-              <div>
-                <strong>Identifiant patient</strong>
-                <p data-patient-id>MB-2026-0042</p>
+            <div class="summary-grid profile-summary-grid">
+              <div class="summary-item">
+                <div class="summary-label">Numero CMU</div>
+                <div class="summary-value" data-patient-id>MB-2026-0042</div>
               </div>
-              <div>
-                <strong>Medecin traitant</strong>
-                <p data-profile-doctor>Dr. Ange Kouassi</p>
+              <div class="summary-item">
+                <div class="summary-label">Assurance</div>
+                <div class="summary-value" data-profile-assurance>CNAM / CMU</div>
               </div>
-              <div>
-                <strong>Telephone du medecin</strong>
-                <p>+225 07 00 00 01</p>
+              <div class="summary-item">
+                <div class="summary-label">Groupe sanguin</div>
+                <div class="summary-value" data-profile-groupe>O+</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Age</div>
+                <div class="summary-value" data-profile-age>24 ans</div>
               </div>
             </div>
           </article>
 
           <article class="card profile-section-card">
             <div class="card-header">
-              <div class="card-title">Securite</div>
+              <div class="card-title">Suivi medical</div>
             </div>
             <div class="info-stack">
               <div>
-                <strong>Mot de passe</strong>
-                <p>La modification du mot de passe pourra etre reliee a l'authentification backend. Le champ n'est pas encore connecte.</p>
+                <strong>Medecin traitant</strong>
+                <p data-profile-doctor>Dr. Ange Kouassi</p>
               </div>
               <div>
-                <strong>Confidentialite</strong>
-                <p>Seules les informations declaratives et civiles editables par le patient sont modifiables depuis cet ecran.</p>
+                <strong>Telephone du medecin</strong>
+                <p data-profile-doctor-phone>+225 07 00 00 01</p>
+              </div>
+              <div>
+                <strong>Profession</strong>
+                <p data-profile-profession>Profession</p>
               </div>
             </div>
           </article>

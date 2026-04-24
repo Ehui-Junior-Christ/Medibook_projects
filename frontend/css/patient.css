@@ -175,6 +175,32 @@
   gap: 18px;
 }
 
+.profile-avatar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-avatar-actions {
+  width: 100%;
+}
+
+.profile-upload-btn {
+  width: 100%;
+}
+
+.profile-summary-copy {
+  margin-top: 10px;
+  color: var(--slate-600);
+  font-size: 13px;
+  max-width: 620px;
+}
+
+.profile-shell-actions {
+  margin-left: auto;
+}
+
 .profile-highlights {
   display: flex;
   gap: 8px;
@@ -193,6 +219,11 @@
   padding: 18px;
 }
 
+.sidebar-photo-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
 .profile-form-grid .col-full {
   grid-column: 1 / -1;
 }
@@ -209,6 +240,10 @@
   margin-top: 4px;
   color: var(--slate-600);
   font-size: 13px;
+}
+
+.profile-summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .timeline-entry {
@@ -281,6 +316,19 @@
     align-items: flex-start;
   }
 
+  .profile-shell-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .profile-shell-actions .btn {
+    width: 100%;
+  }
+
+  .profile-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
   .patient-hero {
     border-radius: 22px;
     box-shadow: 0 20px 40px rgba(6, 78, 82, .18);
@@ -317,6 +365,11 @@
 
   .profile-highlights {
     gap: 6px;
+  }
+
+  .profile-avatar-panel {
+    width: 100%;
+    align-items: flex-start;
   }
 
   .document-card,
