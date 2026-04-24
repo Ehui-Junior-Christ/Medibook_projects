@@ -7,4 +7,5 @@ public class LoginDto {
 
     private String identifiant;
     private String motDePasse;
+    private String role;
 }

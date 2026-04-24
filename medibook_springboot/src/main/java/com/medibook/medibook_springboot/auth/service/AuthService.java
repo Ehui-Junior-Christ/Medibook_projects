@@ -15,7 +15,11 @@ import com.medibook.medibook_springboot.patient.repository.PatientRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -37,16 +41,38 @@ public class AuthService {
         this.infirmierRepository = infirmierRepository;
     }
 
-    public LoginResponseDto login(String identifiant, String motDePasse) {
-        Utilisateur utilisateur = utilisateurRepository
-                .findByCmuOrTelephone(identifiant, identifiant)
-                .or(() -> medecinRepository.findByMatricule(identifiant).map(medecin -> (Utilisateur) medecin))
-                .or(() -> infirmierRepository.findByMatricule(identifiant).map(infirmier -> (Utilisateur) infirmier))
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+    public LoginResponseDto login(String identifiant, String motDePasse, String requestedRole) {
+        String normalizedIdentifiant = normalize(identifiant);
+        String normalizedRequestedRole = normalize(requestedRole);
 
-        if (!motDePasse.equals(utilisateur.getMotDePasse())) {
+        if (normalizedIdentifiant == null || isBlank(motDePasse)) {
+            throw new IllegalArgumentException("Identifiant et mot de passe obligatoires");
+        }
+
+        List<Utilisateur> utilisateurs = findLoginCandidates(normalizedIdentifiant);
+        if (utilisateurs.isEmpty()) {
+            throw new RuntimeException("Utilisateur introuvable");
+        }
+
+        if (normalizedRequestedRole != null) {
+            Role role = parseRole(normalizedRequestedRole);
+            utilisateurs = utilisateurs.stream()
+                    .filter(utilisateur -> utilisateur.getRole() == role)
+                    .collect(Collectors.toList());
+            if (utilisateurs.isEmpty()) {
+                throw new RuntimeException("Aucun compte ne correspond au role selectionne");
+            }
+        }
+
+        List<Utilisateur> utilisateursAvecBonMotDePasse = utilisateurs.stream()
+                .filter(utilisateur -> motDePasse.equals(utilisateur.getMotDePasse()))
+                .collect(Collectors.toList());
+
+        if (utilisateursAvecBonMotDePasse.isEmpty()) {
             throw new RuntimeException("Mot de passe incorrect");
         }
+
+        Utilisateur utilisateur = resolveLoginUser(utilisateursAvecBonMotDePasse, normalizedRequestedRole);
 
         if (utilisateur.getActif() == null || !utilisateur.getActif()) {
             throw new RuntimeException("Compte desactive");
@@ -58,6 +84,44 @@ public class AuthService {
                 utilisateur.getPrenom(),
                 utilisateur.getRole().name()
         );
+    }
+
+    private List<Utilisateur> findLoginCandidates(String identifiant) {
+        Map<Long, Utilisateur> candidats = new LinkedHashMap<>();
+
+        utilisateurRepository.findAllByCmu(identifiant).forEach(utilisateur -> candidats.put(utilisateur.getId(), utilisateur));
+        utilisateurRepository.findAllByTelephone(identifiant).forEach(utilisateur -> candidats.put(utilisateur.getId(), utilisateur));
+        medecinRepository.findByMatricule(identifiant).ifPresent(medecin -> candidats.put(medecin.getId(), medecin));
+        infirmierRepository.findByMatricule(identifiant).ifPresent(infirmier -> candidats.put(infirmier.getId(), infirmier));
+
+        return candidats.values().stream().filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    private Utilisateur resolveLoginUser(List<Utilisateur> utilisateurs, String requestedRole) {
+        if (utilisateurs.size() == 1) {
+            return utilisateurs.get(0);
+        }
+
+        if (requestedRole != null) {
+            throw new RuntimeException("Plusieurs comptes correspondent a cet identifiant pour ce role");
+        }
+
+        List<Utilisateur> comptesMedicaux = utilisateurs.stream()
+                .filter(this::isMedicalRole)
+                .collect(Collectors.toList());
+        if (comptesMedicaux.size() == 1) {
+            return comptesMedicaux.get(0);
+        }
+
+        throw new RuntimeException("Plusieurs comptes correspondent a cet identifiant. Precisez le role pour vous connecter");
+    }
+
+    private Role parseRole(String role) {
+        try {
+            return Role.valueOf(role.trim().toUpperCase());
+        } catch (Exception exception) {
+            throw new IllegalArgumentException("Role invalide");
+        }
     }
 
     public void register(RegisterDto request) {

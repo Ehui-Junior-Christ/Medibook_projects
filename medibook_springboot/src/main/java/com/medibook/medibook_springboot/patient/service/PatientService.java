@@ -60,6 +60,13 @@ public class PatientService {
         return mapPatient(getPatientOrThrow(id));
     }
 
+    @Transactional(readOnly = true)
+    public PatientResponseDto findByCmu(String cmu) {
+        return patientRepository.findByCmu(cmu)
+                .map(this::mapPatient)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Patient introuvable."));
+    }
+
     @Transactional
     public PatientResponseDto update(Long id, PatientRequestDto request) {
         Patient patient = getPatientOrThrow(id);

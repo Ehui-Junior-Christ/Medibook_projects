@@ -45,7 +45,7 @@
                     <button class="btn btn-secondary" type="button" data-patient-lookup-submit>Rechercher</button>
                 </div>
                 <div class="patient-lookup-results" data-patient-lookup-results></div>
-                <p class="patient-lookup-hint">Apres la recherche CMU et le choix du patient, son dossier s'affiche avec les actions "Nouvelle consultation" et "Creer certificat".</p>
+                <p class="patient-lookup-hint">Saisissez le numero CMU puis cliquez sur rechercher. Si le patient existe, le dossier de consultation s'ouvre directement.</p>
             </div>
 
             <div class="page is-hidden" id="page-nouvelle-consult" data-consultation-form-shell>
@@ -103,10 +103,10 @@
                     <div>
                         <p class="workflow-eyebrow">Suite de la consultation</p>
                         <h3 class="workflow-panel-title">La consultation est enregistree</h3>
-                        <p class="workflow-copy">Les actions suivantes apparaissent automatiquement apres l'enregistrement.</p>
+                        <p class="workflow-copy">Les boutons suivants apparaissent automatiquement apres l'enregistrement de la consultation.</p>
                     </div>
                     <div class="workflow-actions">
-                        <a class="btn btn-secondary" href="nouveau-certificat.html" data-after-consult-certificat>Creer certificat</a>
+                        <a class="btn btn-secondary" href="nouveau-certificat.html" data-after-consult-certificat>Certificats</a>
                         <a class="btn btn-primary" href="nouvelle-ordonnance.html" data-after-consult-ordonnance>Nouvelle ordonnance</a>
                     </div>
                 </div>
