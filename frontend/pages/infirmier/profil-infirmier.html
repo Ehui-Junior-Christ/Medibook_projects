@@ -52,12 +52,21 @@
 
     <div class="content-area">
       <div class="card mb-16">
-        <div class="profile-hero">
-          <div class="profile-avatar-xl" id="ipAvatarPreview" data-infirmier-avatar data-infirmier-initiales>KM</div>
-          <div>
+        <div class="profile-shell">
+          <div class="profile-avatar-panel">
+            <div class="profile-avatar-xl" id="ipAvatarPreview" data-infirmier-avatar data-infirmier-initiales>KM</div>
+            <div class="profile-avatar-actions">
+              <label class="btn btn-secondary btn-sm profile-upload-btn" for="ipAvatar">Changer la photo</label>
+              <input id="ipAvatar" type="file" accept="image/*" hidden>
+            </div>
+          </div>
+          <div class="flex-1">
             <div class="card-title" style="font-size:22px" data-infirmier-name>Marie Kone</div>
             <div class="profile-meta"><span data-infirmier-role>Infirmier · Urgences</span> · <span data-infirmier-matricule>MAT-INF-00087</span></div>
             <div class="profile-meta"><span data-infirmier-phone>+225 07 12 34 56</span> · <span data-infirmier-email>marie.kone@medibook.ci</span></div>
+            <div class="profile-meta"><span data-infirmier-cmu>CMU-XXXX-XXXXX</span> · <span data-infirmier-sexe>Non renseigne</span> · <span data-infirmier-birthdate>Non renseignee</span></div>
+            <p class="profile-summary-copy">Cet espace affiche les informations utiles a votre service. Vous pouvez mettre a jour vos coordonnees, votre biographie et votre photo si besoin.</p>
+            <div class="profile-feedback" data-infirmier-profile-feedback></div>
           </div>
         </div>
       </div>
@@ -83,16 +92,24 @@
               <input id="ipMatricule" type="text" placeholder="MAT-INF-00087" readonly>
             </div>
             <div class="fld">
+              <label>Numero CMU</label>
+              <input id="ipCmu" type="text" placeholder="CMU-XXXX-XXXXX" readonly>
+            </div>
+            <div class="fld">
+              <label>Sexe</label>
+              <input id="ipSexe" type="text" placeholder="Feminin" readonly>
+            </div>
+            <div class="fld">
+              <label>Date de naissance</label>
+              <input id="ipBirthDate" type="text" placeholder="14/03/1987" readonly>
+            </div>
+            <div class="fld">
               <label>Telephone</label>
               <input id="ipPhone" type="text" placeholder="+225 07 12 34 56">
             </div>
             <div class="fld">
               <label>Email</label>
               <input id="ipEmail" type="email" placeholder="marie.kone@medibook.ci">
-            </div>
-            <div class="fld col-full">
-              <label>Photo de profil</label>
-              <input id="ipAvatar" type="file" accept="image/*">
             </div>
             <div class="fld col-full">
               <label>Biographie</label>
@@ -110,4 +127,3 @@
 </div>
 </body>
 </html>
-

@@ -23,7 +23,7 @@ public class MedecinService {
 
     @Transactional
     public MedecinResponseDto create(MedecinRequestDto request) {
-        validateUniqueFields(request, null);
+        validateMatricule(request, null);
         Medecin medecin = new Medecin();
         applyRequest(medecin, request);
         medecin.setRole(Role.MEDECIN);
@@ -44,7 +44,7 @@ public class MedecinService {
     @Transactional
     public MedecinResponseDto update(Long id, MedecinRequestDto request) {
         Medecin medecin = getMedecinOrThrow(id);
-        validateUniqueFields(request, id);
+        validateMatricule(request, id);
         applyRequest(medecin, request);
         return map(medecinRepository.save(medecin));
     }
@@ -74,17 +74,17 @@ public class MedecinService {
         }
     }
 
-    private void validateUniqueFields(MedecinRequestDto request, Long currentId) {
+    private void validateMatricule(MedecinRequestDto request, Long currentId) {
+        if (request.getMatricule() == null || request.getMatricule().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le matricule medecin est obligatoire.");
+        }
+
         medecinRepository.findAll().stream()
                 .filter(existing -> currentId == null || !existing.getId().equals(currentId))
-                .filter(existing ->
-                        existing.getEmail().equalsIgnoreCase(request.getEmail())
-                                || existing.getTelephone().equals(request.getTelephone())
-                                || existing.getCmu().equals(request.getCmu())
-                                || existing.getMatricule().equalsIgnoreCase(request.getMatricule()))
+                .filter(existing -> existing.getMatricule().equalsIgnoreCase(request.getMatricule()))
                 .findFirst()
                 .ifPresent(existing -> {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Un medecin existe deja avec ces informations.");
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Un medecin existe deja avec ce matricule.");
                 });
     }
 

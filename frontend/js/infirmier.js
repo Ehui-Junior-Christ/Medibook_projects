@@ -30,6 +30,13 @@ function saveInfirmierSession(updates) {
   window.localStorage.setItem("infirmierSession", JSON.stringify(mockInfirmier));
 }
 
+function formatInfirmierBirthDate(value) {
+  if (!value) return "Non renseignee";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("fr-FR").format(date);
+}
+
 const mockPatients = [
   {
     id: 1,
@@ -165,6 +172,15 @@ function initSidebar() {
   document.querySelectorAll("[data-infirmier-email]").forEach((node) => {
     node.textContent = mockInfirmier.email;
   });
+  document.querySelectorAll("[data-infirmier-cmu]").forEach((node) => {
+    node.textContent = mockInfirmier.cmu || "Non renseigne";
+  });
+  document.querySelectorAll("[data-infirmier-sexe]").forEach((node) => {
+    node.textContent = mockInfirmier.sexe || "Non renseigne";
+  });
+  document.querySelectorAll("[data-infirmier-birthdate]").forEach((node) => {
+    node.textContent = formatInfirmierBirthDate(mockInfirmier.dateNaissance);
+  });
   document.querySelectorAll("[data-infirmier-bio]").forEach((node) => {
     node.textContent = mockInfirmier.bio;
   });
@@ -265,17 +281,24 @@ function initProfileForm() {
     service: document.getElementById("ipService"),
     role: document.getElementById("ipRole"),
     matricule: document.getElementById("ipMatricule"),
+    cmu: document.getElementById("ipCmu"),
+    sexe: document.getElementById("ipSexe"),
+    birthDate: document.getElementById("ipBirthDate"),
     telephone: document.getElementById("ipPhone"),
     email: document.getElementById("ipEmail"),
     bio: document.getElementById("ipBio")
   };
   const avatarInput = document.getElementById("ipAvatar");
   const preview = document.getElementById("ipAvatarPreview");
+  const feedback = document.querySelector("[data-infirmier-profile-feedback]");
 
   if (fields.nomComplet) fields.nomComplet.value = `${mockInfirmier.prenom} ${mockInfirmier.nom}`;
   if (fields.service) fields.service.value = mockInfirmier.service;
   if (fields.role) fields.role.value = mockInfirmier.role;
   if (fields.matricule) fields.matricule.value = mockInfirmier.matricule;
+  if (fields.cmu) fields.cmu.value = mockInfirmier.cmu || "";
+  if (fields.sexe) fields.sexe.value = mockInfirmier.sexe || "";
+  if (fields.birthDate) fields.birthDate.value = mockInfirmier.dateNaissance ? formatInfirmierBirthDate(mockInfirmier.dateNaissance) : "";
   if (fields.telephone) fields.telephone.value = mockInfirmier.telephone;
   if (fields.email) fields.email.value = mockInfirmier.email;
   if (fields.bio) fields.bio.value = mockInfirmier.bio;
@@ -307,6 +330,9 @@ function initProfileForm() {
         preview.style.backgroundPosition = "center";
         preview.textContent = "";
       }
+      if (feedback) {
+        feedback.textContent = "Nouvelle photo prete a etre enregistree.";
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -329,6 +355,9 @@ function initProfileForm() {
     initSidebar();
     if (preview && !mockInfirmier.avatar) {
       preview.textContent = mockInfirmier.initiales;
+    }
+    if (feedback) {
+      feedback.textContent = "Profil infirmier mis a jour avec succes.";
     }
     alert("Profil infirmier mis a jour.");
   });

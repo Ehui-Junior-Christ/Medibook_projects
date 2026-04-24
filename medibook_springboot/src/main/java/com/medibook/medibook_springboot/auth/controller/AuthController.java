@@ -5,6 +5,7 @@ import com.medibook.medibook_springboot.auth.dto.LoginResponseDto;
 import com.medibook.medibook_springboot.auth.dto.RegisterDto;
 import com.medibook.medibook_springboot.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,8 +34,15 @@ public class AuthController {
             return ResponseEntity.ok("Utilisateur cree avec succes");
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        } catch (DataIntegrityViolationException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Certaines informations sont invalides ou deja utilisees");
         } catch (RuntimeException exception) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la creation du compte");
+            String message = exception.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(message == null || message.isBlank()
+                            ? "Erreur lors de la creation du compte"
+                            : message);
         }
     }
 }

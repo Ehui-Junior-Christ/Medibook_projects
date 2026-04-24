@@ -30,13 +30,13 @@ public  class Utilisateur {
     @Column(nullable = false, length = 100)
     private String prenom;
 
-    @Column(nullable = false, length = 100, unique = true)
+    @Column(nullable = false, length = 100)
     private String cmu;
 
-    @Column(length = 20, unique = true)
+    @Column(length = 20)
     private String telephone;
 
-    @Column(nullable = false, length = 150, unique = true)
+    @Column(nullable = false, length = 150)
     private String email;
 
     // ======================

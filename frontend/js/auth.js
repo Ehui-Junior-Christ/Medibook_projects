@@ -1,5 +1,80 @@
 let selectedRole = "patient";
 
+function buildInitials(prenom = "", nom = "") {
+  const initials = `${String(prenom || "").trim().charAt(0)}${String(nom || "").trim().charAt(0)}`.toUpperCase();
+  return initials || "MB";
+}
+
+function syncMedecinSession({
+  id = null,
+  nom = "",
+  prenom = "",
+  telephone = "",
+  email = "",
+  matricule = "",
+  specialiteMedicale = "",
+  sexe = "",
+  dateNaissance = "",
+  cmu = "",
+  photoProfil = ""
+}) {
+  const existing = JSON.parse(localStorage.getItem("medecinSession") || "null");
+  const nextSession = {
+    ...(existing || {}),
+    id: id ?? existing?.id ?? null,
+    name: [prenom, nom].filter(Boolean).join(" ").trim() || existing?.name || "Medecin",
+    role: "Medecin",
+    initials: buildInitials(prenom || existing?.prenom, nom || existing?.nom),
+    phone: telephone || existing?.phone || "",
+    email: email || existing?.email || "",
+    matricule: matricule || existing?.matricule || "",
+    specialty: specialiteMedicale || existing?.specialty || "Medecine generale",
+    sexe: sexe || existing?.sexe || "",
+    dateNaissance: dateNaissance || existing?.dateNaissance || "",
+    cmu: cmu || existing?.cmu || "",
+    avatar: photoProfil || existing?.avatar || "",
+    nom: nom || existing?.nom || "",
+    prenom: prenom || existing?.prenom || ""
+  };
+
+  localStorage.setItem("medecinSession", JSON.stringify(nextSession));
+}
+
+function syncInfirmierSession({
+  id = null,
+  nom = "",
+  prenom = "",
+  telephone = "",
+  email = "",
+  matricule = "",
+  service = "",
+  sexe = "",
+  dateNaissance = "",
+  cmu = "",
+  photoProfil = ""
+}) {
+  const existing = JSON.parse(localStorage.getItem("infirmierSession") || "null");
+  const nextSession = {
+    ...(existing || {}),
+    id: id ?? existing?.id ?? null,
+    nom: nom || existing?.nom || "",
+    prenom: prenom || existing?.prenom || "",
+    initiales: buildInitials(prenom || existing?.prenom, nom || existing?.nom),
+    role: "Infirmier",
+    telephone: telephone || existing?.telephone || "",
+    email: email || existing?.email || "",
+    matricule: matricule || existing?.matricule || "",
+    service: service || existing?.service || "Urgences",
+    sexe: sexe || existing?.sexe || "",
+    dateNaissance: dateNaissance || existing?.dateNaissance || "",
+    cmu: cmu || existing?.cmu || "",
+    avatar: photoProfil || existing?.avatar || "",
+    bio: existing?.bio || "Infirmier en charge du suivi des soins, des signes vitaux et de la coordination terrain."
+  };
+
+  localStorage.setItem("infirmierSession", JSON.stringify(nextSession));
+}
+
 function toggleRole(role) {
   selectedRole = role;
   const patientForm = document.getElementById("form-patient");
@@ -130,6 +205,36 @@ function goApp() {
     })
     .then((data) => {
       localStorage.setItem("user", JSON.stringify(data));
+      if (data.role === "MEDECIN") {
+        syncMedecinSession({
+          id: data.id,
+          nom: data.nom,
+          prenom: data.prenom,
+          telephone: data.telephone,
+          email: data.email,
+          matricule: data.matricule,
+          specialiteMedicale: data.specialiteMedicale || data.specialty,
+          sexe: data.sexe,
+          dateNaissance: data.dateNaissance,
+          cmu: data.numeroAssure || data.cmu,
+          photoProfil: data.photoProfil
+        });
+      }
+      if (data.role === "INFIRMIER") {
+        syncInfirmierSession({
+          id: data.id,
+          nom: data.nom,
+          prenom: data.prenom,
+          telephone: data.telephone,
+          email: data.email,
+          matricule: data.matricule,
+          service: data.service,
+          sexe: data.sexe,
+          dateNaissance: data.dateNaissance,
+          cmu: data.numeroAssure || data.cmu,
+          photoProfil: data.photoProfil
+        });
+      }
       const dashboardByRole = {
         PATIENT: "./patient/dashboard.html",
         MEDECIN: "./medecin/dashboard.html",
@@ -261,6 +366,32 @@ function register() {
       return res.text();
     })
     .then(() => {
+      if (selectedRole.toUpperCase() === "MEDECIN") {
+        syncMedecinSession({
+          nom,
+          prenom,
+          telephone,
+          email,
+          matricule,
+          specialiteMedicale,
+          sexe,
+          dateNaissance,
+          cmu
+        });
+      }
+      if (selectedRole.toUpperCase() === "INFIRMIER") {
+        syncInfirmierSession({
+          nom,
+          prenom,
+          telephone,
+          email,
+          matricule,
+          service,
+          sexe,
+          dateNaissance,
+          cmu
+        });
+      }
       const recapNom = document.getElementById("rc-nom");
       const recapCmu = document.getElementById("rc-cmu");
       const recapRole = document.getElementById("rc-role");

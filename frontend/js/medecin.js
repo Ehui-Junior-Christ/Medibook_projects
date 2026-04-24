@@ -12,8 +12,9 @@ const DEFAULT_MEDECIN_SESSION = {
 
 const SHARED_RECORDS_KEY = "medibook.shared.records";
 const WORKFLOW_STATE_KEY = "medibook.medecin.workflow";
+const API_BASE_URL = "http://localhost:8080/api";
 
-const MEDECIN_PATIENTS = [
+const DEFAULT_MEDECIN_PATIENTS = [
   {
     id: "CMU-2024-08821",
     fullName: "Kouadio Jean Baptiste",
@@ -57,6 +58,7 @@ const MEDECIN_PATIENTS = [
     summary: "Suivi prenatal"
   }
 ];
+let MEDECIN_PATIENTS = [...DEFAULT_MEDECIN_PATIENTS];
 
 const MEDECIN_CONSULTATIONS = [
   { patientId: "CMU-2024-08821", date: "2025-03-12", status: "done" },
@@ -79,9 +81,9 @@ const MEDECIN_CERTIFICATS = [
 
 const MEDECIN_NOTIFICATION_COUNT = 3;
 const MEDECIN_NOTIFICATIONS = [
-  { title: "Resultats biologiques", body: "Le bilan du patient Kouadio Jean Baptiste est disponible.", time: "Aujourd'hui · 08:15", tag: "laboratoire" },
-  { title: "Consultation a valider", body: "La consultation d'Assi Koffi Martial attend votre validation.", time: "Aujourd'hui · 10:00", tag: "consultation" },
-  { title: "Rappel de suivi", body: "Traore Awa Mariam doit etre revue cette semaine.", time: "Demain · 09:30", tag: "suivi" }
+  { title: "Resultats biologiques", body: "Le bilan du patient Kouadio Jean Baptiste est disponible.", time: "Aujourd'hui Â· 08:15", tag: "laboratoire" },
+  { title: "Consultation a valider", body: "La consultation d'Assi Koffi Martial attend votre validation.", time: "Aujourd'hui Â· 10:00", tag: "consultation" },
+  { title: "Rappel de suivi", body: "Traore Awa Mariam doit etre revue cette semaine.", time: "Demain Â· 09:30", tag: "suivi" }
 ];
 
 function getStoredMedecinSession() {
@@ -99,6 +101,74 @@ let MEDECIN_SESSION = getStoredMedecinSession();
 function saveMedecinSession(updates) {
   MEDECIN_SESSION = { ...MEDECIN_SESSION, ...updates };
   window.localStorage.setItem("medecinSession", JSON.stringify(MEDECIN_SESSION));
+}
+
+function getPatientInitials(fullName = "") {
+  return fullName
+    .split(" ")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("") || "PT";
+}
+
+function formatBirthDate(value) {
+  if (!value) return "Non renseignee";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("fr-FR").format(date);
+}
+
+function formatAge(value) {
+  if (!value) return "Age non renseigne";
+  const birthDate = new Date(value);
+  if (Number.isNaN(birthDate.getTime())) return "Age non renseigne";
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+  return `${Math.max(age, 0)} ans`;
+}
+
+function normalizePatientFromApi(patient) {
+  const fullName = [patient.prenom, patient.nom].filter(Boolean).join(" ").trim() || "Patient";
+  const cmu = patient.numeroAssure || patient.cmu || `PAT-${patient.id}`;
+  return {
+    id: String(patient.id ?? cmu),
+    fullName,
+    initials: getPatientInitials(fullName),
+    cmu,
+    age: formatAge(patient.dateNaissance),
+    birthDate: formatBirthDate(patient.dateNaissance),
+    phone: patient.telephone || "Non renseigne",
+    allergy: patient.allergies || "Aucune allergie connue",
+    condition: patient.maladiesChroniques || "Aucune condition renseignee",
+    blood: patient.groupeSanguin || "Non renseigne",
+    lastConsultation: "Aucune consultation",
+    summary: patient.notesPatient || "Aucun resume clinique disponible"
+  };
+}
+
+async function loadPatientsFromApi() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/patients`);
+    if (!response.ok) {
+      throw new Error("Chargement des patients impossible");
+    }
+
+    const patients = await response.json();
+    if (Array.isArray(patients) && patients.length > 0) {
+      MEDECIN_PATIENTS = patients.map(normalizePatientFromApi);
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  MEDECIN_PATIENTS = [...DEFAULT_MEDECIN_PATIENTS];
 }
 
 function fillText(selector, value) {
@@ -152,6 +222,11 @@ function saveWorkflowState(updates) {
 }
 
 function setSelectedPatient(patientId) {
+  if (!patientId) {
+    window.localStorage.removeItem("medecinSelectedPatientId");
+    saveWorkflowState({ patientId: null });
+    return;
+  }
   window.localStorage.setItem("medecinSelectedPatientId", patientId);
   saveWorkflowState({ patientId });
 }
@@ -160,11 +235,13 @@ function getSelectedPatient() {
   const statePatientId = getWorkflowState().patientId;
   const savedPatientId = window.localStorage.getItem("medecinSelectedPatientId");
   const patientId = statePatientId || savedPatientId;
-  return MEDECIN_PATIENTS.find((patient) => patient.id === patientId) || MEDECIN_PATIENTS[0];
+  if (!patientId) return null;
+  return MEDECIN_PATIENTS.find((patient) => patient.id === patientId || patient.cmu === patientId) || null;
 }
 
 function goToWorkflowPage(page, action, extras = {}) {
-  saveWorkflowState({ action, patientId: getSelectedPatient().id, ...extras });
+  const selectedPatient = getSelectedPatient();
+  saveWorkflowState({ action, patientId: selectedPatient?.id, ...extras });
   window.location.href = page;
 }
 
@@ -229,7 +306,7 @@ function filterPatients(query) {
   if (!normalized) return MEDECIN_PATIENTS;
   return MEDECIN_PATIENTS.filter((patient) => {
     return [patient.fullName, patient.cmu, patient.phone, patient.summary].some((value) =>
-      value.toLowerCase().includes(normalized)
+      String(value || "").toLowerCase().includes(normalized)
     );
   });
 }
@@ -238,8 +315,8 @@ function filterPatientsByPriority(query) {
   const normalized = query.trim().toLowerCase();
   const patients = filterPatients(query);
   return patients.sort((a, b) => {
-    const aStartsWithCmu = a.cmu.toLowerCase().startsWith(normalized);
-    const bStartsWithCmu = b.cmu.toLowerCase().startsWith(normalized);
+    const aStartsWithCmu = String(a.cmu || "").toLowerCase().startsWith(normalized);
+    const bStartsWithCmu = String(b.cmu || "").toLowerCase().startsWith(normalized);
     if (aStartsWithCmu !== bStartsWithCmu) return aStartsWithCmu ? -1 : 1;
     return a.fullName.localeCompare(b.fullName);
   });
@@ -269,14 +346,10 @@ function applyPatientData(patient) {
   fillHtml("[data-patient-meta-short]", `${patient.cmu} · ${patient.age}`);
   fillHtml("[data-patient-meta-long]", `${patient.cmu} · Ne le ${patient.birthDate} · ${patient.phone}`);
 
-  document.querySelectorAll("[data-patient-lookup-input]").forEach((input) => {
-    if (!input.value.trim()) {
-      input.value = patient.cmu;
-    }
-  });
-
   renderDossierPatientRecords(patient);
+  syncDossierVisibility();
   syncConsultationVisibility();
+  hydrateConsultationSelects();
   hydrateConsultationFollowUp();
 }
 
@@ -289,7 +362,7 @@ function createPatientSearchItem(patient) {
     <span class="patient-search-avatar">${patient.initials}</span>
     <span class="patient-search-copy">
       <strong>${patient.fullName}</strong>
-      <small>${patient.cmu} · ${patient.age}</small>
+      <small>${patient.cmu} Â· ${patient.age}</small>
     </span>
   `;
   return item;
@@ -308,7 +381,7 @@ function selectPatient(patient, options = {}) {
   }
   applyPatientData(patient);
   if (input) {
-    input.value = patient.cmu;
+    input.value = "";
   }
   if (selectedLabel) {
     selectedLabel.textContent = `${patient.fullName} · ${patient.cmu}`;
@@ -328,13 +401,14 @@ function initPatientSearch() {
     const selectedLabel = shell.querySelector(".patient-search-selected");
     if (!input || !results) return;
 
-    const renderResults = (query = "") => {
+    const renderResults = async (query = "") => {
+      await loadPatientsFromApi();
       results.innerHTML = "";
       filterPatientsByPriority(query).slice(0, 5).forEach((patient) => {
         const item = createPatientSearchItem(patient);
         item.addEventListener("click", () => {
           selectPatient(patient, { input, selectedLabel });
-          input.value = patient.fullName;
+          input.value = "";
           shell.classList.remove("open");
         });
         results.appendChild(item);
@@ -367,8 +441,9 @@ function initPatientSearch() {
   });
 }
 
-function renderLookupResults(container, query, action = "dossier") {
+async function renderLookupResults(container, query, action = "dossier") {
   if (!container) return;
+  await loadPatientsFromApi();
   container.innerHTML = "";
   const matches = filterPatientsByPriority(query);
 
@@ -390,14 +465,14 @@ function renderLookupResults(container, query, action = "dossier") {
       <span class="patient-search-avatar">${patient.initials}</span>
       <span class="patient-lookup-copy">
         <strong>${patient.fullName}</strong>
-        <small>${patient.cmu} · ${patient.age} · ${patient.phone}</small>
+        <small>${patient.cmu} Â· ${patient.age} Â· ${patient.phone}</small>
       </span>
       <span class="badge badge-teal">Choisir</span>
     `;
     button.addEventListener("click", () => {
       selectPatient(patient, { action });
-      if (document.body.dataset.page === "consultation") {
-        saveWorkflowState({ action: "consultation" });
+      if (document.body.dataset.page === "consultation" && action === "dossier") {
+        goToWorkflowPage("dossier-patient.html", "dossier");
       }
     });
     container.appendChild(button);
@@ -411,7 +486,7 @@ function initPatientLookup() {
     const results = block.querySelector("[data-patient-lookup-results]");
     if (!input || !submit || !results) return;
 
-    const runSearch = () => renderLookupResults(results, input.value, "dossier");
+    const runSearch = async () => renderLookupResults(results, input.value, "dossier");
     submit.addEventListener("click", runSearch);
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -427,7 +502,7 @@ function initPatientLookup() {
     const results = block.querySelector("[data-patient-lookup-results]");
     if (!input || !submit || !results) return;
 
-    const runSearch = () => renderLookupResults(results, input.value, "consultation");
+    const runSearch = async () => renderLookupResults(results, input.value, "dossier");
     submit.addEventListener("click", runSearch);
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -510,11 +585,66 @@ function syncConsultationVisibility() {
   formShell.classList.toggle("is-hidden", !shouldShowForm);
 }
 
+function syncDossierVisibility() {
+  const picker = document.querySelector("[data-patient-lookup]");
+  const dossierShell = document.querySelector("[data-dossier-content]");
+  if (!picker || !dossierShell) return;
+  const patient = getSelectedPatient();
+  const shouldShowDossier = Boolean(patient) && document.body.dataset.page === "dossier";
+  picker.classList.toggle("is-hidden", shouldShowDossier);
+  dossierShell.classList.toggle("is-hidden", !shouldShowDossier);
+}
+
 function hydrateConsultationFollowUp() {
   const actions = document.querySelector("[data-post-consult-actions]");
   if (!actions) return;
   const workflow = getWorkflowState();
   actions.classList.toggle("is-hidden", !workflow.consultationSaved);
+}
+
+function getPatientConsultationOptions(patient = getSelectedPatient()) {
+  if (!patient) return [];
+
+  const sharedConsultations = getSharedPatientRecords(patient.id).consultations.map((item) => ({
+    value: `${new Intl.DateTimeFormat("fr-FR").format(new Date(item.date))} - ${item.titre || item.diagnostic || "Consultation medicale"}`,
+    date: item.date
+  }));
+
+  if (sharedConsultations.length) {
+    return sharedConsultations.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  return [{
+    value: `${patient.lastConsultation} - ${patient.summary || "Consultation medicale"}`,
+    date: "2025-03-12"
+  }];
+}
+
+function hydrateConsultationSelects() {
+  const options = getPatientConsultationOptions();
+  if (!options.length) return;
+
+  ["cConsult", "oConsult"].forEach((selectId) => {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+
+    const previousValue = select.value;
+    select.innerHTML = options.map((item) => `<option>${item.value}</option>`).join("");
+    select.value = options.some((item) => item.value === previousValue) ? previousValue : options[0].value;
+  });
+}
+
+function hydrateCurrentPatientContext() {
+  const patient = getSelectedPatient();
+  if (!patient) {
+    syncDossierVisibility();
+    syncConsultationVisibility();
+    hydrateConsultationFollowUp();
+    return;
+  }
+
+  applyPatientData(patient);
+  hydrateConsultationSelects();
 }
 
 function initPageIdentity() {
@@ -586,7 +716,7 @@ function addRow() {
   const table = document.getElementById("ordoRows");
   if (!table) return;
   const row = document.createElement("tr");
-  row.innerHTML = '<td><input type="text" placeholder="Medicament" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Dosage" oninput="updateOrdonnance()"></td><td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="1" min="1" max="6" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Matin..." oninput="updateOrdonnance()"></td><td><input type="number" value="7" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Instructions" oninput="updateOrdonnance()"></td><td><button class="btn-row-del" type="button" onclick="delRow(this)">✕</button></td>';
+  row.innerHTML = '<td><input type="text" placeholder="Medicament" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Dosage" oninput="updateOrdonnance()"></td><td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="1" min="1" max="6" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Matin..." oninput="updateOrdonnance()"></td><td><input type="number" value="7" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Instructions" oninput="updateOrdonnance()"></td><td><button class="btn-row-del" type="button" onclick="delRow(this)">âœ•</button></td>';
   table.appendChild(row);
   updateOrdonnance();
 }
@@ -666,6 +796,7 @@ function collectCertificatData() {
 
 function collectConsultationData() {
   const patient = getSelectedPatient();
+  if (!patient) return null;
   const taValue = document.getElementById("consult-ta")?.value?.trim() || "145/92";
   const [taSys, taDia] = taValue.split("/").map((part) => Number.parseInt(part?.trim() || "", 10));
   const temperature = Number.parseFloat(document.getElementById("consult-temperature")?.value || "38.7");
@@ -783,6 +914,7 @@ function renderDossierPatientRecords(patient = getSelectedPatient()) {
   const ordonnanceRoot = document.getElementById("dtab-ordo");
   const vitalsRoot = document.getElementById("dtab-vit");
   if (!consultRoot && !ordonnanceRoot && !vitalsRoot) return;
+  if (!patient) return;
 
   const shared = getSharedPatientRecords(patient.id);
   const consultationItems = shared.consultations.length ? shared.consultations : [{
@@ -816,7 +948,7 @@ function renderDossierPatientRecords(patient = getSelectedPatient()) {
           </div>
           <div class="flex-1">
             <div class="consult-title">${item.titre}</div>
-            <div class="consult-sub">TA: ${vitals.taSys || "--"}/${vitals.taDia || "--"} · T°: ${vitals.temp || "--"}°C · FC: ${vitals.fc || "--"} bpm</div>
+            <div class="consult-sub">TA: ${vitals.taSys || "--"}/${vitals.taDia || "--"} Â· TÂ°: ${vitals.temp || "--"}Â°C Â· FC: ${vitals.fc || "--"} bpm</div>
             <div class="consult-sub">${item.diagnostic || ""}</div>
           </div>
         </div>
@@ -848,22 +980,22 @@ function renderDossierPatientRecords(patient = getSelectedPatient()) {
     vitalsRoot.innerHTML = `
       <div class="vital-grid">
         <div class="vital-card ${warnTA ? "warning" : ""}">
-          <div class="vital-icon">🩸</div>
+          <div class="vital-icon">ðŸ©¸</div>
           <div class="vital-val">${vital.taSys}/${vital.taDia}</div>
           <div class="vital-lbl">Tension (mmHg)</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">🌡</div>
-          <div class="vital-val">${vital.temp}°C</div>
+          <div class="vital-icon">ðŸŒ¡</div>
+          <div class="vital-val">${vital.temp}Â°C</div>
           <div class="vital-lbl">Temperature</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">❤</div>
+          <div class="vital-icon">â¤</div>
           <div class="vital-val">${vital.fc} bpm</div>
           <div class="vital-lbl">Frequence cardiaque</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">💨</div>
+          <div class="vital-icon">ðŸ’¨</div>
           <div class="vital-val">${vital.spo2}%</div>
           <div class="vital-lbl">SpO2</div>
         </div>
@@ -886,7 +1018,7 @@ function initConsultationVitalsSync() {
     const spo2 = spo2Input.value.trim() || spo2Input.placeholder || "--";
 
     fillText("[data-consult-vital='tension']", taValue);
-    fillText("[data-consult-vital='temperature']", `${temperature}°C`);
+    fillText("[data-consult-vital='temperature']", `${temperature}Â°C`);
     fillText("[data-consult-vital='fc']", `${fc} bpm`);
     fillText("[data-consult-vital='spo2']", `${spo2}%`);
 
@@ -969,8 +1101,13 @@ function initConsultationActions() {
   const validateButton = document.querySelector("[data-consultation-validate]");
 
   draftButton?.addEventListener("click", () => {
+    const patient = getSelectedPatient();
+    if (!patient) {
+      window.alert("Veuillez d'abord selectionner un patient.");
+      return;
+    }
     const payload = {
-      patientId: getSelectedPatient().id,
+      patientId: patient.id,
       motif: document.querySelector("#ct1 input[type='text']")?.value || "",
       diagnostic: document.querySelector("#ct3 textarea")?.value || "",
       traitement: document.querySelector("#ct4 textarea")?.value || ""
@@ -980,7 +1117,12 @@ function initConsultationActions() {
   });
 
   validateButton?.addEventListener("click", () => {
-    const payload = { ...collectConsultationData(), validatedAt: new Date().toISOString() };
+    const consultationData = collectConsultationData();
+    if (!consultationData) {
+      window.alert("Veuillez d'abord selectionner un patient.");
+      return;
+    }
+    const payload = { ...consultationData, validatedAt: new Date().toISOString() };
     saveValidatedConsultation(payload);
     window.localStorage.setItem("lastValidatedConsultation", JSON.stringify(payload));
     saveWorkflowState({
@@ -1052,7 +1194,7 @@ function activateConsultationStep(wrapper, step) {
     item.classList.remove("active", "done");
     if (itemStep < Number(step)) {
       item.classList.add("done");
-      if (dot) dot.textContent = "✓";
+      if (dot) dot.textContent = "âœ“";
     } else if (itemStep === Number(step)) {
       item.classList.add("active");
       if (dot) dot.textContent = String(itemStep);
@@ -1147,6 +1289,9 @@ function initMedecinSessionUi() {
   fillText("[data-medecin-phone]", MEDECIN_SESSION.phone);
   fillText("[data-medecin-email]", MEDECIN_SESSION.email);
   fillText("[data-medecin-matricule]", MEDECIN_SESSION.matricule);
+  fillText("[data-medecin-cmu]", MEDECIN_SESSION.cmu || "Non renseigne");
+  fillText("[data-medecin-sexe]", MEDECIN_SESSION.sexe || "Non renseigne");
+  fillText("[data-medecin-birthdate]", MEDECIN_SESSION.dateNaissance ? formatBirthDate(MEDECIN_SESSION.dateNaissance) : "Non renseignee");
   fillText("[data-medecin-bio]", MEDECIN_SESSION.bio);
 
   document.querySelectorAll("[data-medecin-avatar]").forEach((node) => {
@@ -1182,13 +1327,28 @@ function initProfileForm() {
   const form = document.getElementById("medecinProfileForm");
   if (!form) return;
   const fields = {
+    name: document.getElementById("mpName"),
+    specialty: document.getElementById("mpSpecialty"),
+    role: document.getElementById("mpRole"),
+    matricule: document.getElementById("mpMatricule"),
+    cmu: document.getElementById("mpCmu"),
+    sexe: document.getElementById("mpSexe"),
+    birthDate: document.getElementById("mpBirthDate"),
     phone: document.getElementById("mpPhone"),
     email: document.getElementById("mpEmail"),
     bio: document.getElementById("mpBio")
   };
   const avatarInput = document.getElementById("mpAvatar");
   const preview = document.getElementById("mpAvatarPreview");
+  const feedback = document.querySelector("[data-medecin-profile-feedback]");
 
+  if (fields.name) fields.name.value = MEDECIN_SESSION.name;
+  if (fields.specialty) fields.specialty.value = MEDECIN_SESSION.specialty;
+  if (fields.role) fields.role.value = MEDECIN_SESSION.role;
+  if (fields.matricule) fields.matricule.value = MEDECIN_SESSION.matricule;
+  if (fields.cmu) fields.cmu.value = MEDECIN_SESSION.cmu || "";
+  if (fields.sexe) fields.sexe.value = MEDECIN_SESSION.sexe || "";
+  if (fields.birthDate) fields.birthDate.value = MEDECIN_SESSION.dateNaissance ? formatBirthDate(MEDECIN_SESSION.dateNaissance) : "";
   if (fields.phone) fields.phone.value = MEDECIN_SESSION.phone;
   if (fields.email) fields.email.value = MEDECIN_SESSION.email;
   if (fields.bio) fields.bio.value = MEDECIN_SESSION.bio;
@@ -1209,6 +1369,9 @@ function initProfileForm() {
         preview.style.backgroundPosition = "center";
         preview.textContent = "";
       }
+      if (feedback) {
+        feedback.textContent = "Nouvelle photo prete a etre enregistree.";
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -1221,11 +1384,15 @@ function initProfileForm() {
       bio: fields.bio?.value?.trim() || DEFAULT_MEDECIN_SESSION.bio
     });
     initMedecinSessionUi();
+    if (feedback) {
+      feedback.textContent = "Profil mis a jour avec succes.";
+    }
     window.alert("Profil mis a jour.");
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadPatientsFromApi();
   initPageIdentity();
   initMedecinSessionUi();
   initDashboardStats();
@@ -1250,7 +1417,11 @@ document.addEventListener("DOMContentLoaded", () => {
     activateConsultationStep(consultationTabs, 1);
   }
 
-  applyPatientData(getSelectedPatient());
+  fillText("[data-search-selected]", "");
+  document.querySelectorAll("[data-patient-lookup-input]").forEach((input) => {
+    input.value = "";
+  });
+  hydrateCurrentPatientContext();
 });
 
 window.setCert = setCert;
@@ -1258,3 +1429,4 @@ window.updateCert = updateCert;
 window.addRow = addRow;
 window.delRow = delRow;
 window.updateOrdonnance = updateOrdonnance;
+

@@ -1109,6 +1109,38 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
   font-weight: 700;
   overflow: hidden;
 }
+.profile-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.profile-avatar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.profile-avatar-actions {
+  width: 100%;
+}
+.profile-upload-btn {
+  width: 100%;
+}
+.profile-summary-copy {
+  margin-top: 10px;
+  color: var(--slate-600);
+  font-size: 13px;
+  max-width: 620px;
+}
+.profile-feedback {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--green);
+  min-height: 18px;
+}
+.profile-shell-actions {
+  margin-left: auto;
+}
 .profile-meta { color: var(--slate-500); font-size: 12px; margin-top: 6px; }
 .profile-section-title {
   font-size: 11px;
@@ -1508,6 +1540,12 @@ tbody tr:last-child td { border-bottom: none; }
   }
   .icon-btn { width: 36px; height: 36px; }
   .profile-avatar-xl { width: 72px; height: 72px; font-size: 24px; }
+  .profile-shell { flex-direction: column; }
+  .profile-shell-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .profile-shell-actions .btn { width: 100%; }
   .patient-ava { width: 48px; height: 48px; font-size: 16px; }
   .patient-ava.sm { width: 34px; height: 34px; font-size: 12px; }
   .steps { align-items: flex-start; gap: 8px; flex-direction: column; }

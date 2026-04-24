@@ -5,6 +5,8 @@ import com.medibook.medibook_springboot.auth.dto.RegisterDto;
 import com.medibook.medibook_springboot.auth.entity.Role;
 import com.medibook.medibook_springboot.auth.entity.Utilisateur;
 import com.medibook.medibook_springboot.auth.repository.UtilisateurRepository;
+import com.medibook.medibook_springboot.infirmier.entity.Infirmier;
+import com.medibook.medibook_springboot.infirmier.repository.InfirmierRepository;
 import com.medibook.medibook_springboot.medecin.entity.Medecin;
 import com.medibook.medibook_springboot.medecin.repository.MedecinRepository;
 import com.medibook.medibook_springboot.patient.entity.CarnetMedical;
@@ -20,20 +22,25 @@ public class AuthService {
     private final UtilisateurRepository utilisateurRepository;
     private final PatientRepository patientRepository;
     private final MedecinRepository medecinRepository;
+    private final InfirmierRepository infirmierRepository;
 
     public AuthService(
             UtilisateurRepository utilisateurRepository,
             PatientRepository patientRepository,
-            MedecinRepository medecinRepository
+            MedecinRepository medecinRepository,
+            InfirmierRepository infirmierRepository
     ) {
         this.utilisateurRepository = utilisateurRepository;
         this.patientRepository = patientRepository;
         this.medecinRepository = medecinRepository;
+        this.infirmierRepository = infirmierRepository;
     }
 
     public LoginResponseDto login(String identifiant, String motDePasse) {
         Utilisateur utilisateur = utilisateurRepository
                 .findByCmuOrTelephone(identifiant, identifiant)
+                .or(() -> medecinRepository.findByMatricule(identifiant).map(medecin -> (Utilisateur) medecin))
+                .or(() -> infirmierRepository.findByMatricule(identifiant).map(infirmier -> (Utilisateur) infirmier))
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         if (!motDePasse.equals(utilisateur.getMotDePasse())) {
@@ -53,14 +60,14 @@ public class AuthService {
     }
 
     public void register(RegisterDto request) {
-        validateRegisterRequest(request);
-
         Role role;
         try {
             role = Role.valueOf(request.getRole().trim().toUpperCase());
         } catch (Exception exception) {
             throw new IllegalArgumentException("Role invalide");
         }
+
+        validateRegisterRequest(request, role);
 
         if (role == Role.PATIENT) {
             registerPatient(request);
@@ -69,6 +76,11 @@ public class AuthService {
 
         if (role == Role.MEDECIN) {
             registerMedecin(request);
+            return;
+        }
+
+        if (role == Role.INFIRMIER) {
+            registerInfirmier(request);
             return;
         }
 
@@ -101,7 +113,11 @@ public class AuthService {
         patient.setSexe(normalize(request.getSexe()));
 
         if (request.getDateNaissance() != null && !request.getDateNaissance().isBlank()) {
-            patient.setDateNaissance(LocalDate.parse(request.getDateNaissance()));
+            try {
+                patient.setDateNaissance(LocalDate.parse(request.getDateNaissance()));
+            } catch (Exception exception) {
+                throw new IllegalArgumentException("Date de naissance invalide");
+            }
         }
 
         CarnetMedical carnetMedical = new CarnetMedical();
@@ -137,7 +153,31 @@ public class AuthService {
         medecinRepository.save(medecin);
     }
 
-    private void validateRegisterRequest(RegisterDto request) {
+    private void registerInfirmier(RegisterDto request) {
+        if (isBlank(request.getMatricule())) {
+            throw new IllegalArgumentException("Le matricule infirmier est obligatoire");
+        }
+        if (infirmierRepository.existsByMatricule(request.getMatricule().trim())) {
+            throw new IllegalArgumentException("Matricule infirmier deja utilise");
+        }
+
+        Infirmier infirmier = new Infirmier();
+        infirmier.setNom(request.getNom().trim());
+        infirmier.setPrenom(request.getPrenom().trim());
+        infirmier.setCmu(request.getCmu().trim());
+        infirmier.setTelephone(normalize(request.getTelephone()));
+        infirmier.setEmail(request.getEmail().trim().toLowerCase());
+        infirmier.setMotDePasse(request.getMotDePasse());
+        infirmier.setRole(Role.INFIRMIER);
+        infirmier.setActif(true);
+        infirmier.setPhotoProfil(defaultPhoto(request.getPhotoProfil()));
+        infirmier.setMatricule(request.getMatricule().trim());
+        infirmier.setService(normalize(request.getService()));
+
+        infirmierRepository.save(infirmier);
+    }
+
+    private void validateRegisterRequest(RegisterDto request, Role role) {
         if (request == null) {
             throw new IllegalArgumentException("Requete invalide");
         }
@@ -146,14 +186,19 @@ public class AuthService {
                 || isBlank(request.getMotDePasse()) || isBlank(request.getRole())) {
             throw new IllegalArgumentException("Veuillez renseigner tous les champs obligatoires");
         }
-        if (utilisateurRepository.existsByCmu(request.getCmu().trim())) {
-            throw new IllegalArgumentException("CMU deja utilise");
+        if (role != Role.MEDECIN) {
+            if (utilisateurRepository.existsByCmu(request.getCmu().trim())) {
+                throw new IllegalArgumentException("CMU deja utilise");
+            }
+            if (utilisateurRepository.existsByTelephone(request.getTelephone().trim())) {
+                throw new IllegalArgumentException("Telephone deja utilise");
+            }
+            if (utilisateurRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
+                throw new IllegalArgumentException("Email deja utilise");
+            }
         }
-        if (utilisateurRepository.existsByTelephone(request.getTelephone().trim())) {
-            throw new IllegalArgumentException("Telephone deja utilise");
-        }
-        if (utilisateurRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
-            throw new IllegalArgumentException("Email deja utilise");
+        if ((role == Role.MEDECIN || role == Role.INFIRMIER) && isBlank(request.getMatricule())) {
+            throw new IllegalArgumentException("Le matricule est obligatoire pour ce role");
         }
         if (request.getMotDePasse().length() < 8) {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caracteres");
