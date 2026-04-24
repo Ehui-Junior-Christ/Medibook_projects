@@ -45,6 +45,11 @@ public class PatientController {
         return patientService.findById(id);
     }
 
+    @GetMapping("/cmu/{cmu}")
+    public PatientResponseDto findByCmu(@PathVariable String cmu) {
+        return patientService.findByCmu(cmu);
+    }
+
     @PutMapping("/{id}")
     public PatientResponseDto update(@PathVariable Long id, @RequestBody PatientRequestDto request) {
         return patientService.update(id, request);

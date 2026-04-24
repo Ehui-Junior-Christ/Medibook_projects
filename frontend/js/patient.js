@@ -295,14 +295,18 @@ function getCurrentPatientId(profile = state.profile) {
 }
 
 function getSharedPatientData(profile = state.profile) {
-  const patientId = getCurrentPatientId(profile);
+  const patientIds = new Set([
+    String(getCurrentPatientId(profile) || ""),
+    String(profile.backendId || ""),
+    String(profile.id || "")
+  ].filter(Boolean));
   const shared = loadSharedRecords();
   return {
-    consultations: shared.consultations.filter((item) => item.patientId === patientId),
-    ordonnances: shared.ordonnances.filter((item) => item.patientId === patientId),
-    documents: shared.documents.filter((item) => item.patientId === patientId),
-    vitals: shared.vitals.filter((item) => item.patientId === patientId),
-    timeline: shared.timeline.filter((item) => item.patientId === patientId)
+    consultations: shared.consultations.filter((item) => patientIds.has(String(item.patientId))),
+    ordonnances: shared.ordonnances.filter((item) => patientIds.has(String(item.patientId))),
+    documents: shared.documents.filter((item) => patientIds.has(String(item.patientId))),
+    vitals: shared.vitals.filter((item) => patientIds.has(String(item.patientId))),
+    timeline: shared.timeline.filter((item) => patientIds.has(String(item.patientId)))
   };
 }
 
@@ -464,6 +468,15 @@ function sanitizeFilename(value) {
     .toLowerCase();
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -534,12 +547,32 @@ function downloadPatientDocument(documentId) {
     `Categorie: ${documentItem.categorie}`,
     `Date: ${formatLongDate(documentItem.date)}`,
     `Source: ${documentItem.source}`,
-    `Format indique: ${documentItem.format}`,
-    "",
-    "Export de demonstration du document selectionne."
-  ].join("\n");
+    `Format indique: ${documentItem.format}`
+  ];
 
-  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content);
+  if (documentItem.categorie === "certificat") {
+    content.push(
+      `Type: ${documentItem.type || "medical"}`,
+      `Destinataire: ${documentItem.destinataire || "A qui de droit"}`,
+      `Motif: ${documentItem.motif || "Non renseigne"}`,
+      `Restrictions: ${documentItem.restrictions || "Aucune"}`
+    );
+    if (documentItem.debutArret || documentItem.finArret) {
+      content.push(`Periode: ${documentItem.debutArret || "--"} au ${documentItem.finArret || "--"}`);
+    }
+  } else if (documentItem.categorie === "ordonnance") {
+    content.push("", "Medicaments:");
+    (documentItem.medicaments || []).forEach((line, index) => {
+      content.push(`${index + 1}. ${line}`);
+    });
+    if (documentItem.recommandations) {
+      content.push("", `Recommandations: ${documentItem.recommandations}`);
+    }
+  } else {
+    content.push("", "Export de demonstration du document selectionne.");
+  }
+
+  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content.join("\n"));
 }
 
 function viewPatientOrdonnance(ordonnanceId) {
@@ -562,6 +595,41 @@ function viewPatientOrdonnance(ordonnanceId) {
 function viewPatientDocument(documentId) {
   const documentItem = getAllDocuments().find((item) => String(item.id) === String(documentId));
   if (!documentItem) return;
+
+  if (documentItem.categorie === "certificat") {
+    const arret = documentItem.debutArret || documentItem.finArret
+      ? `<p><strong>Periode :</strong> ${escapeHtml(documentItem.debutArret || "--")} au ${escapeHtml(documentItem.finArret || "--")}</p>`
+      : "";
+    openPreviewWindow(
+      documentItem.nom,
+      `
+        <h1>${escapeHtml(documentItem.nom)}</h1>
+        <div class="meta">${escapeHtml(documentItem.source || "Medecin")} · ${formatLongDate(documentItem.date)} · ${escapeHtml(documentItem.format || "PDF")}</div>
+        <p><strong>Type :</strong> ${escapeHtml(documentItem.type || "medical")}</p>
+        <p><strong>Destinataire :</strong> ${escapeHtml(documentItem.destinataire || "A qui de droit")}</p>
+        <p><strong>Motif :</strong> ${escapeHtml(documentItem.motif || "Non renseigne")}</p>
+        <p><strong>Restrictions :</strong> ${escapeHtml(documentItem.restrictions || "Aucune restriction renseignee")}</p>
+        ${arret}
+      `
+    );
+    return;
+  }
+
+  if (documentItem.categorie === "ordonnance") {
+    const medicines = (documentItem.medicaments || []).map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+    openPreviewWindow(
+      documentItem.nom,
+      `
+        <h1>${escapeHtml(documentItem.nom)}</h1>
+        <div class="meta">${escapeHtml(documentItem.source || "Medecin")} · ${formatLongDate(documentItem.date)} · ${escapeHtml(documentItem.format || "PDF")}</div>
+        <p><strong>Medecin :</strong> ${escapeHtml(documentItem.medecin || documentItem.source || "Non renseigne")} · ${escapeHtml(documentItem.specialite || "Specialite non renseignee")}</p>
+        <h2>Prescription</h2>
+        <ul>${medicines || "<li>Aucun medicament renseigne.</li>"}</ul>
+        <p><strong>Recommandations :</strong> ${escapeHtml(documentItem.recommandations || "Aucune recommandation complementaire")}</p>
+      `
+    );
+    return;
+  }
 
   openPreviewWindow(
     documentItem.nom,
@@ -1049,6 +1117,11 @@ function bindDocumentsFilters() {
   });
 }
 
+function getDocumentsLinkedToConsultation(consultationId) {
+  const shared = getSharedPatientData();
+  return shared.documents.filter((item) => String(item.consultationId || "") === String(consultationId || ""));
+}
+
 function bindConsultationFilters() {
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1071,6 +1144,14 @@ function bindConsultationFilters() {
     setText("[data-modal-symptomes]", consultation.symptomes);
     setText("[data-modal-diagnostic]", consultation.diagnostic);
     setText("[data-modal-traitement]", consultation.traitement);
+    setText("[data-modal-observations]", consultation.observations || "Aucune observation complementaire.");
+    const linkedDocuments = getDocumentsLinkedToConsultation(consultation.id);
+    setText(
+      "[data-modal-documents]",
+      linkedDocuments.length
+        ? linkedDocuments.map((item) => `${item.nom} (${item.categorie})`).join(" · ")
+        : "Aucun document lie a cette consultation."
+    );
     document.querySelector("[data-consultation-modal]")?.classList.add("open");
   });
 

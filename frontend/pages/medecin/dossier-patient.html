@@ -75,7 +75,7 @@
                     <button class="btn btn-secondary" type="button" data-patient-lookup-submit>Rechercher</button>
                 </div>
                 <div class="patient-lookup-results" data-patient-lookup-results></div>
-                <p class="patient-lookup-hint">Saisissez le numero CMU, cliquez sur le patient trouve, puis son dossier s'affichera.</p>
+                <p class="patient-lookup-hint">Saisissez le numero CMU puis cliquez sur rechercher. Si une correspondance exacte est trouvee, le dossier s'affiche directement.</p>
             </div>
 
             <div class="is-hidden" data-dossier-content>
@@ -108,11 +108,13 @@
                     <div class="tabs-nav">
                         <button class="tab-btn active" data-target="dtab-consult">Consultations</button>
                         <button class="tab-btn" data-target="dtab-ordo">Ordonnances</button>
+                        <button class="tab-btn" data-target="dtab-cert">Certificats</button>
                         <button class="tab-btn" data-target="dtab-ant">Antecedents</button>
                         <button class="tab-btn" data-target="dtab-vit">Signes vitaux</button>
                     </div>
                     <div class="tab-content active" id="dtab-consult"></div>
                     <div class="tab-content" id="dtab-ordo"></div>
+                    <div class="tab-content" id="dtab-cert"></div>
                     <div class="tab-content" id="dtab-ant">
                         <div class="grid g2 gap-14">
                             <div class="card">
@@ -130,6 +132,16 @@
             </div>
         </div>
     </main>
+</div>
+<div class="overlay" data-dossier-detail-modal>
+    <div class="modal">
+        <div class="modal-title" data-dossier-detail-title>Detail</div>
+        <div class="modal-sub" data-dossier-detail-subtitle></div>
+        <div class="info-stack" data-dossier-detail-body></div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" data-close-dossier-detail-modal>Fermer</button>
+        </div>
+    </div>
 </div>
 </body>
 </html>
