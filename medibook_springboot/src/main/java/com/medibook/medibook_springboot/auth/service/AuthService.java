@@ -15,6 +15,7 @@ import com.medibook.medibook_springboot.patient.repository.PatientRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -186,23 +187,126 @@ public class AuthService {
                 || isBlank(request.getMotDePasse()) || isBlank(request.getRole())) {
             throw new IllegalArgumentException("Veuillez renseigner tous les champs obligatoires");
         }
-        if (role != Role.MEDECIN) {
-            if (utilisateurRepository.existsByCmu(request.getCmu().trim())) {
-                throw new IllegalArgumentException("CMU deja utilise");
-            }
-            if (utilisateurRepository.existsByTelephone(request.getTelephone().trim())) {
-                throw new IllegalArgumentException("Telephone deja utilise");
-            }
-            if (utilisateurRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
-                throw new IllegalArgumentException("Email deja utilise");
-            }
+
+        if (role == Role.PATIENT) {
+            validatePatientDuplicatesForMedicalStaffOnly(request);
+        } else if (utilisateurRepository.existsByCmu(request.getCmu().trim())) {
+            throw new IllegalArgumentException("CMU deja utilise");
+        } else if (utilisateurRepository.existsByTelephone(request.getTelephone().trim())) {
+            throw new IllegalArgumentException("Telephone deja utilise");
+        } else if (utilisateurRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
+            throw new IllegalArgumentException("Email deja utilise");
         }
+
         if ((role == Role.MEDECIN || role == Role.INFIRMIER) && isBlank(request.getMatricule())) {
             throw new IllegalArgumentException("Le matricule est obligatoire pour ce role");
         }
         if (request.getMotDePasse().length() < 8) {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caracteres");
         }
+    }
+
+    private void validatePatientDuplicatesForMedicalStaffOnly(RegisterDto request) {
+        Utilisateur cmuOwner = validatePatientFieldReuse(
+                utilisateurRepository.findAllByCmu(request.getCmu().trim()),
+                "CMU deja utilise"
+        );
+        Utilisateur phoneOwner = validatePatientFieldReuse(
+                utilisateurRepository.findAllByTelephone(request.getTelephone().trim()),
+                "Telephone deja utilise"
+        );
+        Utilisateur emailOwner = validatePatientFieldReuse(
+                utilisateurRepository.findAllByEmail(request.getEmail().trim().toLowerCase()),
+                "Email deja utilise"
+        );
+
+        Utilisateur owner = firstNonNull(cmuOwner, phoneOwner, emailOwner);
+        if (owner == null) {
+            return;
+        }
+
+        if ((cmuOwner != null && !cmuOwner.getId().equals(owner.getId()))
+                || (phoneOwner != null && !phoneOwner.getId().equals(owner.getId()))
+                || (emailOwner != null && !emailOwner.getId().equals(owner.getId()))) {
+            throw new IllegalArgumentException("CMU, telephone et email doivent appartenir au meme compte medical");
+        }
+
+        if (isBlank(request.getMatricule())) {
+            throw new IllegalArgumentException("Le matricule du medecin/infirmier est obligatoire pour creer son compte patient");
+        }
+
+        if (!isOwnerMatricule(owner, request.getMatricule().trim())) {
+            throw new IllegalArgumentException("Creation du compte patient autorisee uniquement pour le medecin/infirmier proprietaire de ces informations");
+        }
+
+        if (!sameIdentity(owner, request)) {
+            throw new IllegalArgumentException("Nom et prenom doivent correspondre au medecin/infirmier proprietaire");
+        }
+    }
+
+    private Utilisateur validatePatientFieldReuse(List<Utilisateur> utilisateurs, String message) {
+        if (utilisateurs == null || utilisateurs.isEmpty()) {
+            return null;
+        }
+
+        // 2e utilisation maximum : la valeur ne doit exister qu'une seule fois avant la creation patient.
+        if (utilisateurs.size() > 1) {
+            throw new IllegalArgumentException(message);
+        }
+
+        boolean hasPatient = utilisateurs.stream().anyMatch(utilisateur -> utilisateur.getRole() == Role.PATIENT);
+        boolean hasOnlyMedicalRoles = utilisateurs.stream().allMatch(this::isMedicalRole);
+
+        if (hasPatient || !hasOnlyMedicalRoles) {
+            throw new IllegalArgumentException(message);
+        }
+
+        return utilisateurs.get(0);
+    }
+
+    private Utilisateur firstNonNull(Utilisateur... utilisateurs) {
+        for (Utilisateur utilisateur : utilisateurs) {
+            if (utilisateur != null) {
+                return utilisateur;
+            }
+        }
+        return null;
+    }
+
+    private boolean isOwnerMatricule(Utilisateur owner, String matricule) {
+        if (owner == null || isBlank(matricule)) {
+            return false;
+        }
+
+        if (owner.getRole() == Role.MEDECIN) {
+            return medecinRepository.findById(owner.getId())
+                    .map(Medecin::getMatricule)
+                    .map(value -> value != null && value.equalsIgnoreCase(matricule))
+                    .orElse(false);
+        }
+        if (owner.getRole() == Role.INFIRMIER) {
+            return infirmierRepository.findById(owner.getId())
+                    .map(Infirmier::getMatricule)
+                    .map(value -> value != null && value.equalsIgnoreCase(matricule))
+                    .orElse(false);
+        }
+        return false;
+    }
+
+    private boolean sameIdentity(Utilisateur owner, RegisterDto request) {
+        if (owner == null || request == null) {
+            return false;
+        }
+        String requestNom = request.getNom() == null ? "" : request.getNom().trim();
+        String requestPrenom = request.getPrenom() == null ? "" : request.getPrenom().trim();
+        String ownerNom = owner.getNom() == null ? "" : owner.getNom().trim();
+        String ownerPrenom = owner.getPrenom() == null ? "" : owner.getPrenom().trim();
+        return ownerNom.equalsIgnoreCase(requestNom) && ownerPrenom.equalsIgnoreCase(requestPrenom);
+    }
+
+    private boolean isMedicalRole(Utilisateur utilisateur) {
+        return utilisateur != null
+                && (utilisateur.getRole() == Role.MEDECIN || utilisateur.getRole() == Role.INFIRMIER);
     }
 
     private String normalize(String value) {

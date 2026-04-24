@@ -314,7 +314,14 @@ function register() {
   const confirmation = document.getElementById("pw2")?.value;
   const groupeSanguin = document.getElementById("groupeSanguin")?.value;
   const allergie = document.getElementById("allergie")?.value?.trim();
-  const matricule = document.getElementById("matricule")?.value?.trim() || document.getElementById("matriculeInfirmier")?.value?.trim();
+  const sessionMedecin = JSON.parse(localStorage.getItem("medecinSession") || "null");
+  const sessionInfirmier = JSON.parse(localStorage.getItem("infirmierSession") || "null");
+  const fallbackMatricule = selectedRole === "patient"
+    ? (sessionMedecin?.matricule || sessionInfirmier?.matricule || "")
+    : "";
+  const matricule = document.getElementById("matricule")?.value?.trim()
+    || document.getElementById("matriculeInfirmier")?.value?.trim()
+    || fallbackMatricule;
   const specialiteMedicale = document.getElementById("specialiteMedicale")?.value;
   const service = document.getElementById("service")?.value;
   const cgu = document.getElementById("cgu")?.checked;
