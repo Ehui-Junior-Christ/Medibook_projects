@@ -9,7 +9,6 @@
     <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
     <script src="../../js/admin.js" defer></script>
-
 </head>
 <body>
 <div class="app">
@@ -20,26 +19,22 @@
                 <div class="sb-logo-text">MediBook Admin</div>
             </div>
         </div>
-
         <nav class="sb-section">
             <span class="sb-section-label">Principal</span>
             <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
             <a href="statistiques.html" class="sb-item"><span class="sb-icon">📊</span>Statistiques</a>
         </nav>
-
         <nav class="sb-section">
             <span class="sb-section-label">Gestion Utilisateurs</span>
             <a href="gestion-patients.html" class="sb-item"><span class="sb-icon">👥</span>Patients</a>
-            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Medecins</a>
             <a href="gestion-infirmiers.html" class="sb-item"><span class="sb-icon">💉</span>Infirmiers</a>
-            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">…</span></a>
         </nav>
-
         <nav class="sb-section">
-            <span class="sb-section-label">Système</span>
+            <span class="sb-section-label">Systeme</span>
             <a href="configuration.html" class="sb-item active"><span class="sb-icon">⚙️</span>Configuration</a>
         </nav>
-
         <div class="sb-footer">
             <div class="sb-user">
                 <div class="sb-avatar">AD</div>
@@ -50,23 +45,21 @@
             </div>
         </div>
     </aside>
-
     <main class="main">
         <header class="topbar">
-            <div class="topbar-title">Configuration du Système</div>
+            <div class="topbar-title">Configuration du Systeme</div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div>
+                <div class="icon-btn" data-admin-notifications>🔔</div>
                 <a href="login.html" class="icon-btn">🚪</a>
             </div>
         </header>
-
         <div class="content-area">
             <div class="card">
-                <div class="card-title" style="margin-bottom: 16px;">Paramètres Généraux</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div class="card-title" style="margin-bottom:16px;">Parametres Generaux</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                     <div class="fld">
                         <label for="platform-name">Nom de la plateforme</label>
-                        <input type="text" id="platform-name" value="MediBook Côte d'Ivoire">
+                        <input type="text" id="platform-name" value="MediBook Cote d'Ivoire">
                     </div>
                     <div class="fld">
                         <label for="support-email">Email de contact support</label>
@@ -80,45 +73,44 @@
                         </select>
                     </div>
                     <div class="fld">
-                        <label for="default-lang">Langue par défaut</label>
+                        <label for="default-lang">Langue par defaut</label>
                         <select id="default-lang">
-                            <option>Français</option>
+                            <option>Francais</option>
                             <option>Anglais</option>
                         </select>
                     </div>
                 </div>
                 <button class="btn btn-primary">Enregistrer les modifications</button>
             </div>
-
             <div class="card">
-                <div class="card-title" style="margin-bottom: 16px;">Sécurité et Accès</div>
+                <div class="card-title" style="margin-bottom:16px;">Securite et Acces</div>
                 <div class="toggle-row">
                     <div class="toggle-info">
                         <span class="toggle-title">Validation manuelle des professionnels</span>
-                        <span class="toggle-desc">Exiger une validation par l'admin pour chaque nouveau médecin/infirmier.</span>
+                        <span class="toggle-desc">Exiger une validation par l'admin pour chaque nouveau medecin/infirmier.</span>
                     </div>
-                    <label class="switch" for="manual-validation">
-                        <input type="checkbox" id="manual-validation" checked>
+                    <label class="switch">
+                        <input type="checkbox" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="toggle-row">
                     <div class="toggle-info">
-                        <span class="toggle-title">Authentification à deux facteurs (2FA)</span>
+                        <span class="toggle-title">Authentification a deux facteurs (2FA)</span>
                         <span class="toggle-desc">Forcer le 2FA pour tous les comptes administrateurs.</span>
                     </div>
-                    <label class="switch" for="2fa-auth">
-                        <input type="checkbox" id="2fa-auth">
+                    <label class="switch">
+                        <input type="checkbox">
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div class="toggle-row">
                     <div class="toggle-info">
-                        <span class="toggle-title">Maintenance du système</span>
-                        <span class="toggle-desc">Désactiver l'accès public à la plateforme pour maintenance.</span>
+                        <span class="toggle-title">Maintenance du systeme</span>
+                        <span class="toggle-desc">Desactiver l'acces public a la plateforme pour maintenance.</span>
                     </div>
-                    <label class="switch" for="maintenance-mode">
-                        <input type="checkbox" id="maintenance-mode">
+                    <label class="switch">
+                        <input type="checkbox">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -128,3 +120,4 @@
 </div>
 </body>
 </html>
+
