@@ -9,7 +9,6 @@
     <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
     <script src="../../js/admin.js" defer></script>
-
 </head>
 <body>
 <div class="app">
@@ -20,26 +19,22 @@
                 <div class="sb-logo-text">MediBook Admin</div>
             </div>
         </div>
-
         <nav class="sb-section">
             <span class="sb-section-label">Principal</span>
             <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
             <a href="statistiques.html" class="sb-item"><span class="sb-icon">📊</span>Statistiques</a>
         </nav>
-
         <nav class="sb-section">
             <span class="sb-section-label">Gestion Utilisateurs</span>
             <a href="gestion-patients.html" class="sb-item active"><span class="sb-icon">👥</span>Patients</a>
-            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Médecins</a>
+            <a href="gestion-medecins.html" class="sb-item"><span class="sb-icon">🩺</span>Medecins</a>
             <a href="gestion-infirmiers.html" class="sb-item"><span class="sb-icon">💉</span>Infirmiers</a>
-            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">5</span></a>
+            <a href="comptes-pending.html" class="sb-item"><span class="sb-icon">⏳</span>Attente validation <span class="sb-badge">…</span></a>
         </nav>
-
         <nav class="sb-section">
-            <span class="sb-section-label">Système</span>
+            <span class="sb-section-label">Systeme</span>
             <a href="configuration.html" class="sb-item"><span class="sb-icon">⚙️</span>Configuration</a>
         </nav>
-
         <div class="sb-footer">
             <div class="sb-user">
                 <div class="sb-avatar">AD</div>
@@ -50,84 +45,37 @@
             </div>
         </div>
     </aside>
-
     <main class="main">
         <header class="topbar">
             <div class="topbar-title">Gestion des Patients</div>
             <div class="topbar-right">
-                <div class="icon-btn">🔔</div>
+                <div class="icon-btn" data-admin-notifications>🔔</div>
                 <a href="login.html" class="icon-btn">🚪</a>
             </div>
         </header>
-
         <div class="content-area">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Liste des Patients</div>
-                    <button class="btn btn-primary">+ Ajouter un patient</button>
                 </div>
-
                 <div class="search-bar">
-                    <label for="search-patient" style="display:none;">Rechercher un patient</label>
-                    <input type="text" id="search-patient" class="fld" style="margin-bottom:0; flex:1;" placeholder="Rechercher par nom, CMU ou téléphone...">
+                    <input type="text" placeholder="Rechercher par nom, CMU ou telephone..." style="margin-bottom:0;flex:1;">
                     <button class="btn btn-secondary">Filtrer</button>
                 </div>
-
                 <div class="table-wrap">
                     <table>
                         <thead>
                         <tr>
                             <th>Patient</th>
                             <th>N° CMU</th>
-                            <th>Date Naissance</th>
-                            <th>Téléphone</th>
+                            <th>Date Inscription</th>
+                            <th>Telephone</th>
                             <th>Statut</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <div class="user-row">
-                                    <div class="user-ava">KJ</div>
-                                    <div>
-                                        <div style="font-weight:600">Kouadio Jean Baptiste</div>
-                                        <div style="font-size:11px;color:var(--slate-500)">jb.kouadio@email.ci</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span style="font-family:monospace">CMU-2024-08821</span></td>
-                            <td>14/03/1987</td>
-                            <td>+225 07 12 34 56</td>
-                            <td><span class="badge badge-green">Actif</span></td>
-                            <td>
-                                <div style="display:flex;gap:6px">
-                                    <button class="btn btn-secondary btn-sm">Modifier</button>
-                                    <button class="btn btn-danger btn-sm">Désactiver</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-row">
-                                    <div class="user-ava" style="background:var(--amber-light)">AK</div>
-                                    <div>
-                                        <div style="font-weight:600">Assi Koffi Martial</div>
-                                        <div style="font-size:11px;color:var(--slate-500)">assi.koffi@email.ci</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span style="font-family:monospace">CMU-2023-04512</span></td>
-                            <td>08/03/1973</td>
-                            <td>+225 05 23 45 67</td>
-                            <td><span class="badge badge-green">Actif</span></td>
-                            <td>
-                                <div style="display:flex;gap:6px">
-                                    <button class="btn btn-secondary btn-sm">Modifier</button>
-                                    <button class="btn btn-danger btn-sm">Désactiver</button>
-                                </div>
-                            </td>
-                        </tr>
+                        <tbody id="gestion-body">
+                        <tr><td colspan="6" style="text-align:center;color:var(--slate-500);padding:24px;">Chargement…</td></tr>
                         </tbody>
                     </table>
                 </div>
