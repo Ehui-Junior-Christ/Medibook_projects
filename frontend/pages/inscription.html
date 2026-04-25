@@ -9,7 +9,7 @@
 </head>
 <body class="page-auth register">
 <div class="screen" id="inscription">
-  <div class="inscrip-card">
+  <div class="inscrip-card inscrip-card-compact">
     <div class="inscrip-left">
       <div>
         <div class="logo-area"><div class="logo-mark">🏥</div><span>MediBook</span></div>
@@ -58,16 +58,16 @@
           <div class="fld"><label>Nom</label><input type="text" id="nom" placeholder="Kouadio"></div>
           <div class="fld"><label>Prenom</label><input type="text" id="prenom" placeholder="Jean Baptiste"></div>
           <div class="fld"><label>Date de naissance</label><input type="date" id="dateNaissance"></div>
-          <div class="fld"><label>Sexe</label><select><option value="">Selectionner</option><option>Masculin</option><option>Feminin</option></select></div>
+          <div class="fld"><label>Sexe</label><select id="sexe"><option value="">Selectionner</option><option>Masculin</option><option>Feminin</option></select></div>
           <div class="fld col-full"><label>Numero CMU</label><input type="text" id="cmu" placeholder="CMU-XXXX-XXXXX"></div>
           <div class="fld"><label>Telephone</label><input type="tel" id="telephone" placeholder="+225 07 XX XX XX"></div>
           <div class="fld"><label>Email</label><input type="email" id="email" placeholder="votre@email.ci"></div>
-          <div class="fld col-full" id="f-mat" style="display:none"><label>Numero matricule (Ordre)</label><input type="text" placeholder="MAT-MED-00XXX"></div>
-          <div class="fld col-full" id="f-spe" style="display:none"><label>Specialite medicale</label><select><option>Medecine generale</option><option>Cardiologie</option><option>Pediatrie</option><option>Gynecologie</option><option>Chirurgie</option><option>Urgentiste</option></select></div>
-          <div class="fld col-full" id="f-mat-inf" style="display:none"><label>Numero matricule infirmier</label><input type="text" placeholder="MAT-INF-00XXX"></div>
-          <div class="fld col-full" id="f-srv" style="display:none"><label>Service</label><select><option>Urgences</option><option>Medecine interne</option><option>Pediatrie</option><option>Maternite</option><option>Chirurgie</option><option>Reanimation</option></select></div>
-          <div class="fld" id="f-sang" style="display:none"><label>Groupe sanguin</label><select><option value="">Non renseigne</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
-          <div class="fld" id="f-allergie" style="display:none"><label>Allergie connue</label><input type="text" placeholder="Ex: Penicilline"></div>
+          <div class="fld col-full" id="f-mat" style="display:none"><label>Numero matricule (Ordre)</label><input type="text" id="matricule" placeholder="MAT-MED-00XXX"></div>
+          <div class="fld col-full" id="f-spe" style="display:none"><label>Specialite medicale</label><select id="specialiteMedicale"><option>Medecine generale</option><option>Cardiologie</option><option>Pediatrie</option><option>Gynecologie</option><option>Chirurgie</option><option>Urgentiste</option></select></div>
+          <div class="fld col-full" id="f-mat-inf" style="display:none"><label>Numero matricule infirmier</label><input type="text" id="matriculeInfirmier" placeholder="MAT-INF-00XXX"></div>
+          <div class="fld col-full" id="f-srv" style="display:none"><label>Service</label><select id="service"><option>Urgences</option><option>Medecine interne</option><option>Pediatrie</option><option>Maternite</option><option>Chirurgie</option><option>Reanimation</option></select></div>
+          <div class="fld" id="f-sang" style="display:none"><label>Groupe sanguin</label><select id="groupeSanguin"><option value="">Non renseigne</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          <div class="fld" id="f-allergie" style="display:none"><label>Allergie connue</label><input type="text" id="allergie" placeholder="Ex: Penicilline"></div>
         </div>
         <div class="inscrip-nav">
           <button class="btn btn-secondary" onclick="isPrev(2)">← Retour</button>
@@ -79,7 +79,7 @@
         <h3>Creer vos identifiants</h3>
         <p class="step-sub">Choisissez un mot de passe securise.</p>
         <div class="grid" style="gap:12px">
-          <div class="fld"><label>Mot de passe</label><input type="password" id="motDePasse" placeholder="Au moins 8 caracteres" oninput="checkPw()"></div>
+          <div class="fld"><label>Mot de passe</label><input type="password" id="pw1" placeholder="Au moins 8 caracteres" oninput="checkPw()"></div>
           <div class="pw-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
           <div id="pw-msg" style="font-size:11.5px;color:var(--slate-400);margin-top:-6px"></div>
           <div class="fld"><label>Confirmer le mot de passe</label><input type="password" id="pw2" placeholder="Repetez le mot de passe" oninput="checkPw()"></div>

@@ -6,6 +6,7 @@ const USER_STORAGE_KEY = "user";
 const defaultPatientProfile = {
   id: "MB-2026-0042",
   backendId: null,
+  avatar: "",
   nom: "Bie",
   prenoms: "Jacquy Sergine",
   dateNaissance: "2002-03-15",
@@ -120,7 +121,11 @@ function loadProfile() {
 }
 
 function saveProfile(profile) {
-  state.profile = { ...defaultPatientProfile, ...profile, prenoms: profile.prenoms || profile.prenom || defaultPatientProfile.prenoms };
+  state.profile = {
+    ...defaultPatientProfile,
+    ...profile,
+    prenoms: profile.prenoms || profile.prenom || defaultPatientProfile.prenoms
+  };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.profile));
 }
 
@@ -168,6 +173,7 @@ function normalizePatientProfile(apiProfile = {}, carnet = null) {
   return {
     ...defaultPatientProfile,
     ...state.profile,
+    avatar: state.profile.avatar || apiProfile.photoProfil || defaultPatientProfile.avatar,
     backendId: apiProfile.id || state.profile.backendId || getStoredUser()?.id || null,
     id: apiProfile.numeroAssure || state.profile.id,
     nom: apiProfile.nom || state.profile.nom,
@@ -237,6 +243,7 @@ function buildPatientPayload(profile) {
     email: profile.email,
     telephone: profile.telephone,
     numeroAssure: profile.numeroAssure,
+    photoProfil: profile.avatar || "",
     dateNaissance: profile.dateNaissance || null,
     sexe: profile.sexe,
     adresse: profile.adresse,
@@ -288,14 +295,18 @@ function getCurrentPatientId(profile = state.profile) {
 }
 
 function getSharedPatientData(profile = state.profile) {
-  const patientId = getCurrentPatientId(profile);
+  const patientIds = new Set([
+    String(getCurrentPatientId(profile) || ""),
+    String(profile.backendId || ""),
+    String(profile.id || "")
+  ].filter(Boolean));
   const shared = loadSharedRecords();
   return {
-    consultations: shared.consultations.filter((item) => item.patientId === patientId),
-    ordonnances: shared.ordonnances.filter((item) => item.patientId === patientId),
-    documents: shared.documents.filter((item) => item.patientId === patientId),
-    vitals: shared.vitals.filter((item) => item.patientId === patientId),
-    timeline: shared.timeline.filter((item) => item.patientId === patientId)
+    consultations: shared.consultations.filter((item) => patientIds.has(String(item.patientId))),
+    ordonnances: shared.ordonnances.filter((item) => patientIds.has(String(item.patientId))),
+    documents: shared.documents.filter((item) => patientIds.has(String(item.patientId))),
+    vitals: shared.vitals.filter((item) => patientIds.has(String(item.patientId))),
+    timeline: shared.timeline.filter((item) => patientIds.has(String(item.patientId)))
   };
 }
 
@@ -335,6 +346,74 @@ function getInitials(profile) {
   const nom = profile.nom || "";
   const prenoms = profile.prenoms || "";
   return `${nom.charAt(0)}${prenoms.charAt(0)}`.toUpperCase() || "MB";
+}
+
+function applyPatientAvatar(profile = state.profile) {
+  document.querySelectorAll("[data-patient-avatar], .sb-avatar[data-patient-initials], .profile-avatar-xl[data-patient-initials]").forEach((node) => {
+    if (profile.avatar) {
+      node.style.backgroundImage = `url(${profile.avatar})`;
+      node.style.backgroundSize = "cover";
+      node.style.backgroundPosition = "center";
+      node.textContent = "";
+      return;
+    }
+    node.style.backgroundImage = "";
+    node.style.backgroundSize = "";
+    node.style.backgroundPosition = "";
+    node.textContent = getInitials(profile);
+  });
+}
+
+async function persistPatientAvatar(avatar) {
+  const nextProfile = { ...state.profile, avatar };
+  try {
+    if (state.apiEnabled) {
+      await saveProfileToApi(nextProfile);
+    } else {
+      saveProfile(nextProfile);
+    }
+    applyPatientAvatar(state.profile);
+    fillProfileSummary(state.profile);
+    fillProfileForm(state.profile);
+    buildSidebar(state.profile, window.location.pathname.split("/").pop() || "dashboard.html");
+    setText("[data-profile-feedback]", "Photo de profil mise a jour.");
+  } catch (error) {
+    console.error(error);
+    setText("[data-profile-feedback]", "Impossible d'enregistrer la photo pour le moment.");
+  }
+}
+
+function initGlobalPatientPhotoShortcut() {
+  const footer = document.querySelector(".sb-footer");
+  if (!footer || footer.querySelector("[data-patient-photo-shortcut]")) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-secondary btn-sm sidebar-photo-btn";
+  button.dataset.patientPhotoShortcut = "true";
+  button.textContent = "Changer photo";
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.hidden = true;
+
+  button.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const avatar = typeof reader.result === "string" ? reader.result : "";
+      if (!avatar) return;
+      await persistPatientAvatar(avatar);
+      input.value = "";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  footer.appendChild(button);
+  footer.appendChild(input);
 }
 
 function getAge(profile) {
@@ -387,6 +466,15 @@ function sanitizeFilename(value) {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function triggerFileDownload(filename, content, mimeType = "text/plain;charset=utf-8") {
@@ -459,12 +547,32 @@ function downloadPatientDocument(documentId) {
     `Categorie: ${documentItem.categorie}`,
     `Date: ${formatLongDate(documentItem.date)}`,
     `Source: ${documentItem.source}`,
-    `Format indique: ${documentItem.format}`,
-    "",
-    "Export de demonstration du document selectionne."
-  ].join("\n");
+    `Format indique: ${documentItem.format}`
+  ];
 
-  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content);
+  if (documentItem.categorie === "certificat") {
+    content.push(
+      `Type: ${documentItem.type || "medical"}`,
+      `Destinataire: ${documentItem.destinataire || "A qui de droit"}`,
+      `Motif: ${documentItem.motif || "Non renseigne"}`,
+      `Restrictions: ${documentItem.restrictions || "Aucune"}`
+    );
+    if (documentItem.debutArret || documentItem.finArret) {
+      content.push(`Periode: ${documentItem.debutArret || "--"} au ${documentItem.finArret || "--"}`);
+    }
+  } else if (documentItem.categorie === "ordonnance") {
+    content.push("", "Medicaments:");
+    (documentItem.medicaments || []).forEach((line, index) => {
+      content.push(`${index + 1}. ${line}`);
+    });
+    if (documentItem.recommandations) {
+      content.push("", `Recommandations: ${documentItem.recommandations}`);
+    }
+  } else {
+    content.push("", "Export de demonstration du document selectionne.");
+  }
+
+  triggerFileDownload(`${sanitizeFilename(documentItem.nom)}.txt`, content.join("\n"));
 }
 
 function viewPatientOrdonnance(ordonnanceId) {
@@ -487,6 +595,41 @@ function viewPatientOrdonnance(ordonnanceId) {
 function viewPatientDocument(documentId) {
   const documentItem = getAllDocuments().find((item) => String(item.id) === String(documentId));
   if (!documentItem) return;
+
+  if (documentItem.categorie === "certificat") {
+    const arret = documentItem.debutArret || documentItem.finArret
+      ? `<p><strong>Periode :</strong> ${escapeHtml(documentItem.debutArret || "--")} au ${escapeHtml(documentItem.finArret || "--")}</p>`
+      : "";
+    openPreviewWindow(
+      documentItem.nom,
+      `
+        <h1>${escapeHtml(documentItem.nom)}</h1>
+        <div class="meta">${escapeHtml(documentItem.source || "Medecin")} · ${formatLongDate(documentItem.date)} · ${escapeHtml(documentItem.format || "PDF")}</div>
+        <p><strong>Type :</strong> ${escapeHtml(documentItem.type || "medical")}</p>
+        <p><strong>Destinataire :</strong> ${escapeHtml(documentItem.destinataire || "A qui de droit")}</p>
+        <p><strong>Motif :</strong> ${escapeHtml(documentItem.motif || "Non renseigne")}</p>
+        <p><strong>Restrictions :</strong> ${escapeHtml(documentItem.restrictions || "Aucune restriction renseignee")}</p>
+        ${arret}
+      `
+    );
+    return;
+  }
+
+  if (documentItem.categorie === "ordonnance") {
+    const medicines = (documentItem.medicaments || []).map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+    openPreviewWindow(
+      documentItem.nom,
+      `
+        <h1>${escapeHtml(documentItem.nom)}</h1>
+        <div class="meta">${escapeHtml(documentItem.source || "Medecin")} · ${formatLongDate(documentItem.date)} · ${escapeHtml(documentItem.format || "PDF")}</div>
+        <p><strong>Medecin :</strong> ${escapeHtml(documentItem.medecin || documentItem.source || "Non renseigne")} · ${escapeHtml(documentItem.specialite || "Specialite non renseignee")}</p>
+        <h2>Prescription</h2>
+        <ul>${medicines || "<li>Aucun medicament renseigne.</li>"}</ul>
+        <p><strong>Recommandations :</strong> ${escapeHtml(documentItem.recommandations || "Aucune recommandation complementaire")}</p>
+      `
+    );
+    return;
+  }
 
   openPreviewWindow(
     documentItem.nom,
@@ -548,6 +691,7 @@ function buildSidebar(profile, currentPage) {
   setText("[data-patient-role]", "Patient");
   setText("[data-patient-initials]", getInitials(profile));
   setText("[data-patient-id]", profile.numeroAssure || profile.id);
+  applyPatientAvatar(profile);
 }
 
 function renderTopbar(profile, currentPage) {
@@ -811,6 +955,8 @@ function fillProfileSummary(profile) {
   setText("[data-profile-age]", `${getAge(profile)} ans`);
   setText("[data-profile-groupe]", profile.groupeSanguin || "--");
   setText("[data-profile-doctor]", `${profile.medecinTraitant || "Medecin non renseigne"} · ${profile.specialiteMedecin || "Specialite non renseignee"}`);
+  setText("[data-profile-doctor-phone]", profile.telephoneMedecin || "Non renseigne");
+  applyPatientAvatar(profile);
 }
 
 function fillProfileForm(profile) {
@@ -872,6 +1018,7 @@ async function saveProfileToApi(profile) {
 function bindProfileForm(profile) {
   const form = document.querySelector("[data-profile-form]");
   if (!form) return;
+  const photoInput = document.getElementById("profilePhotoInput");
 
   document.querySelectorAll("[data-enable-edit]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -884,9 +1031,26 @@ function bindProfileForm(profile) {
   document.querySelectorAll("[data-cancel-edit]").forEach((button) => {
     button.addEventListener("click", () => {
       fillProfileForm(state.profile);
+      applyPatientAvatar(state.profile);
+      if (photoInput) {
+        photoInput.value = "";
+      }
       applyProfileState(false);
       history.replaceState(null, "", "profil.html");
     });
+  });
+
+  photoInput?.addEventListener("change", () => {
+    const file = photoInput.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const avatar = typeof reader.result === "string" ? reader.result : "";
+      state.profile = { ...state.profile, avatar };
+      applyPatientAvatar(state.profile);
+      setText("[data-profile-feedback]", "Nouvelle photo prete a etre enregistree.");
+    };
+    reader.readAsDataURL(file);
   });
 
   form.addEventListener("input", (event) => {
@@ -925,6 +1089,7 @@ function bindProfileForm(profile) {
       fillProfileForm(state.profile);
       buildSidebar(state.profile, "profil.html");
       renderPatientNotificationsMenu();
+      applyPatientAvatar(state.profile);
       applyProfileState(false);
       history.replaceState(null, "", "profil.html");
       setText("[data-profile-feedback]", "Profil mis a jour avec succes.");
@@ -952,6 +1117,11 @@ function bindDocumentsFilters() {
   });
 }
 
+function getDocumentsLinkedToConsultation(consultationId) {
+  const shared = getSharedPatientData();
+  return shared.documents.filter((item) => String(item.consultationId || "") === String(consultationId || ""));
+}
+
 function bindConsultationFilters() {
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -974,6 +1144,14 @@ function bindConsultationFilters() {
     setText("[data-modal-symptomes]", consultation.symptomes);
     setText("[data-modal-diagnostic]", consultation.diagnostic);
     setText("[data-modal-traitement]", consultation.traitement);
+    setText("[data-modal-observations]", consultation.observations || "Aucune observation complementaire.");
+    const linkedDocuments = getDocumentsLinkedToConsultation(consultation.id);
+    setText(
+      "[data-modal-documents]",
+      linkedDocuments.length
+        ? linkedDocuments.map((item) => `${item.nom} (${item.categorie})`).join(" · ")
+        : "Aucun document lie a cette consultation."
+    );
     document.querySelector("[data-consultation-modal]")?.classList.add("open");
   });
 
@@ -1089,6 +1267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await hydratePatientStateFromApi();
   buildSidebar(state.profile, currentPage);
+  initGlobalPatientPhotoShortcut();
   renderTopbar(state.profile, currentPage);
   bindPatientGlobalSearch();
   bindPatientNotifications();
