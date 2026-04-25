@@ -23,8 +23,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public LoginResponseDto login(@RequestBody LoginDto request) {
-        return authService.login(request.getIdentifiant(), request.getMotDePasse());
+    public ResponseEntity<?> login(@RequestBody LoginDto request) {
+        try {
+            return ResponseEntity.ok(
+                    authService.login(request.getIdentifiant(), request.getMotDePasse(), request.getRole())
+            );
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+        } catch (RuntimeException exception) {
+            String message = exception.getMessage();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(message == null || message.isBlank()
+                            ? "Identifiants incorrects"
+                            : message);
+        }
     }
 
     @PostMapping("/register")

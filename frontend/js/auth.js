@@ -194,7 +194,8 @@ function goApp() {
     },
     body: JSON.stringify({
       identifiant,
-      motDePasse
+      motDePasse,
+      role: selectedRole.toUpperCase()
     })
   })
     .then((res) => {
