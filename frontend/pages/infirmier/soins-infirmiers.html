@@ -91,14 +91,14 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Date / Heure</th>
-                <th>Patient</th>
-                <th>Type de soin</th>
-                <th>Détail</th>
-                <th>Infirmier</th>
-                <th>Actions</th>
-              </tr>
+            <tr>
+              <th>Date / Heure</th>
+              <th>Patient</th>
+              <th>Type de soin</th>
+              <th>Détail</th>
+              <th>Infirmier</th>
+              <th>Actions</th>
+            </tr>
             </thead>
             <tbody id="tbody-soins"></tbody>
           </table>
@@ -121,7 +121,8 @@
       <button class="modal-close" onclick="fermerModal('modal-soin-form')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="fld"><label>Patient</label>
+      <div class="fld">
+        <label for="sf-patient">Patient</label>
         <select id="sf-patient">
           <option value="">Sélectionner un patient</option>
           <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
@@ -129,7 +130,8 @@
           <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
         </select>
       </div>
-      <div class="fld"><label>Type de soin</label>
+      <div class="fld">
+        <label for="sf-type">Type de soin</label>
         <select id="sf-type">
           <option value="">Sélectionner</option>
           <option>Pansement</option>
@@ -143,14 +145,22 @@
           <option>Surveillance post-opératoire</option>
         </select>
       </div>
-      <div class="fld"><label>Détail / Médicament administré</label>
+      <div class="fld">
+        <label for="sf-detail">Détail / Médicament administré</label>
         <input type="text" id="sf-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
       </div>
       <div class="form-grid-2">
-        <div class="fld"><label>Date</label><input type="date" id="sf-date"></div>
-        <div class="fld"><label>Heure</label><input type="time" id="sf-heure"></div>
+        <div class="fld">
+          <label for="sf-date">Date</label>
+          <input type="date" id="sf-date">
+        </div>
+        <div class="fld">
+          <label for="sf-heure">Heure</label>
+          <input type="time" id="sf-heure">
+        </div>
       </div>
-      <div class="fld"><label>Observations</label>
+      <div class="fld">
+        <label for="sf-obs">Observations</label>
         <textarea id="sf-obs" rows="3" placeholder="Notes sur le déroulement du soin, réaction du patient…"></textarea>
       </div>
     </div>
@@ -182,6 +192,3 @@
 <script src="../../js/infirmier.js"></script>
 </body>
 </html>
-
-
-

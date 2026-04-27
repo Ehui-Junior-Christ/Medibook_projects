@@ -57,7 +57,7 @@
         <div class="upload-grid">
           <div>
             <div class="fld">
-              <label>Patient</label>
+              <label for="up-patient">Patient</label>
               <select id="up-patient">
                 <option value="">-- Sélectionner un patient --</option>
                 <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
@@ -66,7 +66,7 @@
               </select>
             </div>
             <div class="fld">
-              <label>Consultation liée</label>
+              <label for="up-consultation">Consultation liée</label>
               <select id="up-consultation">
                 <option value="">-- Sélectionner une consultation --</option>
                 <option value="1">12/03/2025 – Fièvre persistante (Dr. Bamba A.)</option>
@@ -74,7 +74,7 @@
               </select>
             </div>
             <div class="fld">
-              <label>Type de document</label>
+              <label for="up-type">Type de document</label>
               <select id="up-type">
                 <option value="">Sélectionner</option>
                 <option value="ANALYSE_BIOLOGIQUE">Analyse biologique (PDF)</option>
@@ -86,7 +86,7 @@
               </select>
             </div>
             <div class="fld">
-              <label>Description</label>
+              <label for="up-description">Description</label>
               <input type="text" id="up-description" placeholder="Ex: Bilan sanguin NFS + CRP · 14/03/2025">
             </div>
           </div>
@@ -94,10 +94,10 @@
           <!-- Zone drag & drop -->
           <div>
             <div class="upload-zone" id="upload-zone"
-              ondragover="dragOver(event)"
-              ondragleave="dragLeave(event)"
-              ondrop="dropFichier(event)"
-              onclick="document.getElementById('file-input').click()">
+                 ondragover="dragOver(event)"
+                 ondragleave="dragLeave(event)"
+                 ondrop="dropFichier(event)"
+                 onclick="document.getElementById('file-input').click()">
               <div class="upload-zone-icon">📂</div>
               <div class="upload-zone-titre">Glisser-déposer un fichier</div>
               <div class="upload-zone-sous">ou cliquer pour parcourir</div>
@@ -105,8 +105,7 @@
             </div>
             <input type="file" id="file-input" style="display:none"
               accept=".pdf,.jpg,.jpeg,.png"
-              onchange="fichierSelectionne(this.files[0])">
-
+                   onchange="fichierSelectionne(this)">
             <!-- Aperçu fichier sélectionné -->
             <div id="fichier-selectionne" class="fichier-apercu" style="display:none">
               <span class="fichier-icone" id="fichier-icone">📄</span>
