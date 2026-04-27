@@ -27,10 +27,10 @@
 }
 
 .fld label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .6px;
+  letter-spacing: 6px;
   color: var(--slate-500);
 }
 
@@ -38,7 +38,7 @@
 .fld select,
 .fld textarea {
   padding: 9px 12px;
-  border: 1.5px solid var(--slate-200);
+  border: 2px solid var(--slate-200);
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-family: inherit;
@@ -152,9 +152,9 @@ tbody tr:hover td { background: var(--teal-50); }
 /* ===== FILTRE SELECT ===== */
 .filtre-select {
   padding: 6px 10px;
-  border: 1.5px solid var(--slate-200);
+  border: 2px solid var(--slate-200);
   border-radius: var(--radius-sm);
-  font-size: 12.5px;
+  font-size: 13px;
   font-family: inherit;
   color: var(--slate-700);
   background: var(--white);
@@ -256,7 +256,7 @@ tbody tr:hover td { background: var(--teal-50); }
 }
 
 .soin-patient {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--slate-400);
   flex-shrink: 0;
 }
@@ -324,7 +324,7 @@ tbody tr:hover td { background: var(--teal-50); }
 
 .fichier-icone { font-size: 22px; }
 .fichier-nom   { font-size: 13px; font-weight: 600; color: var(--slate-900); }
-.fichier-taille { font-size: 11.5px; color: var(--slate-500); margin-top: 2px; }
+.fichier-taille { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
 
 .progress-label {
   font-size: 12px;
@@ -343,12 +343,12 @@ tbody tr:hover td { background: var(--teal-50); }
   height: 100%;
   background: var(--teal-500);
   border-radius: 3px;
-  width: 0%;
+  width: 0;
   transition: width .3s;
 }
 
 .upload-feedback {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   padding: 7px 10px;
   border-radius: var(--radius-sm);
@@ -366,50 +366,35 @@ tbody tr:hover td { background: var(--teal-50); }
 
 /* ===== MODAL ===== */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,.5);
-  z-index: 200;
   display: none;
-  align-items: center;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
   justify-content: center;
-  backdrop-filter: blur(3px);
+  align-items: center;
+  z-index: 1000;
 }
-
-.modal-overlay.open { display: flex; }
-
+.modal-overlay.open {
+  display: flex;
+}
 .modal-box {
-  background: var(--white);
-  border-radius: 18px;
-  width: min(560px, 92vw);
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 40px 100px rgba(0,0,0,.25);
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
 }
-
 .modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 0;
+  margin-bottom: 15px;
 }
-
-.modal-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--slate-900);
-}
-
 .modal-close {
   background: none;
   border: none;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
-  color: var(--slate-400);
-  padding: 4px;
-  border-radius: 6px;
-  transition: .15s;
 }
 
 .modal-close:hover { background: var(--slate-100); color: var(--slate-700); }
@@ -423,7 +408,7 @@ tbody tr:hover td { background: var(--teal-50); }
   border: 1px solid var(--teal-200);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--teal-800);
   margin-bottom: 14px;
 }
@@ -504,4 +489,227 @@ tbody tr:hover td { background: var(--teal-50); }
     padding-left: 18px;
     padding-right: 18px;
   }
+}
+
+
+
+
+/* ========== STYLE SPACIEUX (version large) ========== */
+
+/* Champs de formulaire espacés */
+.fld {
+  margin-bottom: 20px;
+}
+
+.fld label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.fld select,
+.fld input,
+.fld textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.fld select:focus,
+.fld input:focus,
+.fld textarea:focus {
+  border-color: #0D8E94;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13,142,148,0.15);
+}
+
+/* Grille à 2 colonnes (date/heure) avec espacement */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+/* Boutons modale mieux espacés */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #0D8E94;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+}
+
+/* Tableau plus aéré */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th {
+  text-align: left;
+  padding: 14px 16px;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f2f5;
+  vertical-align: middle;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 30px;
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.badge-teal { background: #ccfbf1; color: #0f766e; }
+.badge-amber { background: #fed7aa; color: #9a3412; }
+.badge-red { background: #fee2e2; color: #b91c1c; }
+.badge-slate { background: #e2e8f0; color: #334155; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-green { background: #dcfce7; color: #15803d; }
+
+/* Modale */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal-box {
+  background: white;
+  border-radius: 24px;
+  width: 560px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 25px 40px -12px rgba(0,0,0,0.25);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #94a3b8;
+}
+.modal-body {
+  padding: 24px;
+}
+
+/* Carte et titres */
+.card {
+  margin-bottom: 28px;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background: white;
+}
+
+.card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.card-sub {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+
+
+
+/* Supprimer l'espacement élargi entre les lettres */
+.fld label,
+.card-title,
+.modal-title,
+.btn,
+th,
+td,
+select,
+input,
+textarea,
+.upload-zone-titre,
+.upload-zone-sous,
+.upload-zone-formats,
+.topbar-title,
+.sb-item,
+.sb-user-name,
+.sb-user-role {
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  word-spacing: normal !important;
 }
