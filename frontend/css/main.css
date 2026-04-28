@@ -858,6 +858,77 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
 .inscrip-step.active { display: block; }
 .inscrip-right h3 { font-size: 19px; margin-bottom: 4px; }
 .step-sub { font-size: 13px; color: var(--slate-500); margin-bottom: 20px; }
+
+/* Home (static favicons grid) */
+.home-favicon-shell { margin-top: 6px; }
+.home-favicon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, .06);
+}
+.home-favicon-item {
+  --accent: var(--teal-700);
+  --delay: 0ms;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  border: 1.5px solid var(--slate-200);
+  background: linear-gradient(180deg, var(--slate-50), var(--white));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  transition: .15s;
+  position: relative;
+  overflow: hidden;
+  animation: home-favicon-float 3.6s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+.home-favicon-item::before {
+  content: "";
+  position: absolute;
+  inset: -18px;
+  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%);
+  opacity: .9;
+  pointer-events: none;
+}
+.home-favicon-item:hover,
+.home-favicon-item:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--teal-300);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, .10);
+}
+.home-favicon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  filter:
+    drop-shadow(0 10px 18px rgba(15, 23, 42, .14))
+    saturate(1.08);
+  animation: home-favicon-wobble 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--delay) * 1.2);
+}
+@keyframes home-favicon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes home-favicon-wobble {
+  0%, 100% { transform: rotate(-1.2deg) scale(1); }
+  50% { transform: rotate(1.2deg) scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-favicon-item { animation: none; }
+  .home-favicon { animation: none; }
+}
+@media (max-width: 520px) {
+  .home-favicon-grid { gap: 8px; padding: 12px; }
+  .home-favicon { width: 20px; height: 20px; }
+}
 .sp-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; }
 .sp-item.active { background: rgba(255, 255, 255, .12); }
 .sp-dot {
