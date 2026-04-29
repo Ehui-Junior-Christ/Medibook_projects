@@ -1,4 +1,4 @@
-﻿// ========== SESSION INFIRMIER ========== //
+// ========== SESSION INFIRMIER ========== //
 const DEFAULT_INFIRMIER_SESSION = {
     id: 3,
     nom: "Kone",
@@ -33,6 +33,32 @@ const mockPatients = [
     { id: 2, nom: "Assi Koffi Martial", cmu: "CMU-2023-04512" },
     { id: 3, nom: "N'guessan Kouamé", cmu: "CMU-2024-11032" }
 ];
+
+// Initialisation du profil depuis localStorage s'il existe
+let savedInfirmier = localStorage.getItem('infirmierProfile');
+if (savedInfirmier) {
+    mockInfirmier = { ...mockInfirmier, ...JSON.parse(savedInfirmier) };
+}
+
+window.applyInfirmierAvatar = function() {
+    document.querySelectorAll("[data-infirmier-avatar], .sb-avatar").forEach(node => {
+        if (mockInfirmier.avatar) {
+            node.style.backgroundImage = `url(${mockInfirmier.avatar})`;
+            node.style.backgroundSize = "cover";
+            node.style.backgroundPosition = "center";
+            node.textContent = "";
+        } else {
+            node.style.backgroundImage = "none";
+            node.textContent = mockInfirmier.initiales;
+        }
+    });
+};
+
+window.saveInfirmierProfile = function(updates) {
+    mockInfirmier = { ...mockInfirmier, ...updates };
+    localStorage.setItem('infirmierProfile', JSON.stringify(mockInfirmier));
+    window.applyInfirmierAvatar();
+};
 
 let mockDocumentsUploades = [];
 
@@ -232,7 +258,8 @@ window.initListePatients = function() {
                     <td>${conditions || '<span class="badge badge-slate">Aucune</span>'}</td>
                     <td>${derniereMesure}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="window.location.href='signes-vitaux.html?id=${p.id}'">Vitaux</button>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='dossier-patient.html?id=${p.id}'">Dossier</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.location.href='signes-vitaux.html?id=${p.id}'">Vitaux</button>
                         <button class="btn btn-secondary btn-sm" onclick="window.location.href='soins-infirmiers.html?id=${p.id}'">Soins</button>
                     </td>
                 </tr>
@@ -292,9 +319,37 @@ window.soumettreNouveauSoin = function() {
 // ========== INITIALISATION AU CHARGEMENT ==========
 document.addEventListener("DOMContentLoaded", function() {
     window.renderTableDocuments();
-    window.initListePatients();    // <-- AJOUTÉ : remplit la liste des patients
-    const sbAvatar = document.getElementById("sb-avatar");
-    if (sbAvatar) sbAvatar.textContent = mockInfirmier.initiales;
+    if (window.initListePatients) window.initListePatients();
+    
+    window.applyInfirmierAvatar();
+    
     const sbName = document.getElementById("sb-name");
     if (sbName) sbName.textContent = mockInfirmier.prenom + " " + mockInfirmier.nom;
+
+    // Gestion du changement de photo de profil
+    const avatarInput = document.getElementById("ipAvatar");
+    if (avatarInput) {
+        avatarInput.addEventListener("change", function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.saveInfirmierProfile({ avatar: e.target.result });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Gestion de la sauvegarde du formulaire (Profil infirmier)
+    const profileForm = document.getElementById("infirmierProfileForm");
+    if (profileForm) {
+        profileForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const phone = document.getElementById("ipPhone")?.value;
+            const email = document.getElementById("ipEmail")?.value;
+            window.saveInfirmierProfile({ telephone: phone, email: email });
+            alert("Profil mis à jour !");
+        });
+    }
 });
