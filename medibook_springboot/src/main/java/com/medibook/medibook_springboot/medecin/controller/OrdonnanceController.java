@@ -1,6 +1,7 @@
 package com.medibook.medibook_springboot.medecin.controller;
 
 import com.medibook.medibook_springboot.medecin.dto.OrdonnanceDto;
+import jakarta.validation.Valid;
 import com.medibook.medibook_springboot.medecin.service.OrdonnanceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,7 +29,7 @@ public class OrdonnanceController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrdonnanceDto create(@RequestBody OrdonnanceDto request) {
+    public OrdonnanceDto create(@Valid @RequestBody OrdonnanceDto request) {
         return ordonnanceService.create(request);
     }
 
@@ -53,7 +54,7 @@ public class OrdonnanceController {
     }
 
     @PutMapping("/{id}")
-    public OrdonnanceDto update(@PathVariable Long id, @RequestBody OrdonnanceDto request) {
+    public OrdonnanceDto update(@PathVariable Long id, @Valid @RequestBody OrdonnanceDto request) {
         return ordonnanceService.update(id, request);
     }
 }

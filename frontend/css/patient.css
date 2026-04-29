@@ -219,11 +219,6 @@
   padding: 18px;
 }
 
-.sidebar-photo-btn {
-  width: 100%;
-  margin-top: 10px;
-}
-
 .profile-form-grid .col-full {
   grid-column: 1 / -1;
 }

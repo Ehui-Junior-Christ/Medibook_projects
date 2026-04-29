@@ -44,13 +44,13 @@
                     <button class="dpill" type="button" data-type="general" onclick="setCert('general', this)">General</button>
                 </div>
                 <div class="grid g2">
-                    <div class="fld"><label>Date du certificat</label><input id="cDate" type="date" oninput="updateCert()"></div>
-                    <div class="fld"><label>Consultation liee</label><select id="cConsult" onchange="updateCert()"><option>12/03/2025 - Fievre persistante</option><option>08/03/2025 - Bilan diabete</option><option>21/03/2025 - Suivi prenatal</option></select></div>
+                    <div class="fld"><label>Date du certificat</label><input id="cDate" type="date" required oninput="updateCert()"></div>
+                    <div class="fld"><label>Consultation liee</label><select id="cConsult" required onchange="updateCert()"><option>12/03/2025 - Fievre persistante</option><option>08/03/2025 - Bilan diabete</option><option>21/03/2025 - Suivi prenatal</option></select></div>
                     <div class="fld" id="fArretD" style="display:none"><label>Debut de l'arret</label><input id="arretD" type="date" oninput="updateCert()"></div>
                     <div class="fld" id="fArretF" style="display:none"><label>Fin de l'arret</label><input id="arretF" type="date" oninput="updateCert()"></div>
-                    <div class="fld"><label>Destinataire</label><input id="cDest" type="text" placeholder="A qui de droit" oninput="updateCert()"></div>
+                    <div class="fld"><label>Destinataire</label><input id="cDest" type="text" required placeholder="A qui de droit" oninput="updateCert()"></div>
                     <div class="fld"><label>Motif medical</label><select id="cMotif" onchange="updateCert()"><option value="pour raisons de sante">pour raisons de sante</option><option value="suite a une consultation">suite a une consultation</option></select></div>
-                    <div class="fld col-full"><label>Restrictions</label><input id="cRestr" type="text" placeholder="Eviter les efforts physiques" oninput="updateCert()"></div>
+                    <div class="fld col-full"><label>Restrictions</label><input id="cRestr" type="text" required placeholder="Eviter les efforts physiques" oninput="updateCert()"></div>
                 </div>
                 <div style="margin:16px 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500)">Apercu</div>
                 <div class="cert-preview" id="certificatPreviewPrint"><div class="cert-header"><div class="cert-title-txt" id="cpTitle">Certificat d'aptitude au travail</div><div class="cert-doctor-txt"><span data-medecin-name>Dr. Bamba A.</span> · <span data-medecin-specialty>Medecine generale</span></div></div><div id="cpBody"><p>Je soussigne, <strong data-medecin-name>Dr. Bamba A.</strong>, certifie avoir examine ce jour :</p><p><strong data-patient-name>Kouadio Jean Baptiste</strong>, ne le <strong data-patient-birth>14/03/1987</strong>, N° CMU : <strong data-patient-cmu>CMU-2024-08821</strong></p><p>Destinataire : <strong id="cpDest">A qui de droit</strong></p><p>Consultation liee : <strong id="cpConsult">12/03/2025 - Fievre persistante</strong></p><p id="cpMain">Et atteste que l'etat de sante de ce patient lui permet d'exercer son activite professionnelle sans restriction particuliere.</p><p id="cpRestr" style="font-style:italic;color:var(--slate-500)"></p></div><div class="cert-sig">Fait a Abidjan, le <span id="cpDate">...</span><div class="cert-sig-line"></div></div></div>

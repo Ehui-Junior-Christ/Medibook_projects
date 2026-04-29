@@ -252,8 +252,8 @@ public class AuthService {
             throw new IllegalArgumentException("Veuillez renseigner tous les champs obligatoires");
         }
 
-        if (role == Role.PATIENT) {
-            validatePatientDuplicatesForMedicalStaffOnly(request);
+        if (role == Role.PATIENT || isMedicalRole(role)) {
+            validatePatientMedicalSharedIdentifiers(request, role);
         } else if (utilisateurRepository.existsByCmu(request.getCmu().trim())) {
             throw new IllegalArgumentException("CMU deja utilise");
         } else if (utilisateurRepository.existsByTelephone(request.getTelephone().trim())) {
@@ -270,17 +270,20 @@ public class AuthService {
         }
     }
 
-    private void validatePatientDuplicatesForMedicalStaffOnly(RegisterDto request) {
-        Utilisateur cmuOwner = validatePatientFieldReuse(
+    private void validatePatientMedicalSharedIdentifiers(RegisterDto request, Role targetRole) {
+        Utilisateur cmuOwner = validateSharedFieldReuse(
                 utilisateurRepository.findAllByCmu(request.getCmu().trim()),
+                targetRole,
                 "CMU deja utilise"
         );
-        Utilisateur phoneOwner = validatePatientFieldReuse(
+        Utilisateur phoneOwner = validateSharedFieldReuse(
                 utilisateurRepository.findAllByTelephone(request.getTelephone().trim()),
+                targetRole,
                 "Telephone deja utilise"
         );
-        Utilisateur emailOwner = validatePatientFieldReuse(
+        Utilisateur emailOwner = validateSharedFieldReuse(
                 utilisateurRepository.findAllByEmail(request.getEmail().trim().toLowerCase()),
+                targetRole,
                 "Email deja utilise"
         );
 
@@ -292,40 +295,51 @@ public class AuthService {
         if ((cmuOwner != null && !cmuOwner.getId().equals(owner.getId()))
                 || (phoneOwner != null && !phoneOwner.getId().equals(owner.getId()))
                 || (emailOwner != null && !emailOwner.getId().equals(owner.getId()))) {
-            throw new IllegalArgumentException("CMU, telephone et email doivent appartenir au meme compte medical");
-        }
-
-        if (isBlank(request.getMatricule())) {
-            throw new IllegalArgumentException("Le matricule du medecin/infirmier est obligatoire pour creer son compte patient");
-        }
-
-        if (!isOwnerMatricule(owner, request.getMatricule().trim())) {
-            throw new IllegalArgumentException("Creation du compte patient autorisee uniquement pour le medecin/infirmier proprietaire de ces informations");
+            throw new IllegalArgumentException("CMU, telephone et email doivent appartenir au meme compte associe");
         }
 
         if (!sameIdentity(owner, request)) {
-            throw new IllegalArgumentException("Nom et prenom doivent correspondre au medecin/infirmier proprietaire");
+            throw new IllegalArgumentException("Nom et prenom doivent correspondre au proprietaire du compte associe");
+        }
+
+        if (targetRole == Role.PATIENT) {
+            if (isBlank(request.getMatricule())) {
+                throw new IllegalArgumentException("Le matricule du medecin/infirmier est obligatoire pour creer son compte patient");
+            }
+
+            if (!isOwnerMatricule(owner, request.getMatricule().trim())) {
+                throw new IllegalArgumentException("Creation du compte patient autorisee uniquement pour le medecin/infirmier proprietaire de ces informations");
+            }
         }
     }
 
-    private Utilisateur validatePatientFieldReuse(List<Utilisateur> utilisateurs, String message) {
+    private Utilisateur validateSharedFieldReuse(List<Utilisateur> utilisateurs, Role targetRole, String message) {
         if (utilisateurs == null || utilisateurs.isEmpty()) {
             return null;
         }
 
-        // 2e utilisation maximum : la valeur ne doit exister qu'une seule fois avant la creation patient.
         if (utilisateurs.size() > 1) {
             throw new IllegalArgumentException(message);
         }
 
-        boolean hasPatient = utilisateurs.stream().anyMatch(utilisateur -> utilisateur.getRole() == Role.PATIENT);
-        boolean hasOnlyMedicalRoles = utilisateurs.stream().allMatch(this::isMedicalRole);
+        Utilisateur owner = utilisateurs.get(0);
+        Role ownerRole = owner.getRole();
 
-        if (hasPatient || !hasOnlyMedicalRoles) {
-            throw new IllegalArgumentException(message);
+        if (targetRole == Role.PATIENT) {
+            if (!isMedicalRole(ownerRole)) {
+                throw new IllegalArgumentException(message);
+            }
+            return owner;
         }
 
-        return utilisateurs.get(0);
+        if (isMedicalRole(targetRole)) {
+            if (ownerRole != Role.PATIENT) {
+                throw new IllegalArgumentException(message);
+            }
+            return owner;
+        }
+
+        throw new IllegalArgumentException(message);
     }
 
     private Utilisateur firstNonNull(Utilisateur... utilisateurs) {
@@ -371,6 +385,10 @@ public class AuthService {
     private boolean isMedicalRole(Utilisateur utilisateur) {
         return utilisateur != null
                 && (utilisateur.getRole() == Role.MEDECIN || utilisateur.getRole() == Role.INFIRMIER);
+    }
+
+    private boolean isMedicalRole(Role role) {
+        return role == Role.MEDECIN || role == Role.INFIRMIER;
     }
 
     private String normalize(String value) {

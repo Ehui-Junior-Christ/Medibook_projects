@@ -14,22 +14,34 @@ import com.medibook.medibook_springboot.patient.entity.Patient;
 import com.medibook.medibook_springboot.patient.entity.Rappel;
 import com.medibook.medibook_springboot.patient.repository.CarnetMedicalRepository;
 import com.medibook.medibook_springboot.patient.repository.PatientRepository;
+import com.medibook.medibook_springboot.patient.repository.RappelRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientService {
 
     private final PatientRepository patientRepository;
     private final CarnetMedicalRepository carnetMedicalRepository;
+    private final RappelRepository rappelRepository;
 
-    public PatientService(PatientRepository patientRepository, CarnetMedicalRepository carnetMedicalRepository) {
+    public PatientService(
+            PatientRepository patientRepository,
+            CarnetMedicalRepository carnetMedicalRepository,
+            RappelRepository rappelRepository
+    ) {
         this.patientRepository = patientRepository;
         this.carnetMedicalRepository = carnetMedicalRepository;
+        this.rappelRepository = rappelRepository;
     }
 
     @Transactional
@@ -90,6 +102,16 @@ public class PatientService {
         return mapCarnet(getOrCreateCarnet(patient));
     }
 
+    @Transactional(readOnly = true)
+    public List<RappelDto> getRappels(Long patientId) {
+        getPatientOrThrow(patientId);
+        return sortRappels(
+                rappelRepository.findByCarnetMedicalPatientIdOrderByDateHeureAscIdAsc(patientId).stream()
+                        .map(this::mapRappel)
+                        .toList()
+        );
+    }
+
     @Transactional
     public CarnetMedicalDto updateCarnetMedical(Long patientId, CarnetMedicalDto dto) {
         Patient patient = getPatientOrThrow(patientId);
@@ -105,10 +127,26 @@ public class PatientService {
         carnet.getConditions().clear();
         dto.getConditions().forEach(item -> carnet.getConditions().add(mapConditionEntity(item, carnet)));
 
-        carnet.getRappels().clear();
-        dto.getRappels().forEach(item -> carnet.getRappels().add(mapRappelEntity(item, carnet)));
+        synchroniserRappels(carnet, dto.getRappels());
 
         return mapCarnet(carnetMedicalRepository.save(carnet));
+    }
+
+    @Transactional
+    public List<RappelDto> updateRappels(Long patientId, List<RappelDto> rappels) {
+        Patient patient = getPatientOrThrow(patientId);
+        CarnetMedical carnet = getOrCreateCarnet(patient);
+        synchroniserRappels(carnet, rappels);
+        CarnetMedical savedCarnet = carnetMedicalRepository.save(carnet);
+        return sortRappels(savedCarnet.getRappels().stream().map(this::mapRappel).toList());
+    }
+
+    @Transactional
+    public RappelDto updateRappelStatut(Long patientId, Long rappelId, Boolean fait) {
+        Rappel rappel = rappelRepository.findByIdAndCarnetMedicalPatientId(rappelId, patientId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rappel introuvable."));
+        rappel.setFait(fait != null ? fait : Boolean.FALSE);
+        return mapRappel(rappelRepository.save(rappel));
     }
 
     private void appliquerRequest(Patient patient, PatientRequestDto request) {
@@ -241,7 +279,7 @@ public class PatientService {
         dto.setTraitementsEnCours(carnet.getTraitementsEnCours());
         dto.setAntecedents(carnet.getAntecedents().stream().map(this::mapAntecedent).toList());
         dto.setConditions(carnet.getConditions().stream().map(this::mapCondition).toList());
-        dto.setRappels(carnet.getRappels().stream().map(this::mapRappel).toList());
+        dto.setRappels(sortRappels(carnet.getRappels().stream().map(this::mapRappel).toList()));
         return dto;
     }
 
@@ -299,15 +337,42 @@ public class PatientService {
         return entity;
     }
 
-    private Rappel mapRappelEntity(RappelDto dto, CarnetMedical carnet) {
-        Rappel entity = new Rappel();
-        entity.setType(dto.getType());
-        entity.setTitre(dto.getTitre());
+    private void synchroniserRappels(CarnetMedical carnet, List<RappelDto> rappels) {
+        List<RappelDto> payload = rappels == null ? List.of() : rappels;
+        Map<Long, Rappel> existingById = carnet.getRappels().stream()
+                .filter(rappel -> rappel.getId() != null)
+                .collect(Collectors.toMap(Rappel::getId, Function.identity()));
+
+        carnet.getRappels().removeIf(existing ->
+                existing.getId() != null
+                        && payload.stream().noneMatch(dto -> Objects.equals(dto.getId(), existing.getId()))
+        );
+
+        for (RappelDto dto : payload) {
+            Rappel entity = dto.getId() != null ? existingById.get(dto.getId()) : null;
+            if (entity == null) {
+                entity = new Rappel();
+                carnet.getRappels().add(entity);
+            }
+            applyRappel(entity, dto, carnet);
+        }
+    }
+
+    private void applyRappel(Rappel entity, RappelDto dto, CarnetMedical carnet) {
+        entity.setType(dto.getType() != null && !dto.getType().isBlank() ? dto.getType() : "rappel");
+        entity.setTitre(dto.getTitre() != null && !dto.getTitre().isBlank() ? dto.getTitre() : "Rappel patient");
         entity.setDescription(dto.getDescription());
         entity.setDateHeure(dto.getDateHeure());
         entity.setUrgence(dto.getUrgence());
         entity.setFait(dto.getFait() != null ? dto.getFait() : Boolean.FALSE);
         entity.setCarnetMedical(carnet);
-        return entity;
+    }
+
+    private List<RappelDto> sortRappels(List<RappelDto> rappels) {
+        return rappels.stream()
+                .sorted(Comparator
+                        .comparing(RappelDto::getDateHeure, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(RappelDto::getId, Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 }
