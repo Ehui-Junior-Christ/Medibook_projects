@@ -47,32 +47,59 @@
       <section class="patient-hero">
         <div class="patient-hero-copy">
           <h1 data-dashboard-greeting>Bonjour</h1>
-          <p>Retrouvez vos rendez-vous, vos documents et les informations medicales utiles dans une interface harmonisee avec le reste de la plateforme.</p>
+          <p>Bienvenue sur votre espace patient MediBook. Accedez a vos services medicaux en toute simplicite.</p>
         </div>
         <div class="patient-hero-mark">🩺</div>
       </section>
 
       <div class="stats-row" data-patient-stats></div>
 
+      <h2 class="uc-section-title">Mes services</h2>
+      <section class="usecase-grid">
+        <a class="usecase-card uc-profil" href="profil.html" id="uc-profil">
+          <div class="uc-icon-wrap"><span>👤</span></div>
+          <div class="uc-body">
+            <h3>Gerer mon profil</h3>
+            <p>Coordonnees, informations civiles et photo de profil.</p>
+          </div>
+          <span class="uc-arrow">→</span>
+        </a>
+        <a class="usecase-card uc-dossier" href="carnet-medical.html" id="uc-dossier">
+          <div class="uc-icon-wrap"><span>📋</span></div>
+          <div class="uc-body">
+            <h3>Consulter carnet medical</h3>
+            <p>Antecedents, allergies, constantes et historique complet.</p>
+          </div>
+          <span class="uc-arrow">→</span>
+        </a>
+        <a class="usecase-card uc-docs" href="documents.html" id="uc-docs">
+          <div class="uc-icon-wrap"><span>📄</span></div>
+          <div class="uc-body">
+            <h3>Telecharger document medical</h3>
+            <p>Certificats, ordonnances, analyses et resultats.</p>
+          </div>
+          <span class="uc-arrow">→</span>
+        </a>
+        <a class="usecase-card uc-images" href="images-medicales.html" id="uc-images">
+          <div class="uc-icon-wrap"><span>🖼️</span></div>
+          <div class="uc-body">
+            <h3>Telecharger image medical</h3>
+            <p>Radiographies, scanners, IRM et images diagnostiques.</p>
+          </div>
+          <span class="uc-arrow">→</span>
+        </a>
+        <a class="usecase-card uc-notifs" href="notifications.html" id="uc-notifs">
+          <div class="uc-icon-wrap"><span>🔔</span></div>
+          <div class="uc-body">
+            <h3>Consulter ses notifications</h3>
+            <p>Alertes, rappels et suivi de vos rendez-vous.</p>
+            <span class="uc-notif-badge" data-dashboard-notif-count></span>
+          </div>
+          <span class="uc-arrow">→</span>
+        </a>
+      </section>
+
       <section class="dashboard-grid">
-        <div class="stack">
-          <article class="card">
-            <div class="card-header">
-              <div class="card-title">Dernieres consultations</div>
-              <a class="btn btn-secondary btn-sm" href="consultation.html">Voir tout</a>
-            </div>
-            <div data-dashboard-consultations></div>
-          </article>
-
-          <article class="card">
-            <div class="card-header">
-              <div class="card-title">Ordonnances en cours</div>
-              <a class="btn btn-secondary btn-sm" href="ordonnances.html">Toutes les ordonnances</a>
-            </div>
-            <div data-dashboard-ordonnances></div>
-          </article>
-        </div>
-
         <div class="stack">
           <article class="card">
             <div class="card-header">
@@ -83,35 +110,8 @@
               <div class="helper-copy" data-next-appointment-copy>Dr. Ange Kouassi · 09:30 · Medecine generale</div>
             </div>
           </article>
-
-          <article class="card">
-            <div class="card-header">
-              <div class="card-title">Actions rapides</div>
-            </div>
-            <div class="quick-links">
-              <a class="quick-link-card" href="profil.html#edit-profile">
-                <span class="quick-link-icon">👤</span>
-                <strong>Mettre a jour mon profil</strong>
-                <span class="helper-copy">Coordonnees civiles et informations de sante.</span>
-              </a>
-              <a class="quick-link-card" href="documents.html">
-                <span class="quick-link-icon">📄</span>
-                <strong>Mes documents</strong>
-                <span class="helper-copy">Ordonnances, certificats et resultats.</span>
-              </a>
-              <a class="quick-link-card" href="carnet-medical.html">
-                <span class="quick-link-icon">📋</span>
-                <strong>Carnet medical</strong>
-                <span class="helper-copy">Antecedents, allergies et constantes.</span>
-              </a>
-              <a class="quick-link-card" href="rappels.html">
-                <span class="quick-link-icon">🔔</span>
-                <strong>Rappels</strong>
-                <span class="helper-copy">Medicaments et suivi de rendez-vous.</span>
-              </a>
-            </div>
-          </article>
-
+        </div>
+        <div class="stack">
           <article class="card">
             <div class="card-header">
               <div class="card-title">Profil resume</div>

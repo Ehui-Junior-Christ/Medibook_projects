@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook – Dossier Patient</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/infirmier.css">
+  <style>
+    .section-title { font-size: 16px; font-weight: 600; margin-top: 24px; margin-bottom: 12px; color: var(--slate-900); }
+    .item-card { background: var(--white); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+    .item-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .item-title { font-weight: 600; color: var(--slate-900); }
+    .item-date { font-size: 13px; color: var(--slate-500); }
+    .item-body { font-size: 14px; color: var(--slate-700); line-height: 1.5; }
+    .pill { display: inline-block; padding: 4px 8px; background: var(--slate-100); color: var(--slate-700); border-radius: 4px; font-size: 12px; margin-right: 4px; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
+    <nav>
+      <div class="sb-section">
+        <span class="sb-section-label">Soins</span>
+        <a href="dashboard.html" class="sb-item"><span class="sb-icon">🏠</span>Tableau de bord</a>
+        <a href="liste-patients.html" class="sb-item active"><span class="sb-icon">👥</span>Patients</a>
+        <a href="signes-vitaux.html" class="sb-item"><span class="sb-icon">❤️</span>Signes vitaux</a>
+        <a href="soins-infirmiers.html" class="sb-item"><span class="sb-icon">🩹</span>Soins infirmiers</a>
+        <a href="upload-documents.html" class="sb-item"><span class="sb-icon">📁</span>Documents</a>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil-infirmier.html">
+        <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
+        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Koné Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Dossier du patient</div>
+      <div class="topbar-right">
+        <div class="icon-btn" id="btn-logout-top">🚪</div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <button class="btn btn-secondary" onclick="window.history.back()" style="margin-bottom: 16px;">← Retour</button>
+      
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="dossier-patient-nom">Chargement...</div>
+            <div class="card-sub" id="dossier-patient-cmu"></div>
+          </div>
+        </div>
+
+        <div id="dossier-content">
+            <p>Chargement des données depuis le serveur...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/api.js"></script>
+<script src="../../js/infirmier.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientId = urlParams.get('id');
+    const nomEl = document.getElementById("dossier-patient-nom");
+    const cmuEl = document.getElementById("dossier-patient-cmu");
+    const contentEl = document.getElementById("dossier-content");
+    
+    if (!patientId) {
+        nomEl.textContent = "Erreur";
+        contentEl.innerHTML = "<p>Aucun patient sélectionné.</p>";
+        return;
+    }
+
+    // Mapping ID frontend mock -> backend ID (pour la démo, on utilise id 1)
+    const backendId = 1; // Dans un vrai système, on mapperait l'id correctement
+
+    // Récupérer infos de base mock
+    const p = mockPatients.find(x => String(x.id) === patientId);
+    if (p) {
+        nomEl.textContent = p.nom;
+        cmuEl.textContent = p.cmu;
+    }
+
+    try {
+        const fetchApi = (path) => fetch("http://localhost:8080/api" + path).then(r => r.ok ? r.json() : []);
+        
+        const [consultations, ordonnances, certificats] = await Promise.all([
+            fetchApi(`/medecins/consultations/patient/${backendId}`),
+            fetchApi(`/medecins/ordonnances/patient/${backendId}`),
+            fetchApi(`/medecins/certificats/patient/${backendId}`)
+        ]);
+
+        let html = "";
+
+        // Consultations
+        html += '<div class="section-title">🩺 Consultations / Historique</div>';
+        if (consultations && consultations.length > 0) {
+            consultations.forEach(c => {
+                html += `<div class="item-card">
+                    <div class="item-header">
+                        <span class="item-title">${c.motifPrincipal}</span>
+                        <span class="item-date">${c.dateConsultation || ''}</span>
+                    </div>
+                    <div class="item-body">
+                        <p><strong>Médecin:</strong> ${c.medecinNom}</p>
+                        <p><strong>Diagnostic:</strong> ${c.diagnostic || 'Non spécifié'}</p>
+                        <p><strong>Observations:</strong> ${c.observations || 'Aucune'}</p>
+                    </div>
+                </div>`;
+            });
+        } else {
+            html += "<p class='item-body'>Aucune consultation trouvée.</p>";
+        }
+
+        // Ordonnances
+        html += '<div class="section-title">💊 Ordonnances</div>';
+        if (ordonnances && ordonnances.length > 0) {
+            ordonnances.forEach(o => {
+                html += `<div class="item-card">
+                    <div class="item-header">
+                        <span class="item-title">Ordonnance du ${o.dateEmission || ''}</span>
+                        <span class="item-date">Médecin: ${o.medecinNom}</span>
+                    </div>
+                    <div class="item-body">
+                        ${o.medicaments ? o.medicaments.map(m => `<span class="pill">${m.nom} (${m.posologie})</span>`).join('') : 'Aucun médicament'}
+                    </div>
+                </div>`;
+            });
+        } else {
+            html += "<p class='item-body'>Aucune ordonnance trouvée.</p>";
+        }
+
+        // Certificats
+        html += '<div class="section-title">📄 Certificats</div>';
+        if (certificats && certificats.length > 0) {
+            certificats.forEach(c => {
+                html += `<div class="item-card">
+                    <div class="item-header">
+                        <span class="item-title">${c.typeCertificat}</span>
+                        <span class="item-date">${c.dateEmission || ''}</span>
+                    </div>
+                    <div class="item-body">
+                        <p><strong>Médecin:</strong> ${c.medecinNom}</p>
+                        <p>${c.description || ''}</p>
+                    </div>
+                </div>`;
+            });
+        } else {
+            html += "<p class='item-body'>Aucun certificat trouvé.</p>";
+        }
+
+        contentEl.innerHTML = html;
+
+    } catch (e) {
+        contentEl.innerHTML = `<p style="color:var(--red)">Erreur lors de la récupération des données (${e.message}). Assurez-vous que le serveur Spring Boot est lancé.</p>`;
+    }
+});
+</script>
+</body>
+</html>

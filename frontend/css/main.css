@@ -1681,3 +1681,109 @@ tbody tr:last-child td { border-bottom: none; }
     margin: 0;
   }
 }
+
+/* =============== ANIMATIONS GLOBALES =============== */
+
+@keyframes slideUpFade {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideRightFade {
+  0% { opacity: 0; transform: translateX(-20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Application des animations */
+
+.card {
+  animation: slideUpFade 0.5s ease-out forwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+
+.modal-box {
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.login-card {
+  animation: slideUpFade 0.6s ease-out forwards;
+}
+
+.sb-item {
+  animation: slideRightFade 0.4s ease-out forwards;
+  opacity: 0;
+}
+.sb-section:nth-child(1) .sb-item:nth-child(1) { animation-delay: 0.05s; }
+.sb-section:nth-child(1) .sb-item:nth-child(2) { animation-delay: 0.1s; }
+.sb-section:nth-child(1) .sb-item:nth-child(3) { animation-delay: 0.15s; }
+.sb-section:nth-child(1) .sb-item:nth-child(4) { animation-delay: 0.2s; }
+.sb-section:nth-child(1) .sb-item:nth-child(5) { animation-delay: 0.25s; }
+.sb-section:nth-child(1) .sb-item:nth-child(6) { animation-delay: 0.3s; }
+
+.topbar-title {
+  animation: slideRightFade 0.5s ease-out forwards;
+}
+
+.stat-card, .usecase-card, .vital-card, .timeline-entry {
+  animation: slideUpFade 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+.usecase-card:nth-child(1) { animation-delay: 0.1s; }
+.usecase-card:nth-child(2) { animation-delay: 0.2s; }
+.usecase-card:nth-child(3) { animation-delay: 0.3s; }
+.usecase-card:nth-child(4) { animation-delay: 0.4s; }
+.usecase-card:nth-child(5) { animation-delay: 0.5s; }
+.usecase-card:nth-child(6) { animation-delay: 0.6s; }
+
+.timeline-entry:nth-child(1) { animation-delay: 0.1s; }
+.timeline-entry:nth-child(2) { animation-delay: 0.2s; }
+.timeline-entry:nth-child(3) { animation-delay: 0.3s; }
+
+.table-wrap tbody tr {
+  animation: fadeIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+.table-wrap tbody tr:nth-child(1) { animation-delay: 0.05s; }
+.table-wrap tbody tr:nth-child(2) { animation-delay: 0.1s; }
+.table-wrap tbody tr:nth-child(3) { animation-delay: 0.15s; }
+.table-wrap tbody tr:nth-child(4) { animation-delay: 0.2s; }
+.table-wrap tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+/* Micro-animations au survol */
+.btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn:active {
+  transform: translateY(0);
+}
+
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow);
+}
