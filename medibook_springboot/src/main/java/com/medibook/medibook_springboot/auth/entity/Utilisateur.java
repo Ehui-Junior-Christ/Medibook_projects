@@ -55,7 +55,8 @@ public  class Utilisateur {
     // ======================
     // Autres
     // ======================
-    @Column(name = "photo_profil")
+    @Lob
+    @Column(name = "photo_profil", columnDefinition = "LONGTEXT")
     private String photoProfil;
 
     @Column(name = "created_at", updatable = false)

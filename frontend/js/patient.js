@@ -1,5 +1,6 @@
 const API_BASE_URL = "http://localhost:8080/api";
 const STORAGE_KEY = "medibook.patient.profile";
+const PATIENT_RUNTIME_KEY = "medibook.patient.runtime";
 const SHARED_RECORDS_KEY = "medibook.shared.records";
 const USER_STORAGE_KEY = "user";
 
@@ -83,13 +84,45 @@ const patientGlobalSearchItems = [
 const state = {
   apiEnabled: false,
   profile: loadProfile(),
-  carnetMedical: null,
+  carnetMedical: loadPatientRuntime().carnetMedical,
   consultations: [...defaultConsultations],
   ordonnances: [...defaultOrdonnances],
   documents: [...defaultDocuments],
-  rappels: [...defaultRappels],
-  historiqueMedical: [...defaultHistoriqueMedical]
+  rappels: loadPatientRuntime().rappels,
+  historiqueMedical: loadPatientRuntime().historiqueMedical
 };
+
+function loadPatientRuntime() {
+  const fallback = {
+    carnetMedical: null,
+    rappels: [...defaultRappels],
+    historiqueMedical: [...defaultHistoriqueMedical]
+  };
+
+  const raw = window.localStorage.getItem(PATIENT_RUNTIME_KEY);
+  if (!raw) return fallback;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      carnetMedical: parsed.carnetMedical || null,
+      rappels: normalizeRappels(Array.isArray(parsed.rappels) ? parsed.rappels : []),
+      historiqueMedical: Array.isArray(parsed.historiqueMedical) && parsed.historiqueMedical.length
+        ? parsed.historiqueMedical
+        : [...defaultHistoriqueMedical]
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function savePatientRuntime() {
+  window.localStorage.setItem(PATIENT_RUNTIME_KEY, JSON.stringify({
+    carnetMedical: state.carnetMedical,
+    rappels: state.rappels,
+    historiqueMedical: state.historiqueMedical
+  }));
+}
 
 function loadSharedRecords() {
   const fallback = { consultations: [], ordonnances: [], documents: [], vitals: [], timeline: [] };
@@ -290,6 +323,33 @@ function buildCarnetPayload(profile = state.profile) {
   };
 }
 
+function buildRappelsPayload() {
+  return state.rappels.map((item) => ({
+    id: typeof item.id === "number" ? item.id : null,
+    type: item.type,
+    titre: item.titre,
+    description: item.description,
+    dateHeure: item.dateHeure || null,
+    urgence: item.urgence,
+    fait: Boolean(item.fait)
+  }));
+}
+
+function syncRappelsFromBackend(rappels = []) {
+  const backendRappels = Array.isArray(rappels) ? rappels : [];
+  state.rappels = normalizeRappels(backendRappels);
+  state.carnetMedical = {
+    ...(state.carnetMedical || {}),
+    rappels: backendRappels
+  };
+  savePatientRuntime();
+}
+
+function hasPersistedRappel(rappel) {
+  return Array.isArray(state.carnetMedical?.rappels)
+    && state.carnetMedical.rappels.some((item) => String(item.id) === String(rappel.id));
+}
+
 function getCurrentPatientId(profile = state.profile) {
   return profile.numeroAssure || defaultPatientProfile.numeroAssure;
 }
@@ -362,58 +422,6 @@ function applyPatientAvatar(profile = state.profile) {
     node.style.backgroundPosition = "";
     node.textContent = getInitials(profile);
   });
-}
-
-async function persistPatientAvatar(avatar) {
-  const nextProfile = { ...state.profile, avatar };
-  try {
-    if (state.apiEnabled) {
-      await saveProfileToApi(nextProfile);
-    } else {
-      saveProfile(nextProfile);
-    }
-    applyPatientAvatar(state.profile);
-    fillProfileSummary(state.profile);
-    fillProfileForm(state.profile);
-    buildSidebar(state.profile, window.location.pathname.split("/").pop() || "dashboard.html");
-    setText("[data-profile-feedback]", "Photo de profil mise a jour.");
-  } catch (error) {
-    console.error(error);
-    setText("[data-profile-feedback]", "Impossible d'enregistrer la photo pour le moment.");
-  }
-}
-
-function initGlobalPatientPhotoShortcut() {
-  const footer = document.querySelector(".sb-footer");
-  if (!footer || footer.querySelector("[data-patient-photo-shortcut]")) return;
-
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "btn btn-secondary btn-sm sidebar-photo-btn";
-  button.dataset.patientPhotoShortcut = "true";
-  button.textContent = "Changer photo";
-
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.hidden = true;
-
-  button.addEventListener("click", () => input.click());
-  input.addEventListener("change", () => {
-    const file = input.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const avatar = typeof reader.result === "string" ? reader.result : "";
-      if (!avatar) return;
-      await persistPatientAvatar(avatar);
-      input.value = "";
-    };
-    reader.readAsDataURL(file);
-  });
-
-  footer.appendChild(button);
-  footer.appendChild(input);
 }
 
 function getAge(profile) {
@@ -1001,7 +1009,7 @@ async function saveProfileToApi(profile) {
 
   let carnet = state.carnetMedical;
   try {
-    carnet = await apiRequest(`/patients/${backendId}/carnet-medical`);
+    carnet = await apiRequest(`/patients/carnets-medicaux/patient/${backendId}`);
   } catch {
     carnet = state.carnetMedical;
   }
@@ -1012,6 +1020,7 @@ async function saveProfileToApi(profile) {
   state.rappels = normalizeRappels(carnet?.rappels || []);
   state.historiqueMedical = normalizeHistoriqueFromCarnet(carnet);
   saveProfile(state.profile);
+  savePatientRuntime();
   return true;
 }
 
@@ -1019,13 +1028,22 @@ function bindProfileForm(profile) {
   const form = document.querySelector("[data-profile-form]");
   if (!form) return;
   const photoInput = document.getElementById("profilePhotoInput");
+  const photoTrigger = document.querySelector("[data-profile-photo-trigger]");
+
+  const enableEditMode = () => {
+    applyProfileState(true);
+    history.replaceState(null, "", "#edit-profile");
+  };
 
   document.querySelectorAll("[data-enable-edit]").forEach((button) => {
     button.addEventListener("click", () => {
-      applyProfileState(true);
-      history.replaceState(null, "", "#edit-profile");
+      enableEditMode();
       form.querySelector("input:not([disabled]), textarea:not([disabled]), select:not([disabled])")?.focus();
     });
+  });
+
+  photoTrigger?.addEventListener("click", () => {
+    enableEditMode();
   });
 
   document.querySelectorAll("[data-cancel-edit]").forEach((button) => {
@@ -1047,8 +1065,9 @@ function bindProfileForm(profile) {
     reader.onload = () => {
       const avatar = typeof reader.result === "string" ? reader.result : "";
       state.profile = { ...state.profile, avatar };
+      enableEditMode();
       applyPatientAvatar(state.profile);
-      setText("[data-profile-feedback]", "Nouvelle photo prete a etre enregistree.");
+      setText("[data-profile-feedback]", "Nouvelle photo prete. Enregistrez les modifications pour la valider.");
     };
     reader.readAsDataURL(file);
   });
@@ -1167,16 +1186,45 @@ function bindConsultationFilters() {
 }
 
 async function persistRappelsIfPossible() {
-  if (!state.apiEnabled || !getCurrentPatientBackendId()) return;
+  if (!state.apiEnabled || !getCurrentPatientBackendId()) {
+    savePatientRuntime();
+    return;
+  }
   try {
-    const carnet = await apiRequest(`/patients/${getCurrentPatientBackendId()}/carnet-medical`, {
+    const rappels = await apiRequest(`/patients/rappels/patient/${getCurrentPatientBackendId()}`, {
       method: "PUT",
-      body: JSON.stringify(buildCarnetPayload())
+      body: JSON.stringify(buildRappelsPayload())
     });
-    state.carnetMedical = carnet;
-    state.rappels = normalizeRappels(carnet?.rappels || []);
+    syncRappelsFromBackend(rappels);
   } catch (error) {
     console.error(error);
+  }
+}
+
+async function persistSingleRappelIfPossible(rappel) {
+  if (!state.apiEnabled || !getCurrentPatientBackendId()) {
+    savePatientRuntime();
+    return;
+  }
+
+  if (!hasPersistedRappel(rappel)) {
+    await persistRappelsIfPossible();
+    return;
+  }
+
+  try {
+    const updated = await apiRequest(`/patients/rappels/${rappel.id}/patient/${getCurrentPatientBackendId()}/statut`, {
+      method: "PATCH",
+      body: JSON.stringify({ fait: Boolean(rappel.fait) })
+    });
+
+    const nextRappels = (state.carnetMedical?.rappels || []).map((item) =>
+      String(item.id) === String(updated.id) ? { ...item, ...updated } : item
+    );
+    syncRappelsFromBackend(nextRappels);
+  } catch (error) {
+    console.error(error);
+    await persistRappelsIfPossible();
   }
 }
 
@@ -1187,11 +1235,12 @@ function bindRappels() {
     const rappel = state.rappels.find((item) => String(item.id) === button.dataset.rappelDone);
     if (!rappel) return;
     rappel.fait = !rappel.fait;
+    savePatientRuntime();
     renderRappels();
     buildSidebar(state.profile, "rappels.html");
     document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getPendingRappelsCount()));
     renderPatientNotificationsMenu();
-    await persistRappelsIfPossible();
+    await persistSingleRappelIfPossible(rappel);
   });
 }
 
@@ -1230,17 +1279,20 @@ async function hydratePatientStateFromApi() {
   if (!backendId) return;
 
   try {
-    const [apiProfile, carnet] = await Promise.all([
+    const [apiProfile, carnet, rappels] = await Promise.all([
       apiRequest(`/patients/${backendId}`),
-      apiRequest(`/patients/${backendId}/carnet-medical`).catch(() => null)
+      apiRequest(`/patients/carnets-medicaux/patient/${backendId}`).catch(() => null),
+      apiRequest(`/patients/rappels/patient/${backendId}`).catch(() => null)
     ]);
 
+    const backendRappels = Array.isArray(rappels) ? rappels : (carnet?.rappels || []);
     state.apiEnabled = true;
-    state.carnetMedical = carnet;
-    state.profile = normalizePatientProfile(apiProfile, carnet);
-    state.rappels = normalizeRappels(carnet?.rappels || []);
-    state.historiqueMedical = normalizeHistoriqueFromCarnet(carnet);
+    state.carnetMedical = carnet ? { ...carnet, rappels: backendRappels } : { ...(state.carnetMedical || {}), rappels: backendRappels };
+    state.profile = normalizePatientProfile(apiProfile, state.carnetMedical);
+    state.rappels = normalizeRappels(backendRappels);
+    state.historiqueMedical = normalizeHistoriqueFromCarnet(state.carnetMedical);
     saveProfile(state.profile);
+    savePatientRuntime();
   } catch (error) {
     console.error("Chargement backend patient impossible, fallback local conserve.", error);
     state.apiEnabled = false;
@@ -1267,7 +1319,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await hydratePatientStateFromApi();
   buildSidebar(state.profile, currentPage);
-  initGlobalPatientPhotoShortcut();
   renderTopbar(state.profile, currentPage);
   bindPatientGlobalSearch();
   bindPatientNotifications();
@@ -1282,8 +1333,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (currentPage === "profil.html") bindProfileForm(state.profile);
 
   window.addEventListener("storage", async (event) => {
-    if (event.key !== SHARED_RECORDS_KEY && event.key !== STORAGE_KEY) return;
+    if (event.key !== SHARED_RECORDS_KEY && event.key !== STORAGE_KEY && event.key !== PATIENT_RUNTIME_KEY) return;
     state.profile = loadProfile();
+    const runtime = loadPatientRuntime();
+    state.carnetMedical = runtime.carnetMedical;
+    state.rappels = runtime.rappels;
+    state.historiqueMedical = runtime.historiqueMedical;
     if (state.apiEnabled) {
       await hydratePatientStateFromApi();
     }

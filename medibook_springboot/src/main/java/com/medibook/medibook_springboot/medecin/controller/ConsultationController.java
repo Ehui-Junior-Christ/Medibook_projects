@@ -1,6 +1,7 @@
 package com.medibook.medibook_springboot.medecin.controller;
 
 import com.medibook.medibook_springboot.medecin.dto.ConsultationDto;
+import jakarta.validation.Valid;
 import com.medibook.medibook_springboot.medecin.service.ConsultationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,7 +29,7 @@ public class ConsultationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ConsultationDto create(@RequestBody ConsultationDto request) {
+    public ConsultationDto create(@Valid @RequestBody ConsultationDto request) {
         return consultationService.create(request);
     }
 
@@ -53,7 +54,7 @@ public class ConsultationController {
     }
 
     @PutMapping("/{id}")
-    public ConsultationDto update(@PathVariable Long id, @RequestBody ConsultationDto request) {
+    public ConsultationDto update(@PathVariable Long id, @Valid @RequestBody ConsultationDto request) {
         return consultationService.update(id, request);
     }
 }

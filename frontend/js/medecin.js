@@ -186,13 +186,55 @@ async function apiFetchJson(path, options = {}) {
   });
 
   if (!response.ok) {
-    const error = new Error(`Erreur API ${response.status}`);
+    let message = `Erreur API ${response.status}`;
+    try {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const payload = await response.json();
+        message = payload.message || payload.detail || payload.error || message;
+      } else {
+        const text = await response.text();
+        if (text) {
+          message = text;
+        }
+      }
+    } catch {
+      // Message par defaut conserve.
+    }
+    const error = new Error(message);
     error.status = response.status;
     throw error;
   }
 
   if (response.status === 204) return null;
   return response.json();
+}
+
+function clearWorkflowValidation() {
+  document.querySelectorAll(".field-invalid").forEach((node) => node.classList.remove("field-invalid"));
+}
+
+function addValidationIssue(issues, tracker, label, field) {
+  issues.push(label);
+  if (field) {
+    field.classList.add("field-invalid");
+    if (!tracker.firstInvalid) {
+      tracker.firstInvalid = field;
+    }
+  }
+}
+
+function focusFirstInvalidField(tracker) {
+  if (tracker.firstInvalid instanceof HTMLElement) {
+    tracker.firstInvalid.focus();
+  }
+}
+
+function buildValidationResult(prefix, issues) {
+  return {
+    ok: issues.length === 0,
+    message: issues.length ? `${prefix} ${issues.join(", ")}.` : ""
+  };
 }
 
 function normalizeDateLabel(value) {
@@ -1008,7 +1050,7 @@ function addRow() {
   const table = document.getElementById("ordoRows");
   if (!table) return;
   const row = document.createElement("tr");
-  row.innerHTML = '<td><input type="text" placeholder="Medicament" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Dosage" oninput="updateOrdonnance()"></td><td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="1" min="1" max="6" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Matin..." oninput="updateOrdonnance()"></td><td><input type="number" value="7" oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Instructions" oninput="updateOrdonnance()"></td><td><button class="btn-row-del" type="button" onclick="delRow(this)">âœ•</button></td>';
+  row.innerHTML = '<td><input type="text" placeholder="Medicament" required oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Dosage" required oninput="updateOrdonnance()"></td><td><select required onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td><td><input type="number" value="1" min="1" max="6" required oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Matin..." required oninput="updateOrdonnance()"></td><td><input type="number" value="7" min="1" required oninput="updateOrdonnance()"></td><td><input type="text" placeholder="Instructions" required oninput="updateOrdonnance()"></td><td><button class="btn-row-del" type="button" onclick="delRow(this)">âœ•</button></td>';
   table.appendChild(row);
   updateOrdonnance();
 }
@@ -1090,39 +1132,149 @@ function collectCertificatData() {
   };
 }
 
+function validateOrdonnanceBeforeSave() {
+  clearWorkflowValidation();
+  const patient = getSelectedPatient();
+  if (!patient) {
+    return { ok: false, message: "Veuillez d'abord selectionner un patient." };
+  }
+
+  const issues = [];
+  const tracker = { firstInvalid: null };
+  const dateField = document.getElementById("oDate");
+  const consultationField = document.getElementById("oConsult");
+  const recommandationsField = document.getElementById("oReco");
+
+  if (!dateField?.value) addValidationIssue(issues, tracker, "date de l'ordonnance", dateField);
+  if (!consultationField?.value) addValidationIssue(issues, tracker, "consultation liee", consultationField);
+  if (!recommandationsField?.value?.trim()) addValidationIssue(issues, tracker, "recommandations", recommandationsField);
+
+  const rows = Array.from(document.querySelectorAll("#ordoRows tr"));
+  if (!rows.length) {
+    issues.push("au moins un medicament");
+  }
+
+  rows.forEach((row, index) => {
+    const suffix = rows.length > 1 ? ` (ligne ${index + 1})` : "";
+    const cells = row.querySelectorAll("td");
+    const medicament = cells[0]?.querySelector("input");
+    const dosage = cells[1]?.querySelector("input");
+    const voie = cells[2]?.querySelector("select");
+    const prises = cells[3]?.querySelector("input");
+    const moments = cells[4]?.querySelector("input");
+    const duree = cells[5]?.querySelector("input");
+    const instructions = cells[6]?.querySelector("input");
+
+    if (!medicament?.value?.trim()) addValidationIssue(issues, tracker, `medicament${suffix}`, medicament);
+    if (!dosage?.value?.trim()) addValidationIssue(issues, tracker, `dosage${suffix}`, dosage);
+    if (!voie?.value?.trim()) addValidationIssue(issues, tracker, `voie${suffix}`, voie);
+    if (!prises?.value || Number(prises.value) <= 0) addValidationIssue(issues, tracker, `prises/jour${suffix}`, prises);
+    if (!moments?.value?.trim()) addValidationIssue(issues, tracker, `moments de prise${suffix}`, moments);
+    if (!duree?.value || Number(duree.value) <= 0) addValidationIssue(issues, tracker, `duree${suffix}`, duree);
+    if (!instructions?.value?.trim()) addValidationIssue(issues, tracker, `instructions${suffix}`, instructions);
+  });
+
+  focusFirstInvalidField(tracker);
+  return buildValidationResult("Veuillez renseigner les champs obligatoires de l'ordonnance :", issues);
+}
+
+function validateCertificatBeforeSave() {
+  clearWorkflowValidation();
+  const patient = getSelectedPatient();
+  if (!patient) {
+    return { ok: false, message: "Veuillez d'abord selectionner un patient." };
+  }
+
+  const issues = [];
+  const tracker = { firstInvalid: null };
+  const type = document.querySelector("#certTypePills .dpill.sel")?.dataset.type || "apt";
+  const dateField = document.getElementById("cDate");
+  const consultationField = document.getElementById("cConsult");
+  const destinataireField = document.getElementById("cDest");
+  const motifField = document.getElementById("cMotif");
+  const restrictionsField = document.getElementById("cRestr");
+  const debutArretField = document.getElementById("arretD");
+  const finArretField = document.getElementById("arretF");
+
+  if (!dateField?.value) addValidationIssue(issues, tracker, "date du certificat", dateField);
+  if (!consultationField?.value) addValidationIssue(issues, tracker, "consultation liee", consultationField);
+  if (!destinataireField?.value?.trim()) addValidationIssue(issues, tracker, "destinataire", destinataireField);
+  if (!motifField?.value?.trim()) addValidationIssue(issues, tracker, "motif medical", motifField);
+  if (!restrictionsField?.value?.trim()) addValidationIssue(issues, tracker, "restrictions", restrictionsField);
+
+  if (type === "arret") {
+    if (!debutArretField?.value) addValidationIssue(issues, tracker, "date de debut d'arret", debutArretField);
+    if (!finArretField?.value) addValidationIssue(issues, tracker, "date de fin d'arret", finArretField);
+    if (debutArretField?.value && finArretField?.value && finArretField.value < debutArretField.value) {
+      addValidationIssue(issues, tracker, "coherence des dates d'arret", finArretField);
+    }
+  }
+
+  focusFirstInvalidField(tracker);
+  return buildValidationResult("Veuillez renseigner les champs obligatoires du certificat :", issues);
+}
+
+function validateConsultationBeforeSave() {
+  clearWorkflowValidation();
+  const patient = getSelectedPatient();
+  if (!patient) {
+    return { ok: false, message: "Veuillez d'abord selectionner un patient." };
+  }
+
+  const issues = [];
+  const tracker = { firstInvalid: null };
+  const motifField = document.getElementById("consult-motif");
+  const symptomesField = document.getElementById("consult-symptomes");
+  const taField = document.getElementById("consult-ta");
+  const temperatureField = document.getElementById("consult-temperature");
+  const fcField = document.getElementById("consult-fc");
+  const spo2Field = document.getElementById("consult-spo2");
+  const diagnosticField = document.getElementById("consult-diagnostic");
+  const traitementField = document.getElementById("consult-traitement");
+
+  if (!motifField?.value?.trim()) addValidationIssue(issues, tracker, "motif principal", motifField);
+  if (!symptomesField?.value?.trim()) addValidationIssue(issues, tracker, "symptomes", symptomesField);
+  if (!taField?.value?.trim() || !/^\d+\s*\/\s*\d+$/.test(taField.value.trim())) addValidationIssue(issues, tracker, "tension arterielle (format 120/80)", taField);
+  if (!temperatureField?.value || Number.isNaN(Number(temperatureField.value)) || Number(temperatureField.value) <= 0) addValidationIssue(issues, tracker, "temperature", temperatureField);
+  if (!fcField?.value || Number.isNaN(Number(fcField.value)) || Number(fcField.value) <= 0) addValidationIssue(issues, tracker, "frequence cardiaque", fcField);
+  if (!spo2Field?.value || Number.isNaN(Number(spo2Field.value)) || Number(spo2Field.value) <= 0) addValidationIssue(issues, tracker, "SpO2", spo2Field);
+  if (!diagnosticField?.value?.trim()) addValidationIssue(issues, tracker, "diagnostic retenu", diagnosticField);
+  if (!traitementField?.value?.trim()) addValidationIssue(issues, tracker, "plan de traitement", traitementField);
+
+  focusFirstInvalidField(tracker);
+  return buildValidationResult("Veuillez renseigner les champs obligatoires de la consultation :", issues);
+}
+
 function collectConsultationData() {
   const patient = getSelectedPatient();
   if (!patient) return null;
-  const taValue = document.getElementById("consult-ta")?.value?.trim() || "145/92";
+  const taValue = document.getElementById("consult-ta")?.value?.trim() || "";
   const [taSys, taDia] = taValue.split("/").map((part) => Number.parseInt(part?.trim() || "", 10));
-  const temperature = Number.parseFloat(document.getElementById("consult-temperature")?.value || "38.7");
-  const fc = Number.parseInt(document.getElementById("consult-fc")?.value || "96", 10);
-  const spo2 = Number.parseInt(document.getElementById("consult-spo2")?.value || "97", 10);
-  const symptomTextareas = document.querySelectorAll("#ct1 textarea");
-  const diagnosticTextareas = document.querySelectorAll("#ct3 textarea");
-  const treatmentTextareas = document.querySelectorAll("#ct4 textarea");
+  const temperature = Number.parseFloat(document.getElementById("consult-temperature")?.value || "");
+  const fc = Number.parseInt(document.getElementById("consult-fc")?.value || "", 10);
+  const spo2 = Number.parseInt(document.getElementById("consult-spo2")?.value || "", 10);
 
   return {
     id: createRecordId("consult"),
     patientId: patient.id,
     date: getTodayIsoDate(),
     heure: getCurrentTimeLabel(),
-    titre: document.querySelector("#ct1 input[type='text']")?.value?.trim() || "Consultation medicale",
+    titre: document.getElementById("consult-motif")?.value?.trim() || "",
     etablissement: "MediBook",
     medecin: MEDECIN_SESSION.name,
     specialite: MEDECIN_SESSION.specialty,
     statut: "terminee",
-    symptomes: symptomTextareas[0]?.value?.trim() || "Symptomes saisis pendant la consultation.",
-    diagnostic: diagnosticTextareas[0]?.value?.trim() || "Diagnostic clinique enregistre.",
-    traitement: treatmentTextareas[0]?.value?.trim() || "Traitement et suivi renseignes.",
-    observations: diagnosticTextareas[1]?.value?.trim() || "",
+    symptomes: document.getElementById("consult-symptomes")?.value?.trim() || "",
+    diagnostic: document.getElementById("consult-diagnostic")?.value?.trim() || "",
+    traitement: document.getElementById("consult-traitement")?.value?.trim() || "",
+    observations: document.getElementById("consult-observations")?.value?.trim() || "",
     medecinId: MEDECIN_API_CONTEXT.medecinId,
     vitals: {
-      taSys: Number.isFinite(taSys) ? taSys : 145,
-      taDia: Number.isFinite(taDia) ? taDia : 92,
-      temp: Number.isFinite(temperature) ? temperature : 38.7,
-      fc: Number.isFinite(fc) ? fc : 96,
-      spo2: Number.isFinite(spo2) ? spo2 : 97
+      taSys: Number.isFinite(taSys) ? taSys : null,
+      taDia: Number.isFinite(taDia) ? taDia : null,
+      temp: Number.isFinite(temperature) ? temperature : null,
+      fc: Number.isFinite(fc) ? fc : null,
+      spo2: Number.isFinite(spo2) ? spo2 : null
     }
   };
 }
@@ -1192,7 +1344,7 @@ async function saveValidatedOrdonnance(payload) {
   let ordonnance = {
     id: createRecordId("ordo").toUpperCase(),
     patientId: patient.id,
-    date: payload.date || getTodayIsoDate(),
+    date: payload.date,
     statut: "active",
     medecin: MEDECIN_SESSION.name,
     specialite: MEDECIN_SESSION.specialty,
@@ -1211,7 +1363,7 @@ async function saveValidatedOrdonnance(payload) {
         patientId: Number.parseInt(patient.id, 10),
         medecinId,
         consultationId: payload.consultationId,
-        datePrescription: payload.date || getTodayIsoDate(),
+        datePrescription: payload.date,
         statut: "active",
         renouvellement: payload.renouvellement,
         validiteJours: Number.parseInt(payload.validite, 10) || null,
@@ -1258,7 +1410,7 @@ async function saveValidatedCertificat(payload) {
   let certificatRecord = {
     id: createRecordId("cert"),
     patientId: patient.id,
-    date: payload.date || getTodayIsoDate(),
+    date: payload.date,
     type: payload.type,
     destinataire: payload.destinataire,
     motif: payload.motif,
@@ -1275,7 +1427,7 @@ async function saveValidatedCertificat(payload) {
         patientId: Number.parseInt(patient.id, 10),
         medecinId,
         consultationId: payload.consultationId,
-        dateCertificat: payload.date || getTodayIsoDate(),
+        dateCertificat: payload.date,
         type: payload.type,
         destinataire: payload.destinataire,
         motif: payload.motif,
@@ -1308,7 +1460,7 @@ async function saveValidatedCertificat(payload) {
   appendSharedRecord("timeline", {
     id: createRecordId("timeline-cert"),
     patientId: patient.id,
-    date: payload.date || getTodayIsoDate(),
+    date: payload.date,
     titre: "Certificat medical",
     detail: `${payload.type} - ${payload.motif || "Document valide"}`,
     source: "medecin"
@@ -1623,6 +1775,11 @@ function initOrdonnanceActions() {
   pdfButton?.addEventListener("click", printOnlyPreview);
   printButton?.addEventListener("click", printOnlyPreview);
   validateButton?.addEventListener("click", async () => {
+    const validation = validateOrdonnanceBeforeSave();
+    if (!validation.ok) {
+      window.alert(validation.message);
+      return;
+    }
     try {
       const payload = collectOrdonnanceData();
       const savedPayload = await saveValidatedOrdonnance(payload);
@@ -1631,7 +1788,7 @@ function initOrdonnanceActions() {
       window.alert("Ordonnance enregistree dans la base de donnees.");
     } catch (error) {
       console.error(error);
-      window.alert("Impossible d'enregistrer l'ordonnance pour le moment.");
+      window.alert(error.message || "Impossible d'enregistrer l'ordonnance pour le moment.");
     }
   });
 }
@@ -1658,6 +1815,11 @@ function initCertificatActions() {
   pdfButton?.addEventListener("click", printOnlyPreview);
   printButton?.addEventListener("click", printOnlyPreview);
   validateButton?.addEventListener("click", async () => {
+    const validation = validateCertificatBeforeSave();
+    if (!validation.ok) {
+      window.alert(validation.message);
+      return;
+    }
     try {
       const payload = collectCertificatData();
       const savedPayload = await saveValidatedCertificat(payload);
@@ -1666,7 +1828,7 @@ function initCertificatActions() {
       window.alert("Certificat enregistre dans la base de donnees.");
     } catch (error) {
       console.error(error);
-      window.alert("Impossible d'enregistrer le certificat pour le moment.");
+      window.alert(error.message || "Impossible d'enregistrer le certificat pour le moment.");
     }
   });
 }
@@ -1692,6 +1854,11 @@ function initConsultationActions() {
   });
 
   validateButton?.addEventListener("click", async () => {
+    const validation = validateConsultationBeforeSave();
+    if (!validation.ok) {
+      window.alert(validation.message);
+      return;
+    }
     const consultationData = collectConsultationData();
     if (!consultationData) {
       window.alert("Veuillez d'abord selectionner un patient.");
@@ -1712,7 +1879,7 @@ function initConsultationActions() {
       window.alert("Consultation enregistree dans la base de donnees. Vous pouvez maintenant creer un certificat ou une ordonnance.");
     } catch (error) {
       console.error(error);
-      window.alert("Impossible d'enregistrer la consultation pour le moment.");
+      window.alert(error.message || "Impossible d'enregistrer la consultation pour le moment.");
     }
   });
 

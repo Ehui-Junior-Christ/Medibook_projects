@@ -39,6 +39,7 @@ public class CertificatService {
 
     @Transactional
     public CertificatDto create(CertificatDto request) {
+        validateRequest(request);
         CertificatMedical certificat = new CertificatMedical();
         applyRequest(certificat, request);
         return map(certificatRepository.save(certificat));
@@ -68,9 +69,25 @@ public class CertificatService {
 
     @Transactional
     public CertificatDto update(Long id, CertificatDto request) {
+        validateRequest(request);
         CertificatMedical certificat = getCertificatOrThrow(id);
         applyRequest(certificat, request);
         return map(certificatRepository.save(certificat));
+    }
+
+    private void validateRequest(CertificatDto request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Requete certificat invalide.");
+        }
+
+        if ("arret".equalsIgnoreCase(request.getType())) {
+            if (request.getDebutArret() == null || request.getFinArret() == null) {
+                throw new IllegalArgumentException("Les dates de debut et de fin d'arret sont obligatoires.");
+            }
+            if (request.getFinArret().isBefore(request.getDebutArret())) {
+                throw new IllegalArgumentException("La date de fin d'arret doit etre posterieure ou egale a la date de debut.");
+            }
+        }
     }
 
     private void applyRequest(CertificatMedical certificat, CertificatDto request) {

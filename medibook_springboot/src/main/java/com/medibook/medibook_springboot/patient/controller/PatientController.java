@@ -1,6 +1,5 @@
 package com.medibook.medibook_springboot.patient.controller;
 
-import com.medibook.medibook_springboot.patient.dto.CarnetMedicalDto;
 import com.medibook.medibook_springboot.patient.dto.PatientRequestDto;
 import com.medibook.medibook_springboot.patient.dto.PatientResponseDto;
 import com.medibook.medibook_springboot.patient.service.PatientService;
@@ -59,15 +58,5 @@ public class PatientController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         patientService.delete(id);
-    }
-
-    @GetMapping("/{id}/carnet-medical")
-    public CarnetMedicalDto getCarnetMedical(@PathVariable Long id) {
-        return patientService.getCarnetMedical(id);
-    }
-
-    @PutMapping("/{id}/carnet-medical")
-    public CarnetMedicalDto updateCarnetMedical(@PathVariable Long id, @RequestBody CarnetMedicalDto request) {
-        return patientService.updateCarnetMedical(id, request);
     }
 }

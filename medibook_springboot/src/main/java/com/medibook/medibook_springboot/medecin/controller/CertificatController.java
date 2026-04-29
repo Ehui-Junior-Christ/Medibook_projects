@@ -1,6 +1,7 @@
 package com.medibook.medibook_springboot.medecin.controller;
 
 import com.medibook.medibook_springboot.medecin.dto.CertificatDto;
+import jakarta.validation.Valid;
 import com.medibook.medibook_springboot.medecin.service.CertificatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,7 +29,7 @@ public class CertificatController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CertificatDto create(@RequestBody CertificatDto request) {
+    public CertificatDto create(@Valid @RequestBody CertificatDto request) {
         return certificatService.create(request);
     }
 
@@ -53,7 +54,7 @@ public class CertificatController {
     }
 
     @PutMapping("/{id}")
-    public CertificatDto update(@PathVariable Long id, @RequestBody CertificatDto request) {
+    public CertificatDto update(@PathVariable Long id, @Valid @RequestBody CertificatDto request) {
         return certificatService.update(id, request);
     }
 }

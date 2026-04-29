@@ -39,8 +39,8 @@
             <div class="patient-banner"><div class="patient-ava sm" data-patient-initials>KJ</div><div class="flex-1"><div class="patient-name" style="font-size:15px" data-patient-name>Kouadio Jean Baptiste</div><div class="patient-meta" data-patient-meta-long>CMU-2024-08821 · Ne le 14/03/1987 · +225 07 12 34 56</div></div><span class="badge badge-red" data-patient-allergy>Allergie Penicilline</span></div>
             <div class="card">
                 <div class="grid g4">
-                    <div class="fld"><label>Date</label><input id="oDate" type="date" oninput="updateOrdonnance()"></div>
-                    <div class="fld"><label>Consultation liee</label><select id="oConsult" onchange="updateOrdonnance()"><option>12/03/2025 - Fievre persistante</option><option>08/03/2025 - Bilan diabete</option><option>21/03/2025 - Suivi prenatal</option></select></div>
+                    <div class="fld"><label>Date</label><input id="oDate" type="date" required oninput="updateOrdonnance()"></div>
+                    <div class="fld"><label>Consultation liee</label><select id="oConsult" required onchange="updateOrdonnance()"><option>12/03/2025 - Fievre persistante</option><option>08/03/2025 - Bilan diabete</option><option>21/03/2025 - Suivi prenatal</option></select></div>
                     <div class="fld"><label>Renouvellement</label><select id="oRenew" onchange="updateOrdonnance()"><option>Non renouvelable</option><option>1 renouvellement</option></select></div>
                     <div class="fld"><label>Validite</label><select id="oValidity" onchange="updateOrdonnance()"><option>30 jours</option><option>60 jours</option></select></div>
                 </div>
@@ -49,13 +49,13 @@
                         <thead><tr><th>Medicament</th><th>Dosage</th><th>Voie</th><th>Prises/j</th><th>Moments</th><th>Duree</th><th>Instructions</th><th></th></tr></thead>
                         <tbody id="ordoRows">
                             <tr>
-                                <td><input type="text" value="Artemether/Lumefantrine" oninput="updateOrdonnance()"></td>
-                                <td><input type="text" value="80/480mg" oninput="updateOrdonnance()"></td>
-                                <td><select onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td>
-                                <td><input type="number" value="2" min="1" max="6" oninput="updateOrdonnance()"></td>
-                                <td><input type="text" value="matin, soir" oninput="updateOrdonnance()"></td>
-                                <td><input type="number" value="3" oninput="updateOrdonnance()"></td>
-                                <td><input type="text" value="Avec les repas" oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="Artemether/Lumefantrine" required oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="80/480mg" required oninput="updateOrdonnance()"></td>
+                                <td><select required onchange="updateOrdonnance()"><option>Oral</option><option>IV</option><option>IM</option></select></td>
+                                <td><input type="number" value="2" min="1" max="6" required oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="matin, soir" required oninput="updateOrdonnance()"></td>
+                                <td><input type="number" value="3" min="1" required oninput="updateOrdonnance()"></td>
+                                <td><input type="text" value="Avec les repas" required oninput="updateOrdonnance()"></td>
                                 <td><button class="btn-row-del" type="button" onclick="delRow(this)">✕</button></td>
                             </tr>
                         </tbody>
@@ -64,7 +64,7 @@
                 <button class="add-row-btn" type="button" onclick="addRow()">+ Ajouter un medicament</button>
                 <div class="fld mt-8">
                     <label>Recommandations</label>
-                    <textarea id="oReco" rows="3" placeholder="Repos complet, hydratation abondante..." oninput="updateOrdonnance()"></textarea>
+                    <textarea id="oReco" rows="3" required placeholder="Repos complet, hydratation abondante..." oninput="updateOrdonnance()"></textarea>
                 </div>
                 <div style="margin:16px 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--slate-500)">Apercu de l'ordonnance</div>
                 <div class="cert-preview" id="ordonnancePreviewPrint">

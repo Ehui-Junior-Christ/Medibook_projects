@@ -799,6 +799,14 @@ h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
   border-color: var(--teal-500);
   box-shadow: 0 0 0 3px var(--teal-100);
 }
+.fld input.field-invalid,
+.fld select.field-invalid,
+.fld textarea.field-invalid,
+.ordo-tbl input.field-invalid,
+.ordo-tbl select.field-invalid {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
 .fld textarea { resize: vertical; }
 .btn-login,
 .btn {
