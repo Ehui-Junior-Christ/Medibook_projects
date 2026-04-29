@@ -3,6 +3,8 @@
  * Centralise tous les appels vers le backend Spring Boot (port 8080).
  */
 
+
+
 const API_BASE = "http://localhost:8080/api/admin";
 
 const AdminAPI = {

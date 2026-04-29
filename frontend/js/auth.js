@@ -241,6 +241,16 @@ function goApp() {
         MEDECIN: "./medecin/dashboard.html",
         INFIRMIER: "./infirmier/dashboard.html"
       };
+
+      // If the user tried to open a protected page directly, resume there after login.
+      const intendedUrl = sessionStorage.getItem("mb_intended_url");
+      if (intendedUrl) {
+        sessionStorage.removeItem("mb_intended_url");
+        sessionStorage.removeItem("mb_intended_rel");
+        window.location.href = intendedUrl;
+        return;
+      }
+
       window.location.href = dashboardByRole[data.role] || dashboardByRole.PATIENT;
     })
     .catch((err) => {
