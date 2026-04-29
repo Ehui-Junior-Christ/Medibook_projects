@@ -63,6 +63,20 @@ const defaultRappels = [
   { id: 4, type: "medicament", titre: "Ibuprofene 400 mg", description: "1 comprime le soir.", moment: "Ce soir a 21h00", urgence: "soir", fait: false }
 ];
 
+const defaultImagesMedicales = [
+  { id: 1, nom: "Radiographie thorax", type: "radiographie", date: "2026-02-02", source: "Imagerie Sainte Marie", format: "JPEG", taille: "2.4 Mo", preview: "" },
+  { id: 2, nom: "Scanner abdominal", type: "scanner", date: "2025-11-15", source: "CHU de Treichville", format: "DICOM", taille: "48 Mo", preview: "" },
+  { id: 3, nom: "Echographie abdominale", type: "echographie", date: "2025-09-22", source: "Clinique Sainte Marie", format: "JPEG", taille: "1.8 Mo", preview: "" }
+];
+
+const defaultNotifications = [
+  { id: "n1", type: "systeme", titre: "Bienvenue sur MediBook", message: "Votre espace patient est pret. Completez votre profil pour commencer.", date: "A votre inscription", lu: true },
+  { id: "n2", type: "alerte", titre: "Ordonnance bientot expiree", message: "L'ordonnance ORD-2026-0021 expire dans 2 jours. Pensez a la renouveler.", date: "Il y a 1 jour", lu: false },
+  { id: "n3", type: "rdv", titre: "Rappel de rendez-vous", message: "Consultation de suivi avec Dr. Ange Kouassi le 20 Avril 2026 a 09h30.", date: "Il y a 2 jours", lu: false },
+  { id: "n4", type: "medicament", titre: "Prise de medicament", message: "N'oubliez pas votre prise d'Amoxicilline 500 mg ce soir a 20h00.", date: "Aujourd'hui", lu: false },
+  { id: "n5", type: "systeme", titre: "Document disponible", message: "Un nouveau certificat medical a ete ajoute a votre dossier.", date: "Il y a 3 jours", lu: true }
+];
+
 const defaultHistoriqueMedical = [
   { date: "2026-04", titre: "Bronchite aigue", detail: "Traitement antibiotique de 7 jours avec repos." },
   { date: "2026-03", titre: "Controle annuel", detail: "Bilan complet, surveillance tensionnelle recommandee." },
@@ -72,13 +86,13 @@ const defaultHistoriqueMedical = [
 
 const patientGlobalSearchItems = [
   { href: "dashboard.html", title: "Tableau de bord", meta: "Vue generale de votre espace patient" },
-  { href: "profil.html", title: "Mon profil", meta: "Consulter vos informations personnelles" },
-  { href: "profil.html#edit-profile", title: "Modifier mon profil", meta: "Mettre a jour vos informations declaratives" },
-  { href: "carnet-medical.html", title: "Carnet medical", meta: "Allergies, antecedents et constantes" },
-  { href: "consultation.html", title: "Consultations", meta: "Historique et rendez-vous medicaux" },
-  { href: "ordonnances.html", title: "Ordonnances", meta: "Prescriptions et traitements en cours" },
-  { href: "documents.html", title: "Documents", meta: "Certificats, analyses et fichiers medicaux" },
-  { href: "rappels.html", title: "Rappels", meta: "Medicaments, alertes et suivi" }
+  { href: "profil.html", title: "Gerer mon profil", meta: "Coordonnees et informations personnelles" },
+  { href: "profil.html#edit-profile", title: "Modifier mon profil", meta: "Mettre a jour vos informations" },
+  { href: "carnet-medical.html", title: "Carnet medical", meta: "Antecedents, allergies et constantes" },
+  { href: "documents.html", title: "Documents medicaux", meta: "Certificats, analyses et fichiers" },
+  { href: "images-medicales.html", title: "Images medicales", meta: "Radiographies, scanners et IRM" },
+  { href: "notifications.html", title: "Notifications", meta: "Alertes et suivi" },
+  { href: "rappels.html", title: "Rappels", meta: "Medicaments et rendez-vous" }
 ];
 
 const state = {
@@ -376,17 +390,46 @@ function sortByDateDesc(items, getDateValue) {
 
 function getAllConsultations(profile = state.profile) {
   const shared = getSharedPatientData(profile).consultations;
-  return sortByDateDesc([...shared, ...state.consultations], (item) => `${item.date}T${item.heure || "00:00"}`);
+  const backend = (state.backendConsultations || []).map(c => ({
+    id: `api-${c.id}`,
+    date: c.dateConsultation,
+    heure: c.heureConsultation?.slice(0, 5) || "00:00",
+    titre: c.motifPrincipal || "Consultation",
+    etablissement: "Clinique/Hopital",
+    medecin: c.medecinNom || "Medecin",
+    specialite: "Medecine",
+    statut: new Date(c.dateConsultation) > new Date() ? "avenir" : "terminee",
+    symptomes: c.symptomes,
+    diagnostic: c.diagnostic,
+    traitement: c.traitement
+  }));
+  return sortByDateDesc([...shared, ...state.consultations, ...backend], (item) => `${item.date}T${item.heure || "00:00"}`);
 }
 
 function getAllOrdonnances(profile = state.profile) {
   const shared = getSharedPatientData(profile).ordonnances;
-  return sortByDateDesc([...shared, ...state.ordonnances], (item) => item.date);
+  const backend = (state.backendOrdonnances || []).map(o => ({
+    id: `ORD-API-${o.id}`,
+    date: o.dateEmission,
+    statut: new Date(o.dateValidite || o.dateEmission) >= new Date() ? "active" : "expiree",
+    medecin: o.medecinNom || "Medecin",
+    specialite: "Medecine",
+    medicaments: o.medicaments ? o.medicaments.map(m => `${m.nom} - ${m.posologie} pendant ${m.duree || '-'}`) : []
+  }));
+  return sortByDateDesc([...shared, ...state.ordonnances, ...backend], (item) => item.date);
 }
 
 function getAllDocuments(profile = state.profile) {
   const shared = getSharedPatientData(profile).documents;
-  return sortByDateDesc([...shared, ...state.documents], (item) => item.date);
+  const backend = (state.backendCertificats || []).map(c => ({
+    id: `api-cert-${c.id}`,
+    nom: c.typeCertificat || "Certificat medical",
+    categorie: "certificat",
+    source: c.medecinNom || "Medecin",
+    format: "PDF",
+    date: c.dateEmission
+  }));
+  return sortByDateDesc([...shared, ...state.documents, ...backend], (item) => item.date);
 }
 
 function getAllTimelineEntries(profile = state.profile) {
@@ -650,6 +693,58 @@ function viewPatientDocument(documentId) {
   );
 }
 
+function downloadPatientImage(imageId) {
+  const img = defaultImagesMedicales.find((item) => String(item.id) === String(imageId));
+  if (!img) return;
+
+  if (img.preview && img.preview.startsWith("data:")) {
+    const link = document.createElement("a");
+    link.href = img.preview;
+    link.download = sanitizeFilename(img.nom) + "." + (img.format.toLowerCase() === "image" ? "jpeg" : img.format.toLowerCase());
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } else {
+    const content = [
+      "MediBook - Image medicale",
+      `Nom: ${img.nom}`,
+      `Type: ${img.type}`,
+      `Date: ${formatLongDate(img.date)}`,
+      `Source: ${img.source}`,
+      `Format indique: ${img.format}`,
+      `Taille: ${img.taille}`
+    ].join("\n");
+    triggerFileDownload(`${sanitizeFilename(img.nom)}.txt`, content);
+  }
+}
+
+function viewPatientImage(imageId) {
+  const img = defaultImagesMedicales.find((item) => String(item.id) === String(imageId));
+  if (!img) return;
+
+  if (img.preview) {
+    openPreviewWindow(
+      img.nom,
+      `
+        <h1>${escapeHtml(img.nom)}</h1>
+        <div class="meta">${escapeHtml(img.source)} · ${formatLongDate(img.date)} · ${escapeHtml(img.taille)}</div>
+        <div style="text-align: center; margin-top: 20px;">
+          <img src="${img.preview}" alt="${escapeHtml(img.nom)}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+        </div>
+      `
+    );
+  } else {
+    openPreviewWindow(
+      img.nom,
+      `
+        <h1>${escapeHtml(img.nom)}</h1>
+        <div class="meta">${escapeHtml(img.source)} · ${formatLongDate(img.date)} · ${escapeHtml(img.taille)}</div>
+        <p>Apercu non disponible pour cette image.</p>
+      `
+    );
+  }
+}
+
 function getPendingRappelsCount() {
   return state.rappels.filter((item) => !item.fait).length;
 }
@@ -667,12 +762,12 @@ function getPatientNotificationItems() {
 function buildSidebar(profile, currentPage) {
   const navItems = [
     { href: "dashboard.html", label: "Tableau de bord", icon: "🏠", section: "Espace", key: "dashboard.html" },
-    { href: "profil.html", label: "Mon profil", icon: "👤", section: "Espace", key: "profil.html" },
+    { href: "profil.html", label: "Gerer mon profil", icon: "👤", section: "Espace", key: "profil.html" },
     { href: "carnet-medical.html", label: "Carnet medical", icon: "📋", section: "Sante", key: "carnet-medical.html" },
-    { href: "consultation.html", label: "Consultations", icon: "🩺", section: "Sante", key: "consultation.html" },
-    { href: "ordonnances.html", label: "Ordonnances", icon: "💊", section: "Documents", key: "ordonnances.html" },
-    { href: "documents.html", label: "Documents", icon: "📄", section: "Documents", key: "documents.html" },
-    { href: "rappels.html", label: "Rappels", icon: "🔔", section: "Suivi", key: "rappels.html" }
+    { href: "documents.html", label: "Documents medicaux", icon: "📄", section: "Documents", key: "documents.html" },
+    { href: "images-medicales.html", label: "Images medicales", icon: "🖼️", section: "Documents", key: "images-medicales.html" },
+    { href: "notifications.html", label: "Notifications", icon: "🔔", section: "Suivi", key: "notifications.html" },
+    { href: "rappels.html", label: "Rappels", icon: "⏰", section: "Suivi", key: "rappels.html" }
   ];
 
   const navRoot = document.querySelector("[data-patient-nav]");
@@ -687,9 +782,13 @@ function buildSidebar(profile, currentPage) {
   navRoot.innerHTML = Object.entries(grouped).map(([section, items]) => {
     const links = items.map((item) => {
       const active = item.key === currentPage ? "active" : "";
-      const badge = item.key === "rappels.html" && getPendingRappelsCount() > 0
-        ? `<span class="sb-badge">${getPendingRappelsCount()}</span>`
-        : "";
+      const notifCount = getUnreadNotificationsCount();
+      let badge = "";
+      if (item.key === "rappels.html" && getPendingRappelsCount() > 0) {
+        badge = `<span class="sb-badge">${getPendingRappelsCount()}</span>`;
+      } else if (item.key === "notifications.html" && notifCount > 0) {
+        badge = `<span class="sb-badge">${notifCount}</span>`;
+      }
       return `<a class="sb-item ${active}" href="${item.href}"><span class="sb-icon">${item.icon}</span><span>${item.label}</span>${badge}</a>`;
     }).join("");
     return `<div class="sb-section"><span class="sb-section-label">${section}</span>${links}</div>`;
@@ -829,39 +928,30 @@ function bindPatientNotifications() {
   });
 }
 
+function getUnreadNotificationsCount() {
+  return defaultNotifications.filter((n) => !n.lu).length + state.rappels.filter((r) => !r.fait).length;
+}
+
 function renderDashboard(profile) {
-  const consultationItems = getAllConsultations(profile);
-  const ordonnanceItems = getAllOrdonnances(profile);
   const documentItems = getAllDocuments(profile);
+  const unreadNotifs = getUnreadNotificationsCount();
 
   const statsRoot = document.querySelector("[data-patient-stats]");
   if (statsRoot) {
     statsRoot.innerHTML = `
-      <div class="stat-card" data-emoji="🩺"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">${consultationItems.length}</div><div class="stat-label">Consultations</div><div class="stat-trend trend-up">Historique complet</div></div>
-      <div class="stat-card" data-emoji="💊"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">${ordonnanceItems.filter((item) => item.statut === "active").length}</div><div class="stat-label">Ordonnances actives</div><div class="stat-trend trend-up">Suivi a jour</div></div>
-      <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">${documentItems.length}</div><div class="stat-label">Documents disponibles</div><div class="stat-trend">Mises a jour automatiques</div></div>
-      <div class="stat-card" data-emoji="🔔"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">${getPendingRappelsCount()}</div><div class="stat-label">Rappels actifs</div><div class="stat-trend trend-amber">Suivi du carnet medical</div></div>
+      <div class="stat-card" data-emoji="👤"><div class="stat-accent" style="background:var(--teal-500)"></div><div class="stat-val">1</div><div class="stat-label">Mon profil</div><div class="stat-trend trend-up">A jour</div></div>
+      <div class="stat-card" data-emoji="📋"><div class="stat-accent" style="background:var(--blue)"></div><div class="stat-val">${getAllTimelineEntries(profile).length}</div><div class="stat-label">Carnet medical</div><div class="stat-trend">Historique complet</div></div>
+      <div class="stat-card" data-emoji="📄"><div class="stat-accent" style="background:var(--green)"></div><div class="stat-val">${documentItems.length}</div><div class="stat-label">Documents</div><div class="stat-trend">Disponibles</div></div>
+      <div class="stat-card" data-emoji="🔔"><div class="stat-accent" style="background:var(--amber)"></div><div class="stat-val">${unreadNotifs}</div><div class="stat-label">Notifications</div><div class="stat-trend trend-amber">Non lues</div></div>
     `;
   }
 
-  const consultationsRoot = document.querySelector("[data-dashboard-consultations]");
-  if (consultationsRoot) {
-    consultationsRoot.innerHTML = consultationItems.slice(0, 3).map((item) => {
-      const [day, month] = formatShortDate(item.date).split(" ");
-      const badgeClass = item.statut === "avenir" ? "badge-amber" : "badge-green";
-      const badgeLabel = item.statut === "avenir" ? "A venir" : "Terminee";
-      return `<div class="consult-item"><div class="consult-date-box"><div class="consult-date-d">${day}</div><div class="consult-date-m">${month}</div></div><div class="flex-1"><div class="consult-title">${item.titre}</div><div class="consult-sub">${item.medecin} · ${item.specialite} · ${item.heure}</div></div><span class="badge ${badgeClass}">${badgeLabel}</span></div>`;
-    }).join("");
+  const notifBadge = document.querySelector("[data-dashboard-notif-count]");
+  if (notifBadge) {
+    notifBadge.textContent = unreadNotifs > 0 ? `${unreadNotifs} non lue(s)` : "";
   }
 
-  const medsRoot = document.querySelector("[data-dashboard-ordonnances]");
-  if (medsRoot) {
-    medsRoot.innerHTML = ordonnanceItems.filter((item) => item.statut === "active").map((item) => {
-      return `<div class="medoc-item"><div class="patient-ava sm">💊</div><div class="flex-1"><div class="medoc-name">${item.id}</div><div class="medoc-detail">${item.medicaments.join(" · ")}</div></div></div>`;
-    }).join("");
-  }
-
-  const nextAppointment = consultationItems.find((item) => item.statut === "avenir");
+  const nextAppointment = getAllConsultations(profile).find((item) => item.statut === "avenir");
   if (nextAppointment) {
     setText("[data-next-appointment-date]", formatLongDate(nextAppointment.date));
     setText("[data-next-appointment-copy]", `${nextAppointment.medecin} · ${nextAppointment.heure} · ${nextAppointment.specialite}`);
@@ -953,7 +1043,7 @@ function renderCarnet(profile) {
   if (antecedentsRoot) antecedentsRoot.innerHTML = `<div class="info-stack"><div><strong>Antecedents</strong><p>${profile.antecedents || "Aucun antecedent declare."}</p></div><div><strong>Maladies chroniques</strong><p>${profile.maladiesChroniques || "Aucune maladie chronique declaree."}</p></div><div><strong>Traitements en cours</strong><p>${profile.traitements || "Aucun traitement renseigne."}</p></div></div>`;
 
   const historyRoot = document.querySelector("[data-carnet-history]");
-  if (historyRoot) historyRoot.innerHTML = getAllTimelineEntries(profile).map((item) => `<div class="timeline-entry"><div class="timeline-date">${item.date}</div><div class="timeline-title">${item.titre}</div><div class="consult-sub">${item.detail}</div></div>`).join("");
+  if (historyRoot) historyRoot.innerHTML = getAllTimelineEntries(profile).map((item) => `<div class="timeline-entry"><div class="timeline-date">${item.date}</div><div class="timeline-title">${item.titre}</div><div class="consult-sub" style="margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--slate-700);">${item.detail}</div></div>`).join("");
 }
 
 function fillProfileSummary(profile) {
@@ -1255,6 +1345,12 @@ function bindPatientDownloads() {
     const documentButton = event.target.closest("[data-download-document]");
     if (documentButton) {
       downloadPatientDocument(documentButton.dataset.downloadDocument);
+      return;
+    }
+
+    const imageButton = event.target.closest("[data-download-image]");
+    if (imageButton) {
+      downloadPatientImage(imageButton.dataset.downloadImage);
     }
   });
 }
@@ -1270,6 +1366,12 @@ function bindPatientViews() {
     const documentButton = event.target.closest("[data-view-document]");
     if (documentButton) {
       viewPatientDocument(documentButton.dataset.viewDocument);
+      return;
+    }
+
+    const imageButton = event.target.closest("[data-view-image]");
+    if (imageButton) {
+      viewPatientImage(imageButton.dataset.viewImage);
     }
   });
 }
@@ -1279,18 +1381,56 @@ async function hydratePatientStateFromApi() {
   if (!backendId) return;
 
   try {
-    const [apiProfile, carnet, rappels] = await Promise.all([
+    const [apiProfile, carnet, rappels, consultations, ordonnances, certificats, imagesMedicales] = await Promise.all([
       apiRequest(`/patients/${backendId}`),
       apiRequest(`/patients/carnets-medicaux/patient/${backendId}`).catch(() => null),
-      apiRequest(`/patients/rappels/patient/${backendId}`).catch(() => null)
+      apiRequest(`/patients/rappels/patient/${backendId}`).catch(() => null),
+      apiRequest(`/medecins/consultations/patient/${backendId}`).catch(() => []),
+      apiRequest(`/medecins/ordonnances/patient/${backendId}`).catch(() => []),
+      apiRequest(`/medecins/certificats/patient/${backendId}`).catch(() => []),
+      apiRequest(`/patients/images-medicales/patient/${backendId}`).catch(() => [])
     ]);
 
     const backendRappels = Array.isArray(rappels) ? rappels : (carnet?.rappels || []);
+    
+    // Mettre a jour les images medicales
+    if (Array.isArray(imagesMedicales) && imagesMedicales.length > 0) {
+        defaultImagesMedicales.length = 0; // Vider le mock
+        imagesMedicales.forEach(img => {
+            defaultImagesMedicales.push({
+                id: img.id,
+                nom: img.nom,
+                type: img.type,
+                date: img.dateImage,
+                source: img.source,
+                format: img.format,
+                taille: img.taille,
+                preview: img.donnees
+            });
+        });
+    }
     state.apiEnabled = true;
     state.carnetMedical = carnet ? { ...carnet, rappels: backendRappels } : { ...(state.carnetMedical || {}), rappels: backendRappels };
     state.profile = normalizePatientProfile(apiProfile, state.carnetMedical);
     state.rappels = normalizeRappels(backendRappels);
-    state.historiqueMedical = normalizeHistoriqueFromCarnet(state.carnetMedical);
+    
+    // Convertir les consultations du medecin en historique medical et consultations
+    const medecinHistorique = Array.isArray(consultations) ? consultations.map(c => ({
+      date: c.dateConsultation ? c.dateConsultation.slice(0, 7) : "Date inconnue",
+      titre: `Consultation - ${c.motifPrincipal || 'Motif non renseigne'}`,
+      detail: `<strong>Médecin:</strong> ${c.medecinNom || 'Non spécifié'}<br>
+               <strong>Symptômes:</strong> ${c.symptomes || 'Non précisés'}<br>
+               <strong>Diagnostic:</strong> ${c.diagnostic || 'Non précisé'}<br>
+               <strong>Traitement:</strong> ${c.traitement || 'Non précisé'}<br>
+               <strong>Observations:</strong> ${c.observations || 'Aucune'}`
+    })) : [];
+    
+    state.historiqueMedical = [...normalizeHistoriqueFromCarnet(state.carnetMedical), ...medecinHistorique];
+    
+    state.backendConsultations = Array.isArray(consultations) ? consultations : [];
+    state.backendOrdonnances = Array.isArray(ordonnances) ? ordonnances : [];
+    state.backendCertificats = Array.isArray(certificats) ? certificats : [];
+    
     saveProfile(state.profile);
     savePatientRuntime();
   } catch (error) {
@@ -1299,10 +1439,125 @@ async function hydratePatientStateFromApi() {
   }
 }
 
+function renderNotificationsPage() {
+  const root = document.querySelector("[data-notif-page-list]");
+  if (!root) return;
+  const activeFilter = document.querySelector(".dpill.sel[data-notif-filter]")?.dataset.notifFilter || "toutes";
+  const allNotifs = [
+    ...defaultNotifications,
+    ...state.rappels.map((r) => ({ id: `r-${r.id}`, type: r.type, titre: r.titre, message: r.description, date: r.moment, lu: r.fait }))
+  ];
+  const filtered = allNotifs.filter((n) => {
+    if (activeFilter === "non-lues") return !n.lu;
+    if (activeFilter === "lues") return n.lu;
+    return true;
+  });
+  setText("[data-notif-page-count]", `${filtered.length} notification(s)`);
+  if (!filtered.length) {
+    root.innerHTML = `<div class="notif-page-empty"><div class="notif-page-empty-icon">🔔</div><p>Aucune notification pour le moment.</p></div>`;
+    return;
+  }
+  root.innerHTML = filtered.map((n) => {
+    const icon = n.type === "medicament" ? "💊" : n.type === "rdv" ? "🗓️" : n.type === "alerte" ? "⚠️" : "🔔";
+    const unreadClass = n.lu ? "" : "unread";
+    const badgeClass = n.lu ? "badge-green" : "badge-amber";
+    const badgeLabel = n.lu ? "Lu" : "Non lu";
+    return `<div class="notif-page-item ${unreadClass}"><div class="notif-page-icon ${n.type}">${icon}</div><div class="notif-page-body"><div class="notif-page-title">${n.titre}</div><div class="notif-page-msg">${n.message}</div><div class="notif-page-time">${n.date}</div></div><div class="notif-page-right"><span class="badge ${badgeClass}">${badgeLabel}</span></div></div>`;
+  }).join("");
+}
+
+function renderImagesMedicales() {
+  const root = document.querySelector("[data-images-list]");
+  if (!root) return;
+  const activeFilter = document.querySelector(".dpill.sel[data-img-filter]")?.dataset.imgFilter || "toutes";
+  const items = defaultImagesMedicales.filter((img) => activeFilter === "toutes" || img.type === activeFilter);
+  setText("[data-images-count]", `${items.length} image(s)`);
+  root.innerHTML = items.map((img) => {
+    const typeIcon = img.type === "radiographie" ? "🩻" : img.type === "scanner" ? "🔬" : img.type === "irm" ? "🧲" : "📷";
+    return `<article class="image-card"><div class="image-card-preview">${typeIcon}</div><div class="image-card-body"><div class="image-card-name">${img.nom}</div><div class="image-card-meta">${img.source} · ${formatLongDate(img.date)} · ${img.taille}</div><div class="image-card-actions"><button class="btn btn-primary btn-sm" type="button" data-download-image="${img.id}">Telecharger</button><button class="btn btn-secondary btn-sm" type="button" data-view-image="${img.id}">Voir</button></div></div></article>`;
+  }).join("");
+}
+
+function bindNotifFilters() {
+  document.querySelectorAll("[data-notif-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-notif-filter]").forEach((b) => b.classList.remove("sel"));
+      btn.classList.add("sel");
+      renderNotificationsPage();
+    });
+  });
+}
+
+function bindImageFilters() {
+  document.querySelectorAll("[data-img-filter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-img-filter]").forEach((b) => b.classList.remove("sel"));
+      btn.classList.add("sel");
+      renderImagesMedicales();
+    });
+  });
+}
+
+function bindUploadZone() {
+  const zone = document.querySelector("[data-upload-zone]");
+  const input = document.querySelector("[data-image-upload-input]");
+  if (!zone || !input) return;
+  zone.addEventListener("click", () => input.click());
+  zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("drag-over"); });
+  zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+  zone.addEventListener("drop", (e) => { e.preventDefault(); zone.classList.remove("drag-over"); handleImageFiles(e.dataTransfer.files); });
+  input.addEventListener("change", () => handleImageFiles(input.files));
+}
+
+function handleImageFiles(files) {
+  if (!files || !files.length) return;
+  const backendId = getCurrentPatientBackendId();
+  
+  Array.from(files).forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const fileData = typeof reader.result === "string" ? reader.result : "";
+      const newImg = {
+        nom: file.name.replace(/\.[^.]+$/, ""),
+        type: "radiographie",
+        dateImage: new Date().toISOString().slice(0, 10),
+        source: "Telecharge par le patient",
+        format: file.type.split("/")[1]?.toUpperCase() || "IMAGE",
+        taille: (file.size / (1024 * 1024)).toFixed(1) + " Mo",
+        donnees: fileData
+      };
+      
+      try {
+        if (state.apiEnabled && backendId) {
+          const savedImg = await apiRequest(`/patients/images-medicales/patient/${backendId}`, {
+            method: "POST",
+            body: JSON.stringify(newImg)
+          });
+          newImg.id = savedImg.id;
+          newImg.date = savedImg.dateImage;
+          newImg.preview = savedImg.donnees;
+        } else {
+          newImg.id = Date.now() + Math.random();
+          newImg.date = newImg.dateImage;
+          newImg.preview = newImg.donnees;
+        }
+        
+        defaultImagesMedicales.unshift(newImg);
+        renderImagesMedicales();
+        alert("Image importée avec succès !");
+      } catch (error) {
+        console.error("Erreur lors de l'enregistrement de l'image:", error);
+        alert("Erreur lors de l'enregistrement de l'image.");
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function rerenderCurrentPage(currentPage) {
   fillProfileSummary(state.profile);
   buildSidebar(state.profile, currentPage);
-  document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getPendingRappelsCount()));
+  document.querySelector("[data-patient-notifications]")?.setAttribute("data-count", String(getUnreadNotificationsCount()));
   renderPatientNotificationsMenu();
 
   if (currentPage === "dashboard.html") renderDashboard(state.profile);
@@ -1312,6 +1567,8 @@ function rerenderCurrentPage(currentPage) {
   if (currentPage === "rappels.html") renderRappels();
   if (currentPage === "carnet-medical.html") renderCarnet(state.profile);
   if (currentPage === "profil.html") renderProfile(state.profile);
+  if (currentPage === "notifications.html") renderNotificationsPage();
+  if (currentPage === "images-medicales.html") renderImagesMedicales();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1331,6 +1588,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (currentPage === "documents.html") bindDocumentsFilters();
   if (currentPage === "rappels.html") bindRappels();
   if (currentPage === "profil.html") bindProfileForm(state.profile);
+  if (currentPage === "notifications.html") bindNotifFilters();
+  if (currentPage === "images-medicales.html") { bindImageFilters(); bindUploadZone(); }
 
   window.addEventListener("storage", async (event) => {
     if (event.key !== SHARED_RECORDS_KEY && event.key !== STORAGE_KEY && event.key !== PATIENT_RUNTIME_KEY) return;
