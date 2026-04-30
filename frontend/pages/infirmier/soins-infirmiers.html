@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediBook – Soins infirmiers</title>
+  <title>MediBook - Soins infirmiers</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/main.css">
   <link rel="stylesheet" href="../../css/infirmier.css">
   <script defer src="../../js/entry-guard.js"></script>
-
 </head>
 <body>
 <div class="app-shell">
@@ -17,7 +16,7 @@
     <div class="sb-logo">
       <div class="sb-logo-inner">
         <div class="sb-logo-mark">🏥</div>
-        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div>
       </div>
     </div>
     <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
@@ -34,7 +33,7 @@
     <div class="sb-footer">
       <a class="sb-user" href="profil-infirmier.html">
         <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
-        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Koné Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
+        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Kone Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
         <span class="sb-user-link">↗</span>
       </a>
     </div>
@@ -45,7 +44,7 @@
       <div class="topbar-title">Soins infirmiers</div>
       <div class="searchbar">
         <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" placeholder="Rechercher par patient ou type de soin…">
+        <input type="text" id="search-input" placeholder="Rechercher par patient ou type de soin...">
       </div>
       <div class="topbar-right">
         <div class="icon-btn" id="btn-logout-top">🚪</div>
@@ -53,29 +52,30 @@
     </header>
 
     <div class="content-area">
-
-      <!-- Sélection patient + bouton -->
       <div class="card" style="margin-bottom:14px">
         <div class="card-header" style="margin-bottom:0">
           <div class="card-title">Enregistrer un soin</div>
           <div style="display:flex;gap:10px;align-items:center">
-            <select id="select-patient-soins" class="filtre-select">
-              <option value="">-- Sélectionner un patient --</option>
-              <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
-              <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
-              <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
-            </select>
+            <div class="patient-search" id="select-patient-soins-search-box">
+              <input
+                type="text"
+                id="select-patient-soins-search"
+                class="filtre-select patient-search-input"
+                placeholder="Rechercher un patient par numero CMU"
+                autocomplete="off">
+              <input type="hidden" id="select-patient-soins">
+              <div class="patient-search-results" id="select-patient-soins-results"></div>
+            </div>
             <button class="btn btn-primary" onclick="ouvrirModal('modal-soin-form')">+ Nouveau soin</button>
           </div>
         </div>
       </div>
 
-      <!-- Historique soins -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Historique des soins</div>
-            <div class="card-sub" id="total-soins">10 soins enregistrés</div>
+            <div class="card-sub" id="total-soins">10 soins enregistres</div>
           </div>
           <select class="filtre-select" id="filtre-type-soin">
             <option value="">Tous les types</option>
@@ -84,9 +84,9 @@
             <option value="Injection IV">Injection IV</option>
             <option value="Injection SC">Injection SC</option>
             <option value="Perfusion">Perfusion</option>
-            <option value="Prélèvement sanguin">Prélèvement sanguin</option>
-            <option value="Prélèvement urinaire">Prélèvement urinaire</option>
-            <option value="Soin d'hygiène">Soin d'hygiène</option>
+            <option value="Prelevement sanguin">Prelevement sanguin</option>
+            <option value="Prelevement urinaire">Prelevement urinaire</option>
+            <option value="Soin d'hygiene">Soin d'hygiene</option>
           </select>
         </div>
 
@@ -97,7 +97,7 @@
               <th>Date / Heure</th>
               <th>Patient</th>
               <th>Type de soin</th>
-              <th>Détail</th>
+              <th>Detail</th>
               <th>Infirmier</th>
               <th>Actions</th>
             </tr>
@@ -108,14 +108,13 @@
 
         <div id="empty-soins" class="empty-state" style="display:none">
           <div class="empty-icon">🩹</div>
-          <div class="empty-txt">Aucun soin trouvé</div>
+          <div class="empty-txt">Aucun soin trouve</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL : Nouveau soin -->
 <div class="modal-overlay" id="modal-soin-form" onclick="fermerModalOverlay(event, 'modal-soin-form')">
   <div class="modal-box">
     <div class="modal-header">
@@ -124,36 +123,39 @@
     </div>
 
     <div class="modal-body">
-
       <div class="fld">
-        <label for="soin-patient">Patient</label>
-        <select id="soin-patient">
-          <option value="">Sélectionner un patient</option>
-          <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
-          <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
-          <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
-        </select>
+        <label for="soin-patient-search">Numero CMU du patient</label>
+        <div class="patient-search" id="soin-patient-search-box">
+          <input
+            type="text"
+            id="soin-patient-search"
+            class="patient-search-input"
+            placeholder="Rechercher un patient par numero CMU"
+            autocomplete="off">
+          <input type="hidden" id="soin-patient">
+          <div class="patient-search-results" id="soin-patient-results"></div>
+        </div>
       </div>
 
       <div class="fld">
         <label for="soin-type">Type de soin</label>
         <select id="soin-type">
-          <option value="">Sélectionner</option>
+          <option value="">Selectionner</option>
           <option>Pansement</option>
           <option>Injection IM</option>
           <option>Injection IV</option>
           <option>Injection SC</option>
           <option>Perfusion</option>
-          <option>Prélèvement sanguin</option>
-          <option>Prélèvement urinaire</option>
-          <option>Soin d'hygiène</option>
-          <option>Surveillance post-opératoire</option>
+          <option>Prelevement sanguin</option>
+          <option>Prelevement urinaire</option>
+          <option>Soin d'hygiene</option>
+          <option>Surveillance post-operatoire</option>
         </select>
       </div>
 
       <div class="fld">
-        <label for="soin-detail">Détail / Médicament administré</label>
-        <input type="text" id="soin-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
+        <label for="soin-detail">Detail / Medicament administre</label>
+        <input type="text" id="soin-detail" placeholder="Ex: Artemether 80mg - bras gauche">
       </div>
 
       <div class="form-grid-2">
@@ -171,23 +173,15 @@
         <label for="soin-obs">Observations</label>
         <textarea id="soin-obs" rows="3"></textarea>
       </div>
-
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="fermerModal('modal-soin-form')">
-        Annuler
-      </button>
-
-      <button class="btn btn-primary" onclick="enregisterSoin()">
-        Enregistrer
-      </button>
+      <button class="btn btn-secondary" onclick="fermerModal('modal-soin-form')">Annuler</button>
+      <button class="btn btn-primary" onclick="enregisterSoin()">Enregistrer</button>
     </div>
-
   </div>
 </div>
 
-<!-- MODAL : Confirmation suppression -->
 <div class="modal-overlay" id="modal-confirm-suppr" onclick="fermerModalOverlay(event, 'modal-confirm-suppr')">
   <div class="modal-box" style="max-width:400px">
     <div class="modal-header">
@@ -195,7 +189,7 @@
       <button class="modal-close" onclick="fermerModal('modal-confirm-suppr')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--slate-600)">Êtes-vous sûr de vouloir supprimer ce soin ? Cette action est irréversible.</p>
+      <p style="font-size:13px;color:var(--slate-600)">Etes-vous sur de vouloir supprimer ce soin ? Cette action est irreversible.</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="fermerModal('modal-confirm-suppr')">Annuler</button>

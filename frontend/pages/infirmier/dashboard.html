@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediBook – Tableau de bord Infirmier</title>
+  <title>MediBook - Tableau de bord Infirmier</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/main.css">
   <link rel="stylesheet" href="../../css/infirmier.css">
 </head>
 <body>
 <div class="app-shell">
-
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-inner">
         <div class="sb-logo-mark">🏥</div>
         <div>
           <div class="sb-logo-text">MediBook</div>
-          <div class="sb-logo-sub">Portail médical</div>
+          <div class="sb-logo-sub">Portail medical</div>
         </div>
       </div>
     </div>
@@ -36,7 +35,7 @@
       <a class="sb-user" href="profil-infirmier.html">
         <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
         <div>
-          <div class="sb-user-name" id="sb-name" data-infirmier-name>Koné Marie</div>
+          <div class="sb-user-name" id="sb-name" data-infirmier-name>Kone Marie</div>
           <div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div>
         </div>
         <span class="sb-user-link">↗</span>
@@ -49,7 +48,7 @@
       <div class="topbar-title">Tableau de bord</div>
       <div class="searchbar">
         <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" placeholder="Rechercher un patient…">
+        <input type="text" id="search-input" placeholder="Rechercher un patient...">
       </div>
       <div class="topbar-right">
         <div class="icon-btn" id="btn-notif">🔔<div class="notif-dot"></div></div>
@@ -58,8 +57,6 @@
     </header>
 
     <div class="content-area">
-
-      <!-- STATS -->
       <div class="stats-row">
         <div class="stat-card" data-emoji="👥">
           <div class="stat-accent" style="background:#10ADAF"></div>
@@ -71,27 +68,24 @@
           <div class="stat-accent" style="background:#DC2626"></div>
           <div class="stat-val" id="stat-vitaux">5</div>
           <div class="stat-label">Mesures aujourd'hui</div>
-          <div class="stat-trend stat-neutral">Dernière : 09h30</div>
+          <div class="stat-trend stat-neutral">Derniere : 09h30</div>
         </div>
         <div class="stat-card" data-emoji="🩹">
           <div class="stat-accent" style="background:#059669"></div>
           <div class="stat-val" id="stat-soins">8</div>
-          <div class="stat-label">Soins effectués</div>
+          <div class="stat-label">Soins effectues</div>
           <div class="stat-trend trend-up">↑ Ce jour</div>
         </div>
         <div class="stat-card" data-emoji="📁">
           <div class="stat-accent" style="background:#F59E0B"></div>
           <div class="stat-val" id="stat-documents">3</div>
-          <div class="stat-label">Documents uploadés</div>
+          <div class="stat-label">Documents uploades</div>
           <div class="stat-trend stat-neutral">Ce mois</div>
         </div>
       </div>
 
-      <!-- CONTENU PRINCIPAL -->
       <div class="dashboard-grid">
-
         <div class="col-left">
-          <!-- Soins du jour -->
           <div class="card">
             <div class="card-header">
               <div>
@@ -103,10 +97,9 @@
             <div id="liste-soins-jour"></div>
           </div>
 
-          <!-- Dernières mesures vitales -->
           <div class="card">
             <div class="card-header">
-              <div class="card-title">Dernières mesures enregistrées</div>
+              <div class="card-title">Dernieres mesures enregistrees</div>
               <a href="signes-vitaux.html" class="btn btn-secondary btn-sm">Tout voir</a>
             </div>
             <div id="liste-mesures-recentes"></div>
@@ -114,7 +107,6 @@
         </div>
 
         <div class="col-right">
-          <!-- Patients prioritaires -->
           <div class="card">
             <div class="card-header">
               <div class="card-title">Alertes patients</div>
@@ -123,7 +115,6 @@
             <div id="liste-alertes"></div>
           </div>
 
-          <!-- Actions rapides -->
           <div class="card" style="margin-top:12px">
             <div class="card-title" style="margin-bottom:12px">Actions rapides</div>
             <div style="display:flex;flex-direction:column;gap:8px">
@@ -134,13 +125,11 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL : Enregistrer soin rapide -->
 <div class="modal-overlay" id="modal-soin" onclick="fermerModalOverlay(event, 'modal-soin')">
   <div class="modal-box">
     <div class="modal-header">
@@ -148,46 +137,50 @@
       <button class="modal-close" onclick="fermerModal('modal-soin')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="fld"><label>Patient</label>
-        <select id="soin-patient">
-          <option value="">Sélectionner un patient</option>
-          <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
-          <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
-        </select>
+      <div class="fld">
+        <label for="dashboard-soin-patient-search">Numero CMU du patient</label>
+        <div class="patient-search" id="dashboard-soin-patient-search-box">
+          <input
+            type="text"
+            id="dashboard-soin-patient-search"
+            class="patient-search-input"
+            placeholder="Rechercher un patient par numero CMU"
+            autocomplete="off">
+          <input type="hidden" id="dashboard-soin-patient">
+          <div class="patient-search-results" id="dashboard-soin-patient-results"></div>
+        </div>
       </div>
-      <div class="fld"><label>Type de soin</label>
+      <div class="fld">
+        <label for="soin-type">Type de soin</label>
         <select id="soin-type">
-          <option value="">Sélectionner</option>
+          <option value="">Selectionner</option>
           <option>Pansement</option>
           <option>Injection IM</option>
           <option>Injection IV</option>
           <option>Injection SC</option>
           <option>Perfusion</option>
-          <option>Prélèvement sanguin</option>
-          <option>Prélèvement urinaire</option>
-          <option>Soin d'hygiène</option>
-          <option>Surveillance post-opératoire</option>
+          <option>Prelevement sanguin</option>
+          <option>Prelevement urinaire</option>
+          <option>Soin d'hygiene</option>
+          <option>Surveillance post-operatoire</option>
         </select>
       </div>
-      <div class="fld"><label>Détail / Médicament administré</label>
-        <input type="text" id="soin-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
+      <div class="fld">
+        <label for="soin-detail">Detail / Medicament administre</label>
+        <input type="text" id="soin-detail" placeholder="Ex: Artemether 80mg - bras gauche">
       </div>
       <div class="form-grid-2">
         <div class="fld"><label>Date</label><input type="date" id="soin-date"></div>
         <div class="fld"><label>Heure</label><input type="time" id="soin-heure"></div>
       </div>
-      <div class="fld"><label>Observations</label>
-        <textarea id="soin-obs" rows="2" placeholder="Notes sur le déroulement du soin…"></textarea>
+      <div class="fld">
+        <label for="soin-obs">Observations</label>
+        <textarea id="soin-obs" rows="2" placeholder="Notes sur le deroulement du soin..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="fermerModal('modal-soin')">
-        Annuler
-      </button>
-
-      <button class="btn btn-primary" onclick="enregisterSoin()">
-        Enregistrer
-      </button>
+      <button class="btn btn-secondary" onclick="fermerModal('modal-soin')">Annuler</button>
+      <button class="btn btn-primary" onclick="enregisterSoin()">Enregistrer</button>
     </div>
   </div>
 </div>

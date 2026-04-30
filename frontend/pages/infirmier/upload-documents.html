@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediBook – Upload Documents</title>
+  <title>MediBook - Upload Documents</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/main.css">
   <link rel="stylesheet" href="../../css/infirmier.css">
   <script defer src="../../js/entry-guard.js"></script>
-
 </head>
 <body>
 <div class="app-shell">
-
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-inner">
         <div class="sb-logo-mark">🏥</div>
-        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div>
       </div>
     </div>
     <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
@@ -34,7 +32,7 @@
     <div class="sb-footer">
       <a class="sb-user" href="profil-infirmier.html">
         <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
-        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Koné Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
+        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Kone Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
         <span class="sb-user-link">↗</span>
       </a>
     </div>
@@ -42,37 +40,39 @@
 
   <div class="main">
     <header class="topbar">
-      <div class="topbar-title">Documents médicaux</div>
+      <div class="topbar-title">Documents medicaux</div>
       <div class="topbar-right">
         <div class="icon-btn" id="btn-logout-top">🚪</div>
       </div>
     </header>
 
     <div class="content-area">
-
-      <!-- Formulaire upload -->
       <div class="card" style="margin-bottom:14px">
         <div class="card-header">
-          <div class="card-title">Ajouter un document médical</div>
+          <div class="card-title">Ajouter un document medical</div>
         </div>
 
         <div class="upload-grid">
           <div>
             <div class="fld">
-              <label for="up-patient">Patient</label>
-              <select id="up-patient">
-                <option value="">-- Sélectionner un patient --</option>
-                <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
-                <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
-                <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
-              </select>
+              <label for="up-patient-search">Numero CMU du patient</label>
+              <div class="patient-search" id="up-patient-search-box">
+                <input
+                  type="text"
+                  id="up-patient-search"
+                  class="patient-search-input"
+                  placeholder="Rechercher un patient par numero CMU"
+                  autocomplete="off">
+                <input type="hidden" id="up-patient">
+                <div class="patient-search-results" id="up-patient-results"></div>
+              </div>
             </div>
             <div class="fld">
-              <label for="up-consultation">Consultation liée</label>
+              <label for="up-consultation">Consultation liee</label>
               <select id="up-consultation">
-                <option value="">-- Sélectionner une consultation --</option>
-                <option value="1">12/03/2025 – Fièvre persistante (Dr. Bamba A.)</option>
-                <option value="2">02/02/2025 – Bilan cardiologique (Dr. Koné M.)</option>
+                <option value="">-- Selectionner une consultation --</option>
+                <option value="1">12/03/2025 - Fievre persistante (Dr. Bamba A.)</option>
+                <option value="2">02/02/2025 - Bilan cardiologique (Dr. Kone M.)</option>
               </select>
             </div>
             <div class="fld">
@@ -83,17 +83,16 @@
                 <option value="IRM">IRM</option>
                 <option value="SCANNER">Scanner</option>
                 <option value="RADIOGRAPHIE">Radiographie</option>
-                <option value="ECHOGRAPHIE">Échographie</option>
+                <option value="ECHOGRAPHIE">Echographie</option>
                 <option value="AUTRE">Autre</option>
               </select>
             </div>
             <div class="fld">
               <label for="up-description">Description</label>
-              <input type="text" id="up-description" placeholder="Ex: Bilan sanguin NFS + CRP · 14/03/2025">
+              <input type="text" id="up-description" placeholder="Ex: Bilan sanguin NFS + CRP - 14/03/2025">
             </div>
           </div>
 
-          <!-- Zone drag & drop -->
           <div>
             <div class="upload-zone" id="upload-zone"
                  ondragover="dragOver(event)"
@@ -101,14 +100,13 @@
                  ondrop="dropFichier(event)"
                  onclick="document.getElementById('file-input').click()">
               <div class="upload-zone-icon">📂</div>
-              <div class="upload-zone-titre">Glisser-déposer un fichier</div>
+              <div class="upload-zone-titre">Glisser-deposer un fichier</div>
               <div class="upload-zone-sous">ou cliquer pour parcourir</div>
               <div class="upload-zone-formats">PDF, JPEG, PNG · Max 20 MB</div>
             </div>
             <input type="file" id="file-input" style="display:none"
               accept=".pdf,.jpg,.jpeg,.png"
-                   onchange="fichierSelectionne(this)">
-            <!-- Aperçu fichier sélectionné -->
+              onchange="fichierSelectionne(this)">
             <div id="fichier-selectionne" class="fichier-apercu" style="display:none">
               <span class="fichier-icone" id="fichier-icone">📄</span>
               <div class="flex-1">
@@ -118,9 +116,8 @@
               <button class="btn btn-danger btn-sm" onclick="retirerFichier()">✕</button>
             </div>
 
-            <!-- Barre de progression -->
             <div id="upload-progress" style="display:none">
-              <div class="progress-label">Envoi en cours…</div>
+              <div class="progress-label">Envoi en cours...</div>
               <div class="progress-bar-wrap">
                 <div class="progress-bar-fill" id="progress-fill"></div>
               </div>
@@ -131,16 +128,15 @@
         <div class="actions-bar">
           <div id="upload-msg" class="upload-feedback" style="display:none"></div>
           <div class="actions-right">
-            <button class="btn btn-secondary" onclick="resetUpload()">Réinitialiser</button>
+            <button class="btn btn-secondary" onclick="resetUpload()">Reinitialiser</button>
             <button class="btn btn-primary" onclick="soumettreFichier()">⬆️ Uploader le document</button>
           </div>
         </div>
       </div>
 
-      <!-- Documents uploadés récemment -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Documents uploadés récemment</div>
+          <div class="card-title">Documents uploades recemment</div>
           <span class="badge badge-slate" id="badge-total-docs">3 documents</span>
         </div>
         <div class="table-wrap">
@@ -159,7 +155,6 @@
           </table>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -168,6 +163,3 @@
 <script src="../../js/infirmier.js"></script>
 </body>
 </html>
-
-
-
