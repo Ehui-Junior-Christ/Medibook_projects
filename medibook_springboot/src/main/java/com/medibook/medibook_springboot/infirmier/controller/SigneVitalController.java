@@ -7,8 +7,12 @@ import com.medibook.medibook_springboot.infirmier.entity.SigneVital;
 import com.medibook.medibook_springboot.infirmier.service.SigneVitalService;
 
 @RestController
-@RequestMapping("/api/signes")
+@RequestMapping("/api/signes-vitaux")
 @RequiredArgsConstructor
+
+// 🔥 AJOUT CRITIQUE ICI
+@CrossOrigin(origins = "*")
+
 public class SigneVitalController {
 
     private final SigneVitalService service;

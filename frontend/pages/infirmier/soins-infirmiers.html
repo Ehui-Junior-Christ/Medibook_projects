@@ -121,19 +121,22 @@
       <div class="modal-title">Enregistrer un soin infirmier</div>
       <button class="modal-close" onclick="fermerModal('modal-soin-form')">✕</button>
     </div>
+
     <div class="modal-body">
+
       <div class="fld">
-        <label for="sf-patient">Patient</label>
-        <select id="sf-patient">
+        <label for="soin-patient">Patient</label>
+        <select id="soin-patient">
           <option value="">Sélectionner un patient</option>
           <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
           <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
           <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
         </select>
       </div>
+
       <div class="fld">
-        <label for="sf-type">Type de soin</label>
-        <select id="sf-type">
+        <label for="soin-type">Type de soin</label>
+        <select id="soin-type">
           <option value="">Sélectionner</option>
           <option>Pansement</option>
           <option>Injection IM</option>
@@ -146,29 +149,40 @@
           <option>Surveillance post-opératoire</option>
         </select>
       </div>
+
       <div class="fld">
-        <label for="sf-detail">Détail / Médicament administré</label>
-        <input type="text" id="sf-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
+        <label for="soin-detail">Détail / Médicament administré</label>
+        <input type="text" id="soin-detail" placeholder="Ex: Artéméther 80mg – bras gauche">
       </div>
+
       <div class="form-grid-2">
         <div class="fld">
-          <label for="sf-date">Date</label>
-          <input type="date" id="sf-date">
+          <label for="soin-date">Date</label>
+          <input type="date" id="soin-date">
         </div>
         <div class="fld">
-          <label for="sf-heure">Heure</label>
-          <input type="time" id="sf-heure">
+          <label for="soin-heure">Heure</label>
+          <input type="time" id="soin-heure">
         </div>
       </div>
+
       <div class="fld">
-        <label for="sf-obs">Observations</label>
-        <textarea id="sf-obs" rows="3" placeholder="Notes sur le déroulement du soin, réaction du patient…"></textarea>
+        <label for="soin-obs">Observations</label>
+        <textarea id="soin-obs" rows="3"></textarea>
       </div>
+
     </div>
+
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="fermerModal('modal-soin-form')">Annuler</button>
-      <button class="btn btn-primary" onclick="soumettreNouveauSoin()">Enregistrer</button>
+      <button class="btn btn-secondary" onclick="fermerModal('modal-soin-form')">
+        Annuler
+      </button>
+
+      <button class="btn btn-primary" onclick="enregisterSoin()">
+        Enregistrer
+      </button>
     </div>
+
   </div>
 </div>
 
