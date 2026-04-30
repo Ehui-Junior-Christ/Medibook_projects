@@ -78,12 +78,33 @@ public class AuthService {
             throw new RuntimeException("Compte desactive");
         }
 
-        return new LoginResponseDto(
-                utilisateur.getId(),
-                utilisateur.getNom(),
-                utilisateur.getPrenom(),
-                utilisateur.getRole().name()
-        );
+        LoginResponseDto response = new LoginResponseDto();
+        response.setId(utilisateur.getId());
+        response.setNom(utilisateur.getNom());
+        response.setPrenom(utilisateur.getPrenom());
+        response.setRole(utilisateur.getRole().name());
+        response.setCmu(utilisateur.getCmu());
+        response.setTelephone(utilisateur.getTelephone());
+        response.setEmail(utilisateur.getEmail());
+        response.setPhotoProfil(utilisateur.getPhotoProfil());
+
+        if (utilisateur instanceof Medecin) {
+            Medecin medecin = (Medecin) utilisateur;
+            response.setMatricule(medecin.getMatricule());
+            response.setSpecialiteMedicale(medecin.getSpecialiteMedicale());
+        } else if (utilisateur instanceof Infirmier) {
+            Infirmier infirmier = (Infirmier) utilisateur;
+            response.setMatricule(infirmier.getMatricule());
+            response.setService(infirmier.getService());
+        } else if (utilisateur instanceof Patient) {
+            Patient patient = (Patient) utilisateur;
+            response.setSexe(patient.getSexe());
+            if (patient.getDateNaissance() != null) {
+                response.setDateNaissance(patient.getDateNaissance().toString());
+            }
+        }
+
+        return response;
     }
 
     private List<Utilisateur> findLoginCandidates(String identifiant) {

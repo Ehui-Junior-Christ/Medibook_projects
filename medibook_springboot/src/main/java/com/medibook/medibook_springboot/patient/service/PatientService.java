@@ -4,15 +4,21 @@ import com.medibook.medibook_springboot.auth.entity.Role;
 import com.medibook.medibook_springboot.patient.dto.AntecedentMedicalDto;
 import com.medibook.medibook_springboot.patient.dto.CarnetMedicalDto;
 import com.medibook.medibook_springboot.patient.dto.ConditionMedicaleDto;
+import com.medibook.medibook_springboot.patient.dto.ImageMedicaleDto;
+import com.medibook.medibook_springboot.patient.dto.NotificationDto;
 import com.medibook.medibook_springboot.patient.dto.PatientRequestDto;
 import com.medibook.medibook_springboot.patient.dto.PatientResponseDto;
 import com.medibook.medibook_springboot.patient.dto.RappelDto;
 import com.medibook.medibook_springboot.patient.entity.AntecedentMedical;
 import com.medibook.medibook_springboot.patient.entity.CarnetMedical;
 import com.medibook.medibook_springboot.patient.entity.ConditionMedicale;
+import com.medibook.medibook_springboot.patient.entity.ImageMedicale;
+import com.medibook.medibook_springboot.patient.entity.Notification;
 import com.medibook.medibook_springboot.patient.entity.Patient;
 import com.medibook.medibook_springboot.patient.entity.Rappel;
 import com.medibook.medibook_springboot.patient.repository.CarnetMedicalRepository;
+import com.medibook.medibook_springboot.patient.repository.ImageMedicaleRepository;
+import com.medibook.medibook_springboot.patient.repository.NotificationRepository;
 import com.medibook.medibook_springboot.patient.repository.PatientRepository;
 import com.medibook.medibook_springboot.patient.repository.RappelRepository;
 import org.springframework.http.HttpStatus;
@@ -33,15 +39,21 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final CarnetMedicalRepository carnetMedicalRepository;
     private final RappelRepository rappelRepository;
+    private final NotificationRepository notificationRepository;
+    private final ImageMedicaleRepository imageMedicaleRepository;
 
     public PatientService(
             PatientRepository patientRepository,
             CarnetMedicalRepository carnetMedicalRepository,
-            RappelRepository rappelRepository
+            RappelRepository rappelRepository,
+            NotificationRepository notificationRepository,
+            ImageMedicaleRepository imageMedicaleRepository
     ) {
         this.patientRepository = patientRepository;
         this.carnetMedicalRepository = carnetMedicalRepository;
         this.rappelRepository = rappelRepository;
+        this.notificationRepository = notificationRepository;
+        this.imageMedicaleRepository = imageMedicaleRepository;
     }
 
     @Transactional
@@ -374,5 +386,121 @@ public class PatientService {
                         .comparing(RappelDto::getDateHeure, Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(RappelDto::getId, Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
+    }
+
+    // ========================
+    // NOTIFICATIONS
+    // ========================
+
+    @Transactional(readOnly = true)
+    public List<NotificationDto> getNotifications(Long patientId) {
+        getPatientOrThrow(patientId);
+        return notificationRepository.findByPatientIdOrderByDateCreationDesc(patientId).stream()
+                .map(this::mapNotification)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public long countUnreadNotifications(Long patientId) {
+        getPatientOrThrow(patientId);
+        return notificationRepository.countByPatientIdAndLuFalse(patientId);
+    }
+
+    @Transactional
+    public NotificationDto createNotification(Long patientId, NotificationDto dto) {
+        Patient patient = getPatientOrThrow(patientId);
+        Notification notif = new Notification();
+        notif.setType(dto.getType() != null ? dto.getType() : "systeme");
+        notif.setTitre(dto.getTitre() != null ? dto.getTitre() : "Notification");
+        notif.setMessage(dto.getMessage());
+        notif.setUrgence(dto.getUrgence());
+        notif.setLu(dto.getLu() != null ? dto.getLu() : false);
+        notif.setPatient(patient);
+        return mapNotification(notificationRepository.save(notif));
+    }
+
+    @Transactional
+    public NotificationDto markNotificationAsRead(Long patientId, Long notifId) {
+        Notification notif = notificationRepository.findById(notifId)
+                .filter(n -> n.getPatient().getId().equals(patientId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification introuvable."));
+        notif.setLu(true);
+        return mapNotification(notificationRepository.save(notif));
+    }
+
+    @Transactional
+    public void deleteNotification(Long patientId, Long notifId) {
+        Notification notif = notificationRepository.findById(notifId)
+                .filter(n -> n.getPatient().getId().equals(patientId))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification introuvable."));
+        notificationRepository.delete(notif);
+    }
+
+    private NotificationDto mapNotification(Notification notif) {
+        NotificationDto dto = new NotificationDto();
+        dto.setId(notif.getId());
+        dto.setType(notif.getType());
+        dto.setTitre(notif.getTitre());
+        dto.setMessage(notif.getMessage());
+        dto.setDateCreation(notif.getDateCreation());
+        dto.setLu(notif.getLu());
+        dto.setUrgence(notif.getUrgence());
+        return dto;
+    }
+
+    // ========================
+    // IMAGES MEDICALES
+    // ========================
+
+    @Transactional(readOnly = true)
+    public List<ImageMedicaleDto> getImagesMedicales(Long patientId, String type) {
+        getPatientOrThrow(patientId);
+        List<ImageMedicale> images = (type != null && !type.isBlank())
+                ? imageMedicaleRepository.findByPatientIdAndTypeOrderByCreatedAtDesc(patientId, type)
+                : imageMedicaleRepository.findByPatientIdOrderByCreatedAtDesc(patientId);
+        return images.stream().map(this::mapImageMedicale).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ImageMedicaleDto getImageMedicale(Long patientId, Long imageId) {
+        return imageMedicaleRepository.findByIdAndPatientId(imageId, patientId)
+                .map(this::mapImageMedicale)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image medicale introuvable."));
+    }
+
+    @Transactional
+    public ImageMedicaleDto createImageMedicale(Long patientId, ImageMedicaleDto dto) {
+        Patient patient = getPatientOrThrow(patientId);
+        ImageMedicale image = new ImageMedicale();
+        image.setNom(dto.getNom() != null ? dto.getNom() : "Image medicale");
+        image.setType(dto.getType() != null ? dto.getType() : "radiographie");
+        image.setDateImage(dto.getDateImage());
+        image.setSource(dto.getSource());
+        image.setFormat(dto.getFormat());
+        image.setTaille(dto.getTaille());
+        image.setDonnees(dto.getDonnees());
+        image.setPatient(patient);
+        return mapImageMedicale(imageMedicaleRepository.save(image));
+    }
+
+    @Transactional
+    public void deleteImageMedicale(Long patientId, Long imageId) {
+        ImageMedicale image = imageMedicaleRepository.findByIdAndPatientId(imageId, patientId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image medicale introuvable."));
+        imageMedicaleRepository.delete(image);
+    }
+
+    private ImageMedicaleDto mapImageMedicale(ImageMedicale image) {
+        ImageMedicaleDto dto = new ImageMedicaleDto();
+        dto.setId(image.getId());
+        dto.setNom(image.getNom());
+        dto.setType(image.getType());
+        dto.setDateImage(image.getDateImage());
+        dto.setSource(image.getSource());
+        dto.setFormat(image.getFormat());
+        dto.setTaille(image.getTaille());
+        dto.setDonnees(image.getDonnees());
+        dto.setCreatedAt(image.getCreatedAt());
+        return dto;
     }
 }

@@ -75,6 +75,34 @@ function syncInfirmierSession({
   localStorage.setItem("infirmierSession", JSON.stringify(nextSession));
 }
 
+function syncPatientSession({
+  id = null,
+  nom = "",
+  prenom = "",
+  telephone = "",
+  email = "",
+  sexe = "",
+  dateNaissance = "",
+  cmu = "",
+  photoProfil = ""
+}) {
+  const existing = JSON.parse(localStorage.getItem("medibook.patient.profile") || "null");
+  const nextSession = {
+    ...(existing || {}),
+    backendId: id ?? existing?.backendId ?? null,
+    id: cmu || existing?.id || "N/A",
+    numeroAssure: cmu || existing?.numeroAssure || "",
+    nom: nom || existing?.nom || "",
+    prenoms: prenom || existing?.prenoms || existing?.prenom || "",
+    telephone: telephone || existing?.telephone || "",
+    email: email || existing?.email || "",
+    sexe: sexe || existing?.sexe || "",
+    dateNaissance: dateNaissance || existing?.dateNaissance || "",
+    avatar: photoProfil || existing?.avatar || ""
+  };
+  localStorage.setItem("medibook.patient.profile", JSON.stringify(nextSession));
+}
+
 function toggleRole(role) {
   selectedRole = role;
   const patientForm = document.getElementById("form-patient");
@@ -127,11 +155,23 @@ function pickRole(role, card) {
     }
   });
 
+  const fIsProPatient = document.getElementById("f-is-pro-patient");
+  if (fIsProPatient) fIsProPatient.style.display = isPat ? "flex" : "none";
+  const cb = document.getElementById("isProPatient");
+  if (cb) cb.checked = false;
+  if (window.toggleProPatientMatricule) window.toggleProPatientMatricule();
+
   const roleField = document.getElementById("rc-role");
   if (roleField) {
     roleField.textContent = role.charAt(0).toUpperCase() + role.slice(1);
   }
 }
+
+window.toggleProPatientMatricule = function() {
+  const cb = document.getElementById("isProPatient");
+  const fMat = document.getElementById("f-mat-pro-patient");
+  if (fMat) fMat.style.display = (cb && cb.checked) ? "flex" : "none";
+};
 
 function setStep(step) {
   document.querySelectorAll(".inscrip-step").forEach((panel) => {
@@ -236,6 +276,19 @@ function goApp() {
           photoProfil: data.photoProfil
         });
       }
+      if (data.role === "PATIENT") {
+        syncPatientSession({
+          id: data.id,
+          nom: data.nom,
+          prenom: data.prenom,
+          telephone: data.telephone,
+          email: data.email,
+          sexe: data.sexe,
+          dateNaissance: data.dateNaissance,
+          cmu: data.numeroAssure || data.cmu,
+          photoProfil: data.photoProfil
+        });
+      }
       const dashboardByRole = {
         PATIENT: "./patient/dashboard.html",
         MEDECIN: "./medecin/dashboard.html",
@@ -325,14 +378,19 @@ function register() {
   const confirmation = document.getElementById("pw2")?.value;
   const groupeSanguin = document.getElementById("groupeSanguin")?.value;
   const allergie = document.getElementById("allergie")?.value?.trim();
-  const sessionMedecin = JSON.parse(localStorage.getItem("medecinSession") || "null");
-  const sessionInfirmier = JSON.parse(localStorage.getItem("infirmierSession") || "null");
-  const fallbackMatricule = selectedRole === "patient"
-    ? (sessionMedecin?.matricule || sessionInfirmier?.matricule || "")
-    : "";
-  const matricule = document.getElementById("matricule")?.value?.trim()
-    || document.getElementById("matriculeInfirmier")?.value?.trim()
-    || fallbackMatricule;
+
+  let matricule = "";
+  if (selectedRole === "medecin") {
+    matricule = document.getElementById("matricule")?.value?.trim() || "";
+  } else if (selectedRole === "infirmier") {
+    matricule = document.getElementById("matriculeInfirmier")?.value?.trim() || "";
+  } else if (selectedRole === "patient") {
+    const isProCreatingPatient = document.getElementById("isProPatient")?.checked;
+    if (isProCreatingPatient) {
+      matricule = document.getElementById("matriculeProPatient")?.value?.trim() || "";
+    }
+  }
+
   const specialiteMedicale = document.getElementById("specialiteMedicale")?.value;
   const service = document.getElementById("service")?.value;
   const cgu = document.getElementById("cgu")?.checked;
@@ -405,6 +463,17 @@ function register() {
           email,
           matricule,
           service,
+          sexe,
+          dateNaissance,
+          cmu
+        });
+      }
+      if (selectedRole.toUpperCase() === "PATIENT") {
+        syncPatientSession({
+          nom,
+          prenom,
+          telephone,
+          email,
           sexe,
           dateNaissance,
           cmu

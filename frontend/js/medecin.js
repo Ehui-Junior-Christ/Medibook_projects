@@ -250,6 +250,7 @@ function getFallbackPatientRecords(patientId) {
     consultations: records.consultations.filter((item) => String(item.patientId) === String(patientId)),
     ordonnances: records.ordonnances.filter((item) => String(item.patientId) === String(patientId)),
     certificats: (records.certificats || []).filter((item) => String(item.patientId) === String(patientId)),
+    imagesMedicales: (records.imagesMedicales || []).filter((item) => String(item.patientId) === String(patientId)),
     vitals: records.vitals.filter((item) => String(item.patientId) === String(patientId)),
     timeline: records.timeline.filter((item) => String(item.patientId) === String(patientId))
   };
@@ -381,16 +382,18 @@ async function refreshPatientRecords(patientId) {
   if (!patientId) return getFallbackPatientRecords(patientId);
 
   try {
-    const [consultations, ordonnances, certificats] = await Promise.all([
-      apiFetchJson(`/medecins/consultations/patient/${patientId}`),
-      apiFetchJson(`/medecins/ordonnances/patient/${patientId}`),
-      apiFetchJson(`/medecins/certificats/patient/${patientId}`)
+    const [consultations, ordonnances, certificats, imagesApi] = await Promise.all([
+      apiFetchJson(`/medecins/consultations/patient/${patientId}`).catch(() => []),
+      apiFetchJson(`/medecins/ordonnances/patient/${patientId}`).catch(() => []),
+      apiFetchJson(`/medecins/certificats/patient/${patientId}`).catch(() => []),
+      apiFetchJson(`/patients/images-medicales/patient/${patientId}`).catch(() => [])
     ]);
 
     const normalized = {
       consultations: Array.isArray(consultations) ? consultations.map(normalizeConsultationFromApi) : [],
       ordonnances: Array.isArray(ordonnances) ? ordonnances.map(normalizeOrdonnanceFromApi) : [],
       certificats: Array.isArray(certificats) ? certificats.map(normalizeCertificatFromApi) : [],
+      imagesMedicales: Array.isArray(imagesApi) ? imagesApi : [],
       vitals: Array.isArray(consultations)
         ? consultations
           .filter((item) => item.tensionSystolique || item.tensionDiastolique || item.temperature || item.frequenceCardiaque || item.spo2)
@@ -510,6 +513,7 @@ function loadSharedRecords() {
       consultations: Array.isArray(parsed.consultations) ? parsed.consultations : [],
       ordonnances: Array.isArray(parsed.ordonnances) ? parsed.ordonnances : [],
       certificats: Array.isArray(parsed.certificats) ? parsed.certificats : [],
+      imagesMedicales: Array.isArray(parsed.imagesMedicales) ? parsed.imagesMedicales : [],
       documents: Array.isArray(parsed.documents) ? parsed.documents : [],
       vitals: Array.isArray(parsed.vitals) ? parsed.vitals : [],
       timeline: Array.isArray(parsed.timeline) ? parsed.timeline : []
@@ -535,6 +539,7 @@ function getSharedPatientRecords(patientId) {
     consultations: records.consultations.filter((item) => String(item.patientId) === String(patientId)),
     ordonnances: records.ordonnances.filter((item) => String(item.patientId) === String(patientId)),
     certificats: (records.certificats || []).filter((item) => String(item.patientId) === String(patientId)),
+    imagesMedicales: (records.imagesMedicales || []).filter((item) => String(item.patientId) === String(patientId)),
     vitals: records.vitals.filter((item) => String(item.patientId) === String(patientId)),
     timeline: records.timeline.filter((item) => String(item.patientId) === String(patientId))
   };
@@ -739,7 +744,13 @@ async function renderLookupResults(container, query, action = "dossier") {
     `;
     button.addEventListener("click", () => {
       selectPatient(patient, { action });
-      if (document.body.dataset.page === "consultation" && action === "dossier") {
+      if (action === "consultation" && document.body.dataset.page === "consultation") {
+        // Show consultation form directly on the same page
+        const picker = document.querySelector("[data-consultation-picker]");
+        const formShell = document.querySelector("[data-consultation-form-shell]");
+        if (picker) picker.classList.add("is-hidden");
+        if (formShell) formShell.classList.remove("is-hidden");
+      } else if (document.body.dataset.page === "consultation" && action === "dossier") {
         goToWorkflowPage("dossier-patient.html", "dossier");
       }
     });
@@ -804,16 +815,11 @@ function initPatientLookup() {
 
       if (patient && String(patient.cmu).toLowerCase() === input.value.trim().toLowerCase()) {
         selectPatient(patient, { action: "consultation", input });
-        results.innerHTML = `
-          <div class="patient-lookup-item">
-            <span class="patient-search-avatar">${patient.initials}</span>
-            <span class="patient-lookup-copy">
-              <strong>${patient.fullName}</strong>
-              <small>${patient.cmu} · ${patient.age} · ${patient.phone}</small>
-            </span>
-            <span class="badge badge-teal">Patient trouve</span>
-          </div>
-        `;
+        // Show consultation form directly instead of just showing the patient card
+        const picker = document.querySelector("[data-consultation-picker]");
+        const formShell = document.querySelector("[data-consultation-form-shell]");
+        if (picker) picker.classList.add("is-hidden");
+        if (formShell) formShell.classList.remove("is-hidden");
         return;
       }
 
@@ -1567,28 +1573,102 @@ function renderDossierPatientRecords(patient = getSelectedPatient()) {
     vitalsRoot.innerHTML = `
       <div class="vital-grid">
         <div class="vital-card ${warnTA ? "warning" : ""}">
-          <div class="vital-icon">ðŸ©¸</div>
+          <div class="vital-icon">🩸</div>
           <div class="vital-val">${vital.taSys}/${vital.taDia}</div>
           <div class="vital-lbl">Tension (mmHg)</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">ðŸŒ¡</div>
-          <div class="vital-val">${vital.temp}Â°C</div>
+          <div class="vital-icon">🌡</div>
+          <div class="vital-val">${vital.temp}°C</div>
           <div class="vital-lbl">Temperature</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">â¤</div>
+          <div class="vital-icon">❤</div>
           <div class="vital-val">${vital.fc} bpm</div>
           <div class="vital-lbl">Frequence cardiaque</div>
         </div>
         <div class="vital-card">
-          <div class="vital-icon">ðŸ’¨</div>
+          <div class="vital-icon">💨</div>
           <div class="vital-val">${vital.spo2}%</div>
           <div class="vital-lbl">SpO2</div>
         </div>
       </div>
     `;
   }
+
+
+  // Render Images Medicales for Medecin
+  const imagesRoot = document.getElementById("medecinImagesList");
+  if (imagesRoot) {
+    if (!shared.imagesMedicales) shared.imagesMedicales = [];
+    if (shared.imagesMedicales.length === 0) {
+      imagesRoot.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--slate-500); padding: 20px;">Aucune image médicale trouvée pour ce patient.</div>`;
+    } else {
+      imagesRoot.innerHTML = shared.imagesMedicales.map(img => `
+        <div class="card" style="display: flex; gap: 16px; align-items: center;">
+          <div style="font-size: 32px;">${img.type === "radiographie" ? "🩻" : "📷"}</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600;">${img.nom || 'Document médical'}</div>
+            <div style="font-size: 12px; color: var(--slate-500);">${img.dateImage || img.date} · ${img.taille}</div>
+          </div>
+          <a href="${img.donnees || img.preview || '#'}" download="Image_Medicale" class="btn btn-secondary btn-sm" target="_blank">Télécharger</a>
+        </div>
+      `).join("");
+    }
+  }
+}
+
+// Medecin: Upload Image Medicale
+function initMedecinImageUpload() {
+  const uploadInput = document.getElementById('medecinImageUpload');
+  if (!uploadInput) return;
+  uploadInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const patient = getSelectedPatient();
+    if (!patient) {
+      alert("Veuillez d'abord selectionner un patient.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const fileData = typeof reader.result === "string" ? reader.result : "";
+      const newImg = {
+        nom: file.name.replace(/\.[^.]+$/, ""),
+        type: "radiographie",
+        dateImage: new Date().toISOString().slice(0, 10),
+        source: "Uploade par le medecin",
+        format: file.type.split("/")[1]?.toUpperCase() || "IMAGE",
+        taille: (file.size / (1024 * 1024)).toFixed(1) + " Mo",
+        donnees: fileData
+      };
+
+      try {
+        if (MEDECIN_API_CONTEXT.ready && patient.id) {
+          const numericId = Number.parseInt(patient.id, 10);
+          if (!Number.isNaN(numericId)) {
+            const savedImg = await apiFetchJson(`/patients/images-medicales/patient/${numericId}`, {
+              method: "POST",
+              body: JSON.stringify(newImg)
+            });
+            newImg.id = savedImg.id;
+          }
+        }
+
+        appendSharedRecord("imagesMedicales", newImg);
+        await refreshPatientRecords(patient.id);
+        renderDossierPatientRecords(patient);
+        alert("Image medicale sauvegardee avec succes dans la base de donnees !");
+      } catch (err) {
+        console.error("Upload error:", err);
+        alert("Erreur lors de l'envoi vers le backend. (Mode local utilise)");
+        appendSharedRecord("imagesMedicales", newImg);
+        renderDossierPatientRecords(patient);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function getConsultationLinkedRecords(patientId, consultationId) {
@@ -2168,10 +2248,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   initSelectableChips();
   initTopbarActions();
+  initConsultationVitalsSync();
   initOrdonnanceActions();
   initCertificatActions();
   initConsultationActions();
-  initConsultationVitalsSync();
+  initDossierDetailInteractions();
+  initMedecinImageUpload();
+  initSidebarActiveState();
+  initConsultationDirectSearch();
 
   if (document.getElementById("certTypePills")) updateCert();
   if (document.getElementById("ordoRows")) updateOrdonnance();
@@ -2198,3 +2282,38 @@ window.updateCert = updateCert;
 window.addRow = addRow;
 window.delRow = delRow;
 window.updateOrdonnance = updateOrdonnance;
+
+function initSidebarActiveState() {
+  const currentPath = window.location.pathname;
+  document.querySelectorAll(".sidebar .sb-item").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (!href) return;
+    link.classList.remove("active");
+    if (currentPath.endsWith(href) || currentPath.endsWith("/" + href)) {
+      link.classList.add("active");
+    }
+  });
+}
+
+function initConsultationDirectSearch() {
+  // On the consultation page, when a patient lookup result is clicked,
+  // show the consultation form directly instead of navigating away.
+  if (document.body.dataset.page !== "consultation") return;
+
+  const lookupResults = document.querySelector("[data-consultation-picker] [data-patient-lookup-results]");
+  if (!lookupResults) return;
+
+  lookupResults.addEventListener("click", (event) => {
+    const item = event.target.closest(".patient-lookup-item");
+    if (!item) return;
+    // After selectPatient runs via the existing handler, ensure form is shown
+    setTimeout(() => {
+      const picker = document.querySelector("[data-consultation-picker]");
+      const formShell = document.querySelector("[data-consultation-form-shell]");
+      if (picker && getSelectedPatient()) {
+        picker.classList.add("is-hidden");
+        if (formShell) formShell.classList.remove("is-hidden");
+      }
+    }, 100);
+  });
+}

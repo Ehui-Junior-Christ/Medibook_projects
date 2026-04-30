@@ -26,6 +26,15 @@
     }
   }
 
+  function getRequiredRole(relPath) {
+    const rel = String(relPath || "").replace(/^\/+/, "");
+    if (rel.startsWith("pages/patient/")) return "PATIENT";
+    if (rel.startsWith("pages/medecin/")) return "MEDECIN";
+    if (rel.startsWith("pages/infirmier/")) return "INFIRMIER";
+    if (rel.startsWith("pages/admin/")) return "ADMIN";
+    return null;
+  }
+
   function getRelFromFrontend(pathname) {
     // We support two common setups:
     // 1) server root is the repo/project root: /frontend/pages/...
@@ -64,14 +73,16 @@
     return PUBLIC_PAGES.has(rel);
   }
 
-  function hasUserSession() {
+  function getUserSession() {
     const user = safeJsonParse(localStorage.getItem("user") || "null");
-    if (!user || typeof user !== "object") return false;
+    if (!user || typeof user !== "object") return null;
     const role = String(user.role || "").toUpperCase();
     const okRole = ["PATIENT", "MEDECIN", "INFIRMIER", "ADMIN"].includes(role);
     // Backend seems to return `id`; accept other common keys too to avoid false negatives.
     const id = user.id ?? user.userId ?? user.utilisateurId ?? null;
-    return okRole && (typeof id === "number" || (typeof id === "string" && id.trim() !== ""));
+    const okId = typeof id === "number" || (typeof id === "string" && id.trim() !== "");
+    if (!okRole || !okId) return null;
+    return { role, id };
   }
 
 
@@ -80,7 +91,9 @@
 
   if (isPublic(rel)) return;
 
-  const hasSession = hasUserSession();
+  const session = getUserSession();
+  const requiredRole = getRequiredRole(rel);
+  const hasSession = Boolean(session);
 
   // Debug aid (useful when one browser behaves differently, e.g. cache/storage).
   // This is intentionally quiet: no console logs, just a global you can inspect.
@@ -89,8 +102,20 @@
     rel,
     isPublic: isPublic(rel),
     hasSession,
+    requiredRole,
+    sessionRole: session?.role || null,
     root: null
   };
+
+  // If authenticated but tries to open another role's area, force back to home.
+  if (hasSession && requiredRole && session.role !== requiredRole) {
+    const root = getFrontendRootUrl();
+    if (root) {
+      window.__mb_entry_guard.root = root;
+      window.location.replace(root);
+    }
+    return;
+  }
 
   if (hasSession) return;
 

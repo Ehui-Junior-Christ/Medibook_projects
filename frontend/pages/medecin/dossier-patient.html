@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediBook - Dossier patient</title>
     <link rel="stylesheet" href="../../css/main.css">
+    <script defer src="../../js/entry-guard.js"></script>
     <script defer src="../../js/medecin.js"></script>
 
 </head>
@@ -112,6 +113,7 @@
                         <button class="tab-btn" data-target="dtab-cert">Certificats</button>
                         <button class="tab-btn" data-target="dtab-ant">Antecedents</button>
                         <button class="tab-btn" data-target="dtab-vit">Signes vitaux</button>
+                        <button class="tab-btn" data-target="dtab-img">Images Medicales</button>
                     </div>
                     <div class="tab-content active" id="dtab-consult"></div>
                     <div class="tab-content" id="dtab-ordo"></div>
@@ -129,6 +131,17 @@
                         </div>
                     </div>
                     <div class="tab-content" id="dtab-vit"></div>
+                    <div class="tab-content" id="dtab-img">
+                        <div class="card mb-16">
+                            <div class="card-title">Ajouter une image médicale</div>
+                            <p class="text-sm" style="margin-bottom: 12px; color: var(--slate-500);">Uploadez une radiographie, un scanner ou un autre document médical pour ce patient.</p>
+                            <input type="file" id="medecinImageUpload" accept="image/*,application/pdf" style="display: none;">
+                            <button class="btn btn-primary" onclick="document.getElementById('medecinImageUpload').click()">Importer une image</button>
+                        </div>
+                        <div id="medecinImagesList" class="grid g2 gap-14">
+                            <!-- Les images seront rendues ici -->
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>

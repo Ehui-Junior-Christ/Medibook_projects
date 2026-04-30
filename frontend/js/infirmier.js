@@ -1,4 +1,4 @@
-﻿// ========== SESSION INFIRMIER ========== //
+// ========== SESSION INFIRMIER ========== //
 const DEFAULT_INFIRMIER_SESSION = {
     id: 2,
     nom: "Kone",

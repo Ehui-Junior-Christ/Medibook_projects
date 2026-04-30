@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediBook - Images medicales</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/patient.css">
+  <script defer src="../../js/patient.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <div class="sb-logo-mark">🏥</div>
+        <div>
+          <div class="sb-logo-text">MediBook</div>
+          <div class="sb-logo-sub">Portail medical</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-role-badge sb-role-patient"><span>🧑</span><span>Patient</span></div>
+    <nav data-patient-nav></nav>
+    <div class="sb-footer">
+      <a class="sb-user" href="profil.html#edit-profile">
+        <div class="sb-avatar" data-patient-initials>BS</div>
+        <div>
+          <div class="sb-user-name" data-patient-name>Patient</div>
+          <div class="sb-user-role">Mes images</div>
+        </div>
+        <span class="sb-user-link">↗</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">Images medicales</div>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-right">
+        <a class="icon-btn logout" href="../login.html" title="Deconnexion">🚪</a>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <section class="card upload-section">
+        <div class="card-header">
+          <div class="card-title">Telecharger une image medicale</div>
+        </div>
+        <div class="upload-zone" data-upload-zone>
+          <div class="upload-zone-icon">🖼️</div>
+          <p class="upload-zone-title">Glissez-deposez vos images ici</p>
+          <p class="upload-zone-sub">ou cliquez pour parcourir vos fichiers</p>
+          <p class="upload-zone-formats">Formats acceptes : JPEG, PNG, DICOM · Taille max : 20 Mo</p>
+          <input type="file" accept="image/*,.dcm" multiple hidden data-image-upload-input>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">Mes images medicales</div>
+          <div class="helper-copy" data-images-count>0 image(s)</div>
+        </div>
+        <div class="filter-row">
+          <button class="dpill sel" type="button" data-img-filter="toutes">Toutes</button>
+          <button class="dpill" type="button" data-img-filter="radiographie">Radiographies</button>
+          <button class="dpill" type="button" data-img-filter="scanner">Scanners</button>
+          <button class="dpill" type="button" data-img-filter="echographie">Echographies</button>
+          <button class="dpill" type="button" data-img-filter="irm">IRM</button>
+        </div>
+        <div class="images-grid" data-images-list></div>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>
