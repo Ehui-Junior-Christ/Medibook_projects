@@ -54,7 +54,7 @@
       <div class="card" style="margin-bottom:14px">
         <div class="card-title" style="margin-bottom:12px">Sélectionner un patient</div>
         <div style="display:flex;gap:10px">
-          <select id="select-patient-vitaux" class="filtre-select" style="flex:1" onchange="chargerPatientVitaux(this.value)">
+          <select id="select-patient-vitaux" class="filtre-select" style="flex:1">
             <option value="">-- Choisir un patient --</option>
             <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
             <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
@@ -155,7 +155,9 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="fermerModal('modal-vitaux')">Annuler</button>
-      <button class="btn btn-primary" onclick="enregistrerVitaux()">Enregistrer</button>
+      <button class="btn btn-primary" onclick="enregistrerSigneVital()">
+        Enregistrer
+      </button>
     </div>
   </div>
 </div>

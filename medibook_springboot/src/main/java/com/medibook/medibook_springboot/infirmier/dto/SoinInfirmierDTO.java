@@ -9,4 +9,5 @@ public class SoinInfirmierDTO {
     private String description;
     private LocalDateTime dateHeure;
     private Long infirmierId;
+    private Long patientId;
 }

@@ -7,8 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/main.css">
   <link rel="stylesheet" href="../../css/infirmier.css">
-  <script defer src="../../js/entry-guard.js"></script>
-
 </head>
 <body>
 <div class="app-shell">
@@ -183,8 +181,13 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="fermerModal('modal-soin')">Annuler</button>
-      <button class="btn btn-primary" onclick="enregistrerSoin()">Enregistrer</button>
+      <button class="btn btn-secondary" onclick="fermerModal('modal-soin')">
+        Annuler
+      </button>
+
+      <button class="btn btn-primary" onclick="enregisterSoin()">
+        Enregistrer
+      </button>
     </div>
   </div>
 </div>
@@ -193,6 +196,3 @@
 <script src="../../js/infirmier.js"></script>
 </body>
 </html>
-
-
-

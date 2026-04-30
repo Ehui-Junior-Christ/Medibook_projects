@@ -2,6 +2,7 @@ package com.medibook.medibook_springboot.infirmier.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.medibook.medibook_springboot.patient.entity.Patient;
 
 @Entity
 @Data
@@ -16,4 +17,9 @@ public class DocumentMedical {
     private String type;
     private String cheminFichier;
     private String description;
+
+    // 🔥 AJOUT IMPORTANT
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 }

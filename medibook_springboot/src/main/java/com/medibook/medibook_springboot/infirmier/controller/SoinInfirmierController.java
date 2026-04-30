@@ -6,6 +6,7 @@ import com.medibook.medibook_springboot.infirmier.dto.SoinInfirmierDTO;
 import com.medibook.medibook_springboot.infirmier.entity.SoinInfirmier;
 import com.medibook.medibook_springboot.infirmier.service.SoinInfirmierService;
 
+@CrossOrigin(origins = "*")   // ← Autorise les requêtes depuis ton frontend
 @RestController
 @RequestMapping("/api/soins")
 @RequiredArgsConstructor

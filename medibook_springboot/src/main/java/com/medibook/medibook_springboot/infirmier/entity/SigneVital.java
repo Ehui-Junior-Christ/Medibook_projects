@@ -3,6 +3,7 @@ package com.medibook.medibook_springboot.infirmier.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.medibook.medibook_springboot.patient.entity.Patient;
 
 @Entity
 @Data
@@ -14,17 +15,25 @@ public class SigneVital {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tension;
+    private Double taSystolique;
+    private Double taDiastolique;
     private Double temperature;
-    private Double poids;
-    private Double imc;
     private Integer frequenceCardiaque;
-    private Double saturationOxygene;
+    private Double poids;
+    private Double taille;
+    private Integer spo2;
     private Double glycemie;
+    private Integer frequenceRespiratoire;
+    private String notes;
 
     private LocalDateTime dateHeure;
 
     @ManyToOne
     @JoinColumn(name = "infirmier_id")
     private Infirmier infirmier;
+
+    // ✅ AJOUT IMPORTANT
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 }
