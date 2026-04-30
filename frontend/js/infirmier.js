@@ -1,6 +1,6 @@
 // ========== SESSION INFIRMIER ========== //
 const DEFAULT_INFIRMIER_SESSION = {
-    id: 3,
+    id: 2,
     nom: "Kone",
     prenom: "Marie",
     initiales: "KM",
@@ -22,6 +22,7 @@ function getStoredInfirmierSession() {
 
 let mockInfirmier = getStoredInfirmierSession();
 
+
 function saveInfirmierSession(updates) {
     mockInfirmier = { ...mockInfirmier, ...updates };
     localStorage.setItem("infirmierSession", JSON.stringify(mockInfirmier));
@@ -33,32 +34,6 @@ const mockPatients = [
     { id: 2, nom: "Assi Koffi Martial", cmu: "CMU-2023-04512" },
     { id: 3, nom: "N'guessan Kouamé", cmu: "CMU-2024-11032" }
 ];
-
-// Initialisation du profil depuis localStorage s'il existe
-let savedInfirmier = localStorage.getItem('infirmierProfile');
-if (savedInfirmier) {
-    mockInfirmier = { ...mockInfirmier, ...JSON.parse(savedInfirmier) };
-}
-
-window.applyInfirmierAvatar = function() {
-    document.querySelectorAll("[data-infirmier-avatar], .sb-avatar").forEach(node => {
-        if (mockInfirmier.avatar) {
-            node.style.backgroundImage = `url(${mockInfirmier.avatar})`;
-            node.style.backgroundSize = "cover";
-            node.style.backgroundPosition = "center";
-            node.textContent = "";
-        } else {
-            node.style.backgroundImage = "none";
-            node.textContent = mockInfirmier.initiales;
-        }
-    });
-};
-
-window.saveInfirmierProfile = function(updates) {
-    mockInfirmier = { ...mockInfirmier, ...updates };
-    localStorage.setItem('infirmierProfile', JSON.stringify(mockInfirmier));
-    window.applyInfirmierAvatar();
-};
 
 let mockDocumentsUploades = [];
 
@@ -112,44 +87,57 @@ window.retirerFichier = function() {
 };
 
 window.soumettreFichier = async function() {
+
     const patientId = document.getElementById("up-patient")?.value;
     const type = document.getElementById("up-type")?.value;
+    console.log("TYPE =", type);
     const description = document.getElementById("up-description")?.value || "";
 
-    if (!patientId) { alert("Veuillez sélectionner un patient."); return; }
-    if (!type) { alert("Veuillez choisir un type de document."); return; }
-    if (!window.fichierEnAttente) { alert("Veuillez sélectionner un fichier."); return; }
-
-    const patient = getPatientById(patientId);
-    if (patient) {
-        mockDocumentsUploades.unshift({
-            id: Date.now(),
-            nom: window.fichierEnAttente.name,
-            patientNom: patient.nom,
-            type: type.replace("_", " "),
-            date: new Date().toLocaleDateString("fr-FR"),
-            taille: window.fichierEnAttente.size < 1024*1024
-                ? (window.fichierEnAttente.size/1024).toFixed(0) + " KB"
-                : (window.fichierEnAttente.size/(1024*1024)).toFixed(1) + " MB",
-            description: description
-        });
+    if (!patientId) {
+        alert("Veuillez sélectionner un patient.");
+        return;
     }
 
-    const prog = document.getElementById("upload-progress");
-    const fill = document.getElementById("progress-fill");
-    if (prog) prog.style.display = "block";
-    let pct = 0;
-    const interval = setInterval(() => {
-        pct += 20;
-        if (fill) fill.style.width = pct + "%";
-        if (pct >= 100) {
-            clearInterval(interval);
-            if (prog) prog.style.display = "none";
-            window.afficherFeedback("Document uploadé avec succès.", "success");
+    if (!type) {
+        alert("Veuillez choisir un type de document.");
+        return;
+    }
+
+    if (!window.fichierEnAttente) {
+        alert("Veuillez sélectionner un fichier.");
+        return;
+    }
+
+    // 🔥 FORM DATA (TRÈS IMPORTANT)
+    const formData = new FormData();
+    formData.append("file", window.fichierEnAttente);
+    formData.append("type", type);
+    formData.append("description", description);
+    formData.append("patientId", patientId);
+
+    try {
+        const response = await fetch("http://localhost:8080/api/documents/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+
+            alert("✅ Document enregistré en base (ID " + result.id + ")");
+
+            // reset UI
             window.resetUpload();
-            window.renderTableDocuments();
+
+        } else {
+            const err = await response.text();
+            alert("❌ Erreur backend : " + err);
         }
-    }, 200);
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Erreur réseau");
+    }
 };
 
 window.afficherFeedback = function(msg, type) {
@@ -242,7 +230,7 @@ window.initListePatients = function() {
         liste.forEach(p => {
             const initiales = p.nom.split(' ').map(n => n[0]).join('').toUpperCase();
             const couleur = couleurs[p.id % couleurs.length];
-            const age = Math.floor(Math.random() * (65 - 25 + 1) + 25); // à remplacer par une vraie donnée si dispo
+            const age = Math.floor(Math.random() * (65 - 25 + 1) + 25);
             const conditions = p.id === 1 ? '<span class="badge badge-amber">HTA</span>' : '';
             const derniereMesure = "Aujourd'hui";
             tbody.innerHTML += `
@@ -258,8 +246,7 @@ window.initListePatients = function() {
                     <td>${conditions || '<span class="badge badge-slate">Aucune</span>'}</td>
                     <td>${derniereMesure}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="window.location.href='dossier-patient.html?id=${p.id}'">Dossier</button>
-                        <button class="btn btn-secondary btn-sm" onclick="window.location.href='signes-vitaux.html?id=${p.id}'">Vitaux</button>
+                        <button class="btn btn-primary btn-sm" onclick="window.location.href='signes-vitaux.html?id=${p.id}'">Vitaux</button>
                         <button class="btn btn-secondary btn-sm" onclick="window.location.href='soins-infirmiers.html?id=${p.id}'">Soins</button>
                     </td>
                 </tr>
@@ -299,57 +286,201 @@ window.fermerModalOverlay = function(event, id) {
     }
 };
 
-// ========== SOUMISSION NOUVEAU SOIN ==========
+// ========== SOUMISSION NOUVEAU SOIN (modale) ==========
 window.soumettreNouveauSoin = function() {
-    const patientId = document.getElementById("sf-patient")?.value;
+    console.log("soumettreNouveauSoin appelée");
+    const selectPatient = document.getElementById("sf-patient");
+    if (!selectPatient) {
+        alert("Le champ patient n'existe pas dans le DOM (id 'sf-patient' introuvable)");
+        return;
+    }
+    const patientId = selectPatient.value;
+    console.log("Valeur patient lue :", patientId);
+
     const type = document.getElementById("sf-type")?.value;
     const detail = document.getElementById("sf-detail")?.value;
     const date = document.getElementById("sf-date")?.value;
     const heure = document.getElementById("sf-heure")?.value;
     const observations = document.getElementById("sf-obs")?.value;
 
-    if (!patientId) { alert("Veuillez sélectionner un patient."); return; }
-    if (!type) { alert("Veuillez choisir un type de soin."); return; }
+    if (!patientId) {
+        alert("Veuillez sélectionner un patient.");
+        return;
+    }
+    if (!type) {
+        alert("Veuillez choisir un type de soin.");
+        return;
+    }
 
-    // Simulation (à connecter avec tes vraies données)
-    alert("Soin enregistré (simulation).");
+    alert(`Simulation : Soin "${type}" enregistré pour patient ${patientId}`);
     window.fermerModal("modal-soin-form");
 };
 
+// ========== ENREGISTRER SOIN DEPUIS LE DASHBOARD ==========
+window.enregisterSoin = async function() {
+    const patientId = document.getElementById("soin-patient")?.value;
+    const typeSoin = document.getElementById("soin-type")?.value;
+    const detail = document.getElementById("soin-detail")?.value;
+    const date = document.getElementById("soin-date")?.value;
+    const heure = document.getElementById("soin-heure")?.value;
+    const observations = document.getElementById("soin-obs")?.value;
+
+    if (!patientId) { alert("Veuillez sélectionner un patient."); return; }
+    if (!typeSoin) { alert("Veuillez choisir un type de soin."); return; }
+    if (!date || !heure) { alert("Veuillez renseigner la date et l'heure."); return; }
+
+    const dateHeure = `${date}T${heure}:00`;
+
+    let description = detail || "";
+    if (observations) {
+        description += " - Observations : " + observations;
+    }
+
+    console.log("PATIENT ID ENVOYÉ :", patientId); // 🔥 ICI
+
+    const soinData = {
+        typeSoin: typeSoin,
+        description: description,
+        dateHeure: dateHeure,
+        infirmierId: 2,
+        patientId: Number(patientId)
+    };
+
+    console.log("DATA ENVOYÉE :", soinData); // 🔥 ICI
+
+
+
+    try {
+        const response = await fetch("http://localhost:8080/api/soins", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(soinData)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(`✅ Soin enregistré en base (ID ${result.id})`);
+
+            const modal = document.getElementById("modal-soin");
+            if (modal) modal.classList.remove("open");
+
+            if (typeof window.initSoins === 'function') {
+                window.initSoins();
+            }
+
+        } else {
+            const errorText = await response.text();
+            alert("❌ Erreur backend : " + errorText);
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Erreur réseau : " + error.message);
+    }
+};
+// ========== ENREGISTRER SIGNES VITAUX ==========
+
+window.enregistrerSigneVital = async function () {
+
+    // 🔥 CORRECTION ICI
+    const patientId = document.getElementById("select-patient-vitaux")?.value;
+
+    const taSyst = document.getElementById("vit-ta-sys")?.value;
+    const taDiast = document.getElementById("vit-ta-dia")?.value;
+    const temperature = document.getElementById("vit-temp")?.value;
+    const fc = document.getElementById("vit-fc")?.value;
+    const poids = document.getElementById("vit-poids")?.value;
+    const taille = document.getElementById("vit-taille")?.value;
+    const spo2 = document.getElementById("vit-spo2")?.value;
+    const glycemie = document.getElementById("vit-glycemie")?.value;
+    const fr = document.getElementById("vit-fr")?.value;
+    const notes = document.getElementById("vit-notes")?.value;
+
+    if (!patientId) {
+        alert("Veuillez sélectionner un patient");
+        return;
+    }
+
+    const data = {
+        patientId: Number(patientId),
+        infirmierId: 2,
+
+        taSystolique: Number(taSyst),
+        taDiastolique: Number(taDiast),
+        temperature: Number(temperature),
+        frequenceCardiaque: Number(fc),
+        poids: Number(poids),
+        taille: Number(taille),
+        spo2: Number(spo2),
+        glycemie: Number(glycemie),
+        frequenceRespiratoire: Number(fr),
+        notes: notes,
+
+        // 🔥 AJOUT IMPORTANT
+        dateHeure: new Date().toISOString()
+    };
+
+    console.log("DATA SIGNES VITAUX :", data);
+
+    try {
+        const response = await fetch("http://localhost:8080/api/signes-vitaux", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert("✅ Signes vitaux enregistrés (ID " + result.id + ")");
+            fermerModal("modal-vitaux");
+        } else {
+            const err = await response.text();
+            alert("❌ Erreur backend : " + err);
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Erreur réseau");
+    }
+};
 // ========== INITIALISATION AU CHARGEMENT ==========
 document.addEventListener("DOMContentLoaded", function() {
     window.renderTableDocuments();
-    if (window.initListePatients) window.initListePatients();
-    
-    window.applyInfirmierAvatar();
-    
+    window.initListePatients();
+    const sbAvatar = document.getElementById("sb-avatar");
+    if (sbAvatar) sbAvatar.textContent = mockInfirmier.initiales;
     const sbName = document.getElementById("sb-name");
     if (sbName) sbName.textContent = mockInfirmier.prenom + " " + mockInfirmier.nom;
-
-    // Gestion du changement de photo de profil
-    const avatarInput = document.getElementById("ipAvatar");
-    if (avatarInput) {
-        avatarInput.addEventListener("change", function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    window.saveInfirmierProfile({ avatar: e.target.result });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    // Gestion de la sauvegarde du formulaire (Profil infirmier)
-    const profileForm = document.getElementById("infirmierProfileForm");
-    if (profileForm) {
-        profileForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const phone = document.getElementById("ipPhone")?.value;
-            const email = document.getElementById("ipEmail")?.value;
-            window.saveInfirmierProfile({ telephone: phone, email: email });
-            alert("Profil mis à jour !");
-        });
-    }
 });
+async function chargerDocuments() {
+    try {
+        const response = await fetch("http://localhost:8080/api/documents");
+        const data = await response.json();
+
+        console.log("DOCUMENTS =", data);
+
+        const tbody = document.querySelector("#tbody-documents"); // ✅ CORRIGÉ
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        data.forEach(doc => {
+            const row = `
+                <tr>
+                    <td>${doc.cheminFichier.split('/').pop()}</td>
+                    <td>${doc.patient ? doc.patient.nom : ""}</td>
+                    <td>${doc.type}</td>
+                    <td>${doc.description || ""}</td>
+                    <td>
+                        <button onclick="window.open('${doc.cheminFichier}')">📥</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+
+    } catch (error) {
+        console.error("Erreur chargement documents :", error);
+    }
+}
+window.onload = chargerDocuments;
