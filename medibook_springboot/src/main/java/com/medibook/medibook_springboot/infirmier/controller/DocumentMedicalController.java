@@ -24,10 +24,4 @@ public class DocumentMedicalController {
     ) {
         return service.upload(file, type, description, patientId);
     }
-
-    // 🔥 AJOUT ICI
-    @GetMapping
-    public java.util.List<DocumentMedical> getAll() {
-        return service.getAll();
-    }
 }

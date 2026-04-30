@@ -452,35 +452,3 @@ document.addEventListener("DOMContentLoaded", function() {
     const sbName = document.getElementById("sb-name");
     if (sbName) sbName.textContent = mockInfirmier.prenom + " " + mockInfirmier.nom;
 });
-async function chargerDocuments() {
-    try {
-        const response = await fetch("http://localhost:8080/api/documents");
-        const data = await response.json();
-
-        console.log("DOCUMENTS =", data);
-
-        const tbody = document.querySelector("#tbody-documents"); // ✅ CORRIGÉ
-        if (!tbody) return;
-
-        tbody.innerHTML = "";
-
-        data.forEach(doc => {
-            const row = `
-                <tr>
-                    <td>${doc.cheminFichier.split('/').pop()}</td>
-                    <td>${doc.patient ? doc.patient.nom : ""}</td>
-                    <td>${doc.type}</td>
-                    <td>${doc.description || ""}</td>
-                    <td>
-                        <button onclick="window.open('${doc.cheminFichier}')">📥</button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-
-    } catch (error) {
-        console.error("Erreur chargement documents :", error);
-    }
-}
-window.onload = chargerDocuments;
