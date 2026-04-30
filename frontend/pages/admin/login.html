@@ -9,6 +9,90 @@
     <script src="../../js/api.js" defer></script>
     <script src="../../js/auth.js" defer></script>
     <script src="../../js/admin.js" defer></script>
+
+    <style>
+        /* ── Modal mot de passe oublié ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 440px;
+            box-shadow: 0 40px 100px rgba(0,0,0,.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--teal-900);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--slate-400);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: var(--slate-100);
+            color: var(--slate-700);
+        }
+        .step-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .step-seg {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--slate-200);
+            transition: .3s;
+        }
+        .step-seg.active { background: var(--teal-600); }
+        .step-seg.done   { background: var(--green); }
+        .modal-hint {
+            font-size: 13px;
+            color: var(--slate-500);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .alert {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 14px;
+            display: none;
+        }
+        .alert.show { display: block; }
+        .alert-error   { background: var(--red-light);   color: var(--red);   }
+        .alert-success { background: var(--green-light); color: var(--green); }
+    </style>
 </head>
 <body class="login-body">
 <div class="login-card">
@@ -20,21 +104,257 @@
         <h3 style="font-family:'Syne'; font-size:22px; margin-bottom:8px;">Espace Administration</h3>
         <p style="color:var(--slate-500); font-size:14px;">Connectez-vous pour gerer la plateforme</p>
     </div>
+
+    <div id="loginError" class="alert alert-error"></div>
+
     <form id="admin-login-form">
         <div class="fld">
             <label for="admin-id">Identifiant Administrateur</label>
-            <input type="text" id="admin-id" placeholder="admin@medibook.ci" required>
+            <input type="text" id="admin-id" placeholder="ex: admin1medibook" required>
         </div>
         <div class="fld">
             <label for="admin-password">Mot de passe</label>
             <input type="password" id="admin-password" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-login">Se connecter au Dashboard</button>
+        <button type="submit" class="btn-login" id="loginBtn">Se connecter au Dashboard</button>
     </form>
-    <div style="margin-top:20px; font-size:13px;">
-        <a href="#" style="color:var(--teal-700); text-decoration:none; font-weight:600;">Mot de passe oublie ?</a>
+
+    <div style="margin-top:20px; font-size:13px; text-align:center;">
+        <a href="#" id="forgotLink" style="color:var(--teal-700); text-decoration:none; font-weight:600;">Mot de passe oublie ?</a>
     </div>
 </div>
+
+<!-- ════════ MODAL MOT DE PASSE OUBLIE ════════ -->
+<div class="modal-overlay" id="forgotModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">Mot de passe oublie</span>
+            <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+
+        <div class="step-bar">
+            <div class="step-seg active" id="seg1"></div>
+            <div class="step-seg" id="seg2"></div>
+        </div>
+
+        <div id="modalError"   class="alert alert-error"></div>
+        <div id="modalSuccess" class="alert alert-success"></div>
+
+        <!-- ETAPE 1 -->
+        <form id="step1Form">
+            <p class="modal-hint">Entrez votre identifiant et votre email pour recevoir un code de verification.</p>
+            <div class="fld">
+                <label for="fpIdentifiant">Identifiant</label>
+                <input type="text" id="fpIdentifiant" placeholder="ex: admin1medibook" required>
+            </div>
+            <div class="fld">
+                <label for="fpEmail">Email</label>
+                <input type="email" id="fpEmail" placeholder="admin@medibook.com" required>
+            </div>
+            <button type="submit" class="btn-login" id="sendCodeBtn">Envoyer le code</button>
+        </form>
+
+        <!-- ETAPE 2 -->
+        <form id="step2Form" style="display:none">
+            <p class="modal-hint">Entrez le code a 6 chiffres et votre nouveau mot de passe.</p>
+            <div class="fld">
+                <label for="fpCode">Code de verification</label>
+                <input type="text" id="fpCode" placeholder="000000" maxlength="6" required>
+            </div>
+            <div class="fld">
+                <label for="fpNewPwd">Nouveau mot de passe</label>
+                <input type="password" id="fpNewPwd" placeholder="••••••••" required>
+            </div>
+            <div class="fld">
+                <label for="fpConfirmPwd">Confirmer le mot de passe</label>
+                <input type="password" id="fpConfirmPwd" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login" id="resetBtn">Reinitialiser</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        const API = 'http://localhost:8080/api/auth';
+        let savedIdentifiant = '';
+
+        /* ── LOGIN (inscription invisible + compte désactivé) ── */
+        document.getElementById('admin-login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hide('loginError');
+
+            const identifiant = document.getElementById('admin-id').value.trim();
+            const motDePasse  = document.getElementById('admin-password').value;
+            const btn = document.getElementById('loginBtn');
+
+            if (!identifiant || !motDePasse) {
+                show('loginError', 'Veuillez remplir tous les champs.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Connexion...';
+
+            try {
+                const res = await fetch(API + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifiant, motDePasse })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    show('loginError', data.message || 'Erreur de connexion');
+                    return;
+                }
+
+                if (data.role !== 'ADMINISTRATEUR') {
+                    show('loginError', 'Acces reserve aux administrateurs.');
+                    return;
+                }
+
+                // Même format que le reste du projet
+                localStorage.setItem('user', JSON.stringify(data));
+                window.location.href = 'dashboard.html';
+
+            } catch (_) {
+                show('loginError', 'Serveur injoignable. Verifiez que le backend est lance.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Se connecter au Dashboard';
+            }
+        });
+
+        /* ── MODAL ouverture / fermeture ── */
+        document.getElementById('forgotLink').addEventListener('click', function (e) {
+            e.preventDefault();
+            resetModal();
+            document.getElementById('forgotModal').classList.add('open');
+        });
+        document.getElementById('modalClose').addEventListener('click', function () {
+            document.getElementById('forgotModal').classList.remove('open');
+        });
+        document.getElementById('forgotModal').addEventListener('click', function (e) {
+            if (e.target === this) this.classList.remove('open');
+        });
+
+        /* ── ETAPE 1 — envoi du code ── */
+        document.getElementById('step1Form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hide('modalError'); hide('modalSuccess');
+
+            savedIdentifiant = document.getElementById('fpIdentifiant').value.trim();
+            const email = document.getElementById('fpEmail').value.trim();
+            const btn = document.getElementById('sendCodeBtn');
+
+            btn.disabled = true; btn.textContent = 'Envoi...';
+
+            try {
+                const res = await fetch(API + '/mot-de-passe-oublie', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifiant: savedIdentifiant, email })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    show('modalError', data.message || 'Erreur');
+                    return;
+                }
+
+                show('modalSuccess', data.message);
+                goToStep2();
+
+            } catch (_) {
+                show('modalError', 'Serveur injoignable.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Envoyer le code';
+            }
+        });
+
+        /* ── ETAPE 2 — reinitialisation ── */
+        document.getElementById('step2Form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            hide('modalError'); hide('modalSuccess');
+
+            const code              = document.getElementById('fpCode').value.trim();
+            const nouveauMotDePasse = document.getElementById('fpNewPwd').value;
+            const confirm           = document.getElementById('fpConfirmPwd').value;
+
+            if (nouveauMotDePasse !== confirm) {
+                show('modalError', 'Les mots de passe ne correspondent pas.');
+                return;
+            }
+            if (nouveauMotDePasse.length < 6) {
+                show('modalError', 'Le mot de passe doit contenir au moins 6 caracteres.');
+                return;
+            }
+
+            const btn = document.getElementById('resetBtn');
+            btn.disabled = true; btn.textContent = 'Reinitialisation...';
+
+            try {
+                const res = await fetch(API + '/reinitialiser-mot-de-passe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identifiant: savedIdentifiant,
+                        code: code,
+                        nouveauMotDePasse: nouveauMotDePasse
+                    })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    show('modalError', data.message || 'Erreur');
+                    return;
+                }
+
+                show('modalSuccess', data.message + ' Fermeture dans 2 s...');
+                setTimeout(function () {
+                    document.getElementById('forgotModal').classList.remove('open');
+                    resetModal();
+                }, 2000);
+
+            } catch (_) {
+                show('modalError', 'Serveur injoignable.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Reinitialiser';
+            }
+        });
+
+        /* ── HELPERS ── */
+        function show(id, msg) {
+            var el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+        function hide(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        function goToStep2() {
+            document.getElementById('step1Form').style.display = 'none';
+            document.getElementById('step2Form').style.display = 'block';
+            document.getElementById('seg1').classList.remove('active');
+            document.getElementById('seg1').classList.add('done');
+            document.getElementById('seg2').classList.add('active');
+        }
+
+        function resetModal() {
+            document.getElementById('step1Form').style.display = 'block';
+            document.getElementById('step2Form').style.display = 'none';
+            document.getElementById('step1Form').reset();
+            document.getElementById('step2Form').reset();
+            document.getElementById('seg1').className = 'step-seg active';
+            document.getElementById('seg2').className = 'step-seg';
+            hide('modalError'); hide('modalSuccess');
+            savedIdentifiant = '';
+        }
+    })();
+</script>
 </body>
 </html>
-

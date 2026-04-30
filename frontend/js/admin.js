@@ -108,7 +108,7 @@ function initAdminLogin() {
                 if (data.role !== "ADMINISTRATEUR") {
                     throw new Error("Acces reserve aux administrateurs.");
                 }
-                localStorage.setItem("adminUser", JSON.stringify(data));
+                localStorage.setItem("user", JSON.stringify(data));
                 window.location.href = "dashboard.html";
             })
             .catch(err => {

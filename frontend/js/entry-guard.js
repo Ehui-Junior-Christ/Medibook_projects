@@ -31,7 +31,7 @@
     if (rel.startsWith("pages/patient/")) return "PATIENT";
     if (rel.startsWith("pages/medecin/")) return "MEDECIN";
     if (rel.startsWith("pages/infirmier/")) return "INFIRMIER";
-    if (rel.startsWith("pages/admin/")) return "ADMIN";
+    if (rel.startsWith("pages/admin/")) return "ADMINISTRATEUR";
     return null;
   }
 
@@ -77,8 +77,7 @@
     const user = safeJsonParse(localStorage.getItem("user") || "null");
     if (!user || typeof user !== "object") return null;
     const role = String(user.role || "").toUpperCase();
-    const okRole = ["PATIENT", "MEDECIN", "INFIRMIER", "ADMIN"].includes(role);
-    // Backend seems to return `id`; accept other common keys too to avoid false negatives.
+    const okRole = ["PATIENT", "MEDECIN", "INFIRMIER", "ADMINISTRATEUR"].includes(role);    // Backend seems to return `id`; accept other common keys too to avoid false negatives.
     const id = user.id ?? user.userId ?? user.utilisateurId ?? null;
     const okId = typeof id === "number" || (typeof id === "string" && id.trim() !== "");
     if (!okRole || !okId) return null;
