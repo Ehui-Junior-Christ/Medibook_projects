@@ -173,6 +173,67 @@ window.toggleProPatientMatricule = function() {
   if (fMat) fMat.style.display = (cb && cb.checked) ? "flex" : "none";
 };
 
+function getRegisterFeedback() {
+  return document.getElementById("register-feedback");
+}
+
+function showRegisterFeedback(message, type = "error") {
+  const feedback = getRegisterFeedback();
+  if (!feedback) return;
+
+  feedback.textContent = message || "Erreur lors de l'inscription.";
+  feedback.classList.remove("is-hidden", "form-feedback-error", "form-feedback-success");
+  feedback.classList.add(type === "success" ? "form-feedback-success" : "form-feedback-error");
+  feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function clearRegisterFeedback() {
+  const feedback = getRegisterFeedback();
+  if (!feedback) return;
+
+  feedback.textContent = "";
+  feedback.classList.add("is-hidden");
+}
+
+function clearRegisterFieldState() {
+  document.querySelectorAll("#inscription .field-invalid").forEach((field) => {
+    field.classList.remove("field-invalid");
+  });
+}
+
+function markRegisterFields(fieldIds) {
+  fieldIds.forEach((fieldId) => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      field.classList.add("field-invalid");
+    }
+  });
+}
+
+function focusRegisterFieldsFromError(message) {
+  const text = String(message || "").toLowerCase();
+
+  if (text.includes("nom") || text.includes("prenom") || text.includes("proprietaire")) {
+    markRegisterFields(["nom", "prenom", "matriculeProPatient"]);
+    setStep(2);
+  } else if (text.includes("cmu") || text.includes("assure")) {
+    markRegisterFields(["cmu"]);
+    setStep(2);
+  } else if (text.includes("email")) {
+    markRegisterFields(["email"]);
+    setStep(2);
+  } else if (text.includes("telephone")) {
+    markRegisterFields(["telephone"]);
+    setStep(2);
+  } else if (text.includes("matricule")) {
+    markRegisterFields(["matricule", "matriculeInfirmier", "matriculeProPatient"]);
+    setStep(2);
+  } else if (text.includes("mot de passe")) {
+    markRegisterFields(["pw1", "pw2"]);
+    setStep(3);
+  }
+}
+
 function setStep(step) {
   document.querySelectorAll(".inscrip-step").forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.step === String(step));
@@ -203,10 +264,14 @@ function prevStep(current) {
 }
 
 function isNext(current) {
+  clearRegisterFeedback();
+  clearRegisterFieldState();
   nextStep(current);
 }
 
 function isPrev(current) {
+  clearRegisterFeedback();
+  clearRegisterFieldState();
   prevStep(current);
 }
 
@@ -367,6 +432,9 @@ function checkPw() {
 }
 
 function register() {
+  clearRegisterFeedback();
+  clearRegisterFieldState();
+
   const nom = document.getElementById("nom")?.value?.trim();
   const prenom = document.getElementById("prenom")?.value?.trim();
   const cmu = document.getElementById("cmu")?.value?.trim();
@@ -396,18 +464,37 @@ function register() {
   const cgu = document.getElementById("cgu")?.checked;
   const photo = document.getElementById("photoProfil")?.files?.[0];
 
-  if (!nom || !prenom || !cmu || !telephone || !email || !motDePasse) {
-    alert("Veuillez renseigner les informations obligatoires.");
+  const identityFields = [
+    ["nom", nom],
+    ["prenom", prenom],
+    ["cmu", cmu],
+    ["telephone", telephone],
+    ["email", email]
+  ];
+  const accountFields = [
+    ["pw1", motDePasse],
+    ["pw2", confirmation]
+  ];
+  const missingIdentityFields = identityFields.filter(([, value]) => !value).map(([fieldId]) => fieldId);
+  const missingAccountFields = accountFields.filter(([, value]) => !value).map(([fieldId]) => fieldId);
+
+  if (missingIdentityFields.length || missingAccountFields.length) {
+    markRegisterFields([...missingIdentityFields, ...missingAccountFields]);
+    setStep(missingIdentityFields.length ? 2 : 3);
+    showRegisterFeedback("Veuillez renseigner les informations obligatoires.");
     return;
   }
 
   if (motDePasse !== confirmation) {
-    alert("Les mots de passe ne correspondent pas.");
+    markRegisterFields(["pw1", "pw2"]);
+    setStep(3);
+    showRegisterFeedback("Les mots de passe ne correspondent pas.");
     return;
   }
 
   if (!cgu) {
-    alert("Veuillez accepter les CGU et la politique de confidentialite.");
+    setStep(3);
+    showRegisterFeedback("Veuillez accepter les CGU et la politique de confidentialite.");
     return;
   }
 
@@ -442,6 +529,7 @@ function register() {
       return res.text();
     })
     .then(() => {
+      clearRegisterFeedback();
       if (selectedRole.toUpperCase() === "MEDECIN") {
         syncMedecinSession({
           nom,
@@ -489,7 +577,9 @@ function register() {
     })
     .catch((err) => {
       console.error(err);
-      alert(err.message || "Erreur lors de l'inscription.");
+      const message = err.message || "Erreur lors de l'inscription.";
+      focusRegisterFieldsFromError(message);
+      showRegisterFeedback(message);
     });
 }
 
@@ -505,5 +595,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.querySelector(".inscrip-step")) {
     setStep(1);
     checkPw();
+  }
+  const registrationPage = document.getElementById("inscription");
+  if (registrationPage) {
+    registrationPage.addEventListener("input", (event) => {
+      event.target?.classList?.remove("field-invalid");
+      clearRegisterFeedback();
+    });
+    registrationPage.addEventListener("change", (event) => {
+      event.target?.classList?.remove("field-invalid");
+      clearRegisterFeedback();
+    });
   }
 });
