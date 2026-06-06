@@ -80,6 +80,17 @@ public class PatientService {
     }
 
     @Transactional(readOnly = true)
+    public List<PatientResponseDto> search(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        return patientRepository.searchByTerm(query.trim()).stream()
+                .map(this::mapPatient)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public PatientResponseDto findById(Long id) {
         return mapPatient(getPatientOrThrow(id));
     }

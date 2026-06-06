@@ -168,6 +168,82 @@ tbody tr:hover td { background: var(--teal-50); }
   box-shadow: 0 0 0 3px var(--teal-100);
 }
 
+.patient-search {
+  position: relative;
+  min-width: 320px;
+}
+
+.patient-search-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 2px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--slate-700);
+  background: var(--white);
+  outline: none;
+  transition: .2s;
+}
+
+.patient-search-input:focus {
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 3px var(--teal-100);
+}
+
+.patient-search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: none;
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, .08);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.patient-search-results.open {
+  display: block;
+}
+
+.patient-search-item,
+.patient-search-empty {
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.patient-search-item {
+  cursor: pointer;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.patient-search-item:last-child {
+  border-bottom: none;
+}
+
+.patient-search-item:hover {
+  background: var(--teal-50);
+}
+
+.patient-search-name {
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.patient-search-meta {
+  margin-top: 2px;
+  color: var(--slate-500);
+  font-size: 12px;
+}
+
+.patient-search-empty {
+  color: var(--slate-500);
+}
+
 /* ===== VITAUX ===== */
 .vital-grid {
   display: grid;

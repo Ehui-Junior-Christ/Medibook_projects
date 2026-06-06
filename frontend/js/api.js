@@ -1,57 +1,81 @@
 /**
- * MediBook Admin - Couche API
- * Centralise tous les appels vers le backend Spring Boot (port 8080).
+ * MediBook Frontend - Couche API
+ * Centralise les appels vers le backend Spring Boot.
  */
 
+const DEFAULT_BACKEND_ORIGIN = "http://localhost:8080";
 
+function getBackendOrigin() {
+    if (window.location.origin === DEFAULT_BACKEND_ORIGIN) {
+        return window.location.origin;
+    }
 
-const API_BASE = "http://localhost:8080/api/admin";
+    return window.localStorage.getItem("medibookApiOrigin") || DEFAULT_BACKEND_ORIGIN;
+}
 
-const AdminAPI = {
+const API_ROOT = `${getBackendOrigin()}/api`;
+const ADMIN_API_BASE = `${API_ROOT}/admin`;
 
-    /** Test de connexion */
+async function parseApiResponse(response, defaultMessage) {
+    if (response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        return contentType.includes("application/json") ? response.json() : response.text();
+    }
+
+    const errorText = await response.text();
+    throw new Error(errorText || defaultMessage);
+}
+
+async function apiRequest(path, options = {}, defaultMessage = "Erreur API") {
+    let response;
+
+    try {
+        response = await fetch(`${API_ROOT}${path}`, options);
+    } catch (error) {
+        throw new Error("Le backend Spring Boot est inaccessible sur http://localhost:8080.");
+    }
+
+    return parseApiResponse(response, defaultMessage);
+}
+
+window.AdminAPI = {
     ping() {
-        return fetch(`${API_BASE}/ping`).then(r => r.text());
+        return fetch(`${ADMIN_API_BASE}/ping`).then(r => r.text());
     },
 
-    /** Statistiques globales */
     getStatistiques() {
-        return fetch(`${API_BASE}/statistiques`).then(r => {
+        return fetch(`${ADMIN_API_BASE}/statistiques`).then(r => {
             if (!r.ok) throw new Error("Erreur chargement statistiques");
             return r.json();
         });
     },
 
-    /** Tous les utilisateurs (filtre optionnel par role) */
     getUtilisateurs(role) {
         const url = role
-            ? `${API_BASE}/utilisateurs?role=${encodeURIComponent(role)}`
-            : `${API_BASE}/utilisateurs`;
+            ? `${ADMIN_API_BASE}/utilisateurs?role=${encodeURIComponent(role)}`
+            : `${ADMIN_API_BASE}/utilisateurs`;
         return fetch(url).then(r => {
             if (!r.ok) throw new Error("Erreur chargement utilisateurs");
             return r.json();
         });
     },
 
-    /** Comptes en attente de validation */
     getComptesEnAttente() {
-        return fetch(`${API_BASE}/utilisateurs/pending`).then(r => {
+        return fetch(`${ADMIN_API_BASE}/utilisateurs/pending`).then(r => {
             if (!r.ok) throw new Error("Erreur chargement comptes en attente");
             return r.json();
         });
     },
 
-    /** Un utilisateur par ID */
     getUtilisateur(id) {
-        return fetch(`${API_BASE}/utilisateurs/${id}`).then(r => {
+        return fetch(`${ADMIN_API_BASE}/utilisateurs/${id}`).then(r => {
             if (!r.ok) throw new Error("Utilisateur introuvable");
             return r.json();
         });
     },
 
-    /** Activer un compte */
     activer(id) {
-        return fetch(`${API_BASE}/utilisateurs/${id}/activer`, {
+        return fetch(`${ADMIN_API_BASE}/utilisateurs/${id}/activer`, {
             method: "PUT"
         }).then(r => {
             if (!r.ok) throw new Error("Erreur activation");
@@ -59,9 +83,8 @@ const AdminAPI = {
         });
     },
 
-    /** Desactiver un compte */
     desactiver(id) {
-        return fetch(`${API_BASE}/utilisateurs/${id}/desactiver`, {
+        return fetch(`${ADMIN_API_BASE}/utilisateurs/${id}/desactiver`, {
             method: "PUT"
         }).then(r => {
             if (!r.ok) throw new Error("Erreur desactivation");
@@ -69,13 +92,43 @@ const AdminAPI = {
         });
     },
 
-    /** Supprimer un compte */
     supprimer(id) {
-        return fetch(`${API_BASE}/utilisateurs/${id}`, {
+        return fetch(`${ADMIN_API_BASE}/utilisateurs/${id}`, {
             method: "DELETE"
         }).then(r => {
             if (!r.ok) throw new Error("Erreur suppression");
             return r.json();
         });
+    }
+};
+
+window.InfirmierAPI = {
+    searchPatients(query) {
+        return apiRequest(`/patients/search?q=${encodeURIComponent(query)}`, {
+            method: "GET"
+        }, "Erreur recherche patients");
+    },
+
+    createSoin(payload) {
+        return apiRequest("/soins", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }, "Erreur enregistrement soin");
+    },
+
+    createSigneVital(payload) {
+        return apiRequest("/signes-vitaux", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }, "Erreur enregistrement signes vitaux");
+    },
+
+    uploadDocument(formData) {
+        return apiRequest("/documents/upload", {
+            method: "POST",
+            body: formData
+        }, "Erreur upload document");
     }
 };

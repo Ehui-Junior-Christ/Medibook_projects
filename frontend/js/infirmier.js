@@ -41,6 +41,190 @@ function getPatientById(id) {
     return mockPatients.find(p => String(p.id) === String(id));
 }
 
+let soinsPatientSelection = null;
+let dashboardPatientSelection = null;
+let vitauxPatientSelection = null;
+let uploadPatientSelection = null;
+const patientSearchCache = new Map();
+
+function mapApiPatient(patient) {
+    return {
+        id: patient.id,
+        nom: patient.nomComplet || [patient.nom, patient.prenom].filter(Boolean).join(" "),
+        cmu: patient.numeroAssure || ""
+    };
+}
+
+function getPatientInitiales(patient) {
+    return (patient.nom || "")
+        .split(" ")
+        .filter(Boolean)
+        .map(part => part[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+}
+
+async function searchPatientsFromBackend(term) {
+    const normalized = term.trim().toLowerCase();
+    if (normalized.length < 2) {
+        return [];
+    }
+
+    if (patientSearchCache.has(normalized)) {
+        return patientSearchCache.get(normalized);
+    }
+
+    const patients = await window.InfirmierAPI.searchPatients(normalized);
+    const mapped = patients.map(mapApiPatient);
+    patientSearchCache.set(normalized, mapped);
+    return mapped;
+}
+
+function renderPatientSearchResults(resultsContainer, patients, onSelect) {
+    if (!resultsContainer) return;
+
+    if (!patients.length) {
+        resultsContainer.innerHTML = '<div class="patient-search-empty">Aucun patient trouvé.</div>';
+        resultsContainer.classList.add("open");
+        return;
+    }
+
+    resultsContainer.innerHTML = patients.map(patient => `
+        <div class="patient-search-item" data-patient-id="${patient.id}">
+            <div class="patient-search-name">${patient.nom}</div>
+            <div class="patient-search-meta">${patient.cmu || "CMU non renseigné"}</div>
+        </div>
+    `).join("");
+
+    resultsContainer.querySelectorAll("[data-patient-id]").forEach(item => {
+        item.addEventListener("click", () => {
+            const patient = patients.find(entry => String(entry.id) === item.dataset.patientId);
+            if (patient) {
+                onSelect(patient);
+            }
+            resultsContainer.classList.remove("open");
+        });
+    });
+
+    resultsContainer.classList.add("open");
+}
+
+function syncSelectedPatientToModal() {
+    if (!soinsPatientSelection) {
+        return;
+    }
+
+    const hiddenInput = document.getElementById("soin-patient");
+    const searchInput = document.getElementById("soin-patient-search");
+    if (hiddenInput) hiddenInput.value = soinsPatientSelection.id;
+    if (searchInput) searchInput.value = soinsPatientSelection.cmu || "";
+}
+
+function syncDashboardPatientSelection() {
+    if (!dashboardPatientSelection) {
+        return;
+    }
+
+    const hiddenInput = document.getElementById("dashboard-soin-patient");
+    const searchInput = document.getElementById("dashboard-soin-patient-search");
+    if (hiddenInput) hiddenInput.value = dashboardPatientSelection.id;
+    if (searchInput) searchInput.value = dashboardPatientSelection.cmu || "";
+}
+
+function updateVitauxPatientUI(patient) {
+    const banner = document.getElementById("patient-banner-vitaux");
+    const section = document.getElementById("section-vitaux");
+    const emptyState = document.getElementById("vitaux-empty");
+    const nameElement = document.getElementById("vit-nom");
+    const metaElement = document.getElementById("vit-meta");
+    const avatarElement = document.getElementById("vit-ava");
+    const modalNameElement = document.getElementById("modal-vit-nom");
+
+    if (!patient) {
+        if (banner) banner.style.display = "none";
+        if (section) section.style.display = "none";
+        if (emptyState) emptyState.style.display = "";
+        if (modalNameElement) modalNameElement.textContent = "—";
+        return;
+    }
+
+    if (banner) banner.style.display = "flex";
+    if (section) section.style.display = "block";
+    if (emptyState) emptyState.style.display = "none";
+    if (nameElement) nameElement.textContent = patient.nom || "Patient";
+    if (metaElement) metaElement.textContent = patient.cmu || "";
+    if (avatarElement) avatarElement.textContent = getPatientInitiales(patient);
+    if (modalNameElement) modalNameElement.textContent = patient.nom || "Patient";
+}
+
+function initPatientSearchField(config) {
+    const searchInput = document.getElementById(config.inputId);
+    const hiddenInput = document.getElementById(config.hiddenInputId);
+    const resultsContainer = document.getElementById(config.resultsId);
+    if (!searchInput || !hiddenInput || !resultsContainer) {
+        return;
+    }
+
+    let lastTerm = "";
+
+    const selectPatient = patient => {
+        hiddenInput.value = patient.id;
+        searchInput.value = patient.cmu || "";
+        if (typeof config.onSelect === "function") {
+            config.onSelect(patient);
+        }
+    };
+
+    searchInput.addEventListener("input", async () => {
+        const term = searchInput.value.trim();
+        hiddenInput.value = "";
+        if (typeof config.onClear === "function") {
+            config.onClear();
+        }
+
+        if (term.length < 2) {
+            resultsContainer.classList.remove("open");
+            resultsContainer.innerHTML = "";
+            return;
+        }
+
+        lastTerm = term;
+
+        try {
+            const patients = await searchPatientsFromBackend(term);
+            if (searchInput.value.trim() !== lastTerm) {
+                return;
+            }
+            renderPatientSearchResults(resultsContainer, patients, selectPatient);
+        } catch (error) {
+            console.error(error);
+            resultsContainer.innerHTML = `<div class="patient-search-empty">${error.message}</div>`;
+            resultsContainer.classList.add("open");
+        }
+    });
+
+    searchInput.addEventListener("focus", async () => {
+        const term = searchInput.value.trim();
+        if (term.length < 2 || hiddenInput.value) {
+            return;
+        }
+
+        try {
+            const patients = await searchPatientsFromBackend(term);
+            renderPatientSearchResults(resultsContainer, patients, selectPatient);
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    document.addEventListener("click", event => {
+        if (!event.target.closest(`#${config.wrapperId}`)) {
+            resultsContainer.classList.remove("open");
+        }
+    });
+}
+
 // ========== FONCTIONS UPLOAD GLOBALES ==========
 window.fichierEnAttente = null;
 
@@ -116,27 +300,12 @@ window.soumettreFichier = async function() {
     formData.append("patientId", patientId);
 
     try {
-        const response = await fetch("http://localhost:8080/api/documents/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-
-            alert("✅ Document enregistré en base (ID " + result.id + ")");
-
-            // reset UI
-            window.resetUpload();
-
-        } else {
-            const err = await response.text();
-            alert("❌ Erreur backend : " + err);
-        }
-
+        const result = await window.InfirmierAPI.uploadDocument(formData);
+        alert("✅ Document enregistré en base (ID " + result.id + ")");
+        window.resetUpload();
     } catch (error) {
         console.error(error);
-        alert("❌ Erreur réseau");
+        alert("❌ " + error.message);
     }
 };
 
@@ -155,6 +324,9 @@ window.resetUpload = function() {
         const el = document.getElementById(id);
         if (el) el.value = "";
     });
+    const uploadSearchInput = document.getElementById("up-patient-search");
+    if (uploadSearchInput) uploadSearchInput.value = "";
+    uploadPatientSelection = null;
 };
 
 window.renderTableDocuments = function() {
@@ -273,6 +445,15 @@ window.initListePatients = function() {
 window.ouvrirModal = function(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.add("open");
+    if (id === "modal-soin-form") {
+        syncSelectedPatientToModal();
+    }
+    if (id === "modal-soin") {
+        syncDashboardPatientSelection();
+    }
+    if (id === "modal-vitaux") {
+        updateVitauxPatientUI(vitauxPatientSelection);
+    }
 };
 
 window.fermerModal = function(id) {
@@ -318,7 +499,7 @@ window.soumettreNouveauSoin = function() {
 
 // ========== ENREGISTRER SOIN DEPUIS LE DASHBOARD ==========
 window.enregisterSoin = async function() {
-    const patientId = document.getElementById("soin-patient")?.value;
+    const patientId = document.getElementById("soin-patient")?.value || document.getElementById("dashboard-soin-patient")?.value;
     const typeSoin = document.getElementById("soin-type")?.value;
     const detail = document.getElementById("soin-detail")?.value;
     const date = document.getElementById("soin-date")?.value;
@@ -351,31 +532,20 @@ window.enregisterSoin = async function() {
 
 
     try {
-        const response = await fetch("http://localhost:8080/api/soins", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(soinData)
-        });
+        const result = await window.InfirmierAPI.createSoin(soinData);
+        alert(`✅ Soin enregistré en base (ID ${result.id})`);
 
-        if (response.ok) {
-            const result = await response.json();
-            alert(`✅ Soin enregistré en base (ID ${result.id})`);
+        const modal = document.getElementById("modal-soin-form");
+        if (modal) modal.classList.remove("open");
+        const dashboardModal = document.getElementById("modal-soin");
+        if (dashboardModal) dashboardModal.classList.remove("open");
 
-            const modal = document.getElementById("modal-soin");
-            if (modal) modal.classList.remove("open");
-
-            if (typeof window.initSoins === 'function') {
-                window.initSoins();
-            }
-
-        } else {
-            const errorText = await response.text();
-            alert("❌ Erreur backend : " + errorText);
+        if (typeof window.initSoins === 'function') {
+            window.initSoins();
         }
-
     } catch (error) {
         console.error(error);
-        alert("❌ Erreur réseau : " + error.message);
+        alert("❌ " + error.message);
     }
 };
 // ========== ENREGISTRER SIGNES VITAUX ==========
@@ -423,30 +593,93 @@ window.enregistrerSigneVital = async function () {
     console.log("DATA SIGNES VITAUX :", data);
 
     try {
-        const response = await fetch("http://localhost:8080/api/signes-vitaux", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            alert("✅ Signes vitaux enregistrés (ID " + result.id + ")");
-            fermerModal("modal-vitaux");
-        } else {
-            const err = await response.text();
-            alert("❌ Erreur backend : " + err);
-        }
-
+        const result = await window.InfirmierAPI.createSigneVital(data);
+        alert("✅ Signes vitaux enregistrés (ID " + result.id + ")");
+        fermerModal("modal-vitaux");
     } catch (error) {
         console.error(error);
-        alert("❌ Erreur réseau");
+        alert("❌ " + error.message);
     }
 };
 // ========== INITIALISATION AU CHARGEMENT ==========
 document.addEventListener("DOMContentLoaded", function() {
     window.renderTableDocuments();
     window.initListePatients();
+    initPatientSearchField({
+        wrapperId: "select-patient-soins-search-box",
+        inputId: "select-patient-soins-search",
+        hiddenInputId: "select-patient-soins",
+        resultsId: "select-patient-soins-results",
+        onSelect: patient => {
+            soinsPatientSelection = patient;
+            syncSelectedPatientToModal();
+        },
+        onClear: () => {
+            soinsPatientSelection = null;
+            const modalHiddenInput = document.getElementById("soin-patient");
+            const modalSearchInput = document.getElementById("soin-patient-search");
+            if (modalHiddenInput) modalHiddenInput.value = "";
+            if (modalSearchInput) modalSearchInput.value = "";
+        }
+    });
+    initPatientSearchField({
+        wrapperId: "soin-patient-search-box",
+        inputId: "soin-patient-search",
+        hiddenInputId: "soin-patient",
+        resultsId: "soin-patient-results",
+        onSelect: patient => {
+            soinsPatientSelection = patient;
+            const pageHiddenInput = document.getElementById("select-patient-soins");
+            const pageSearchInput = document.getElementById("select-patient-soins-search");
+            if (pageHiddenInput) pageHiddenInput.value = patient.id;
+            if (pageSearchInput) pageSearchInput.value = patient.cmu || "";
+        },
+        onClear: () => {
+            soinsPatientSelection = null;
+            const pageHiddenInput = document.getElementById("select-patient-soins");
+            const pageSearchInput = document.getElementById("select-patient-soins-search");
+            if (pageHiddenInput) pageHiddenInput.value = "";
+            if (pageSearchInput) pageSearchInput.value = "";
+        }
+    });
+    initPatientSearchField({
+        wrapperId: "dashboard-soin-patient-search-box",
+        inputId: "dashboard-soin-patient-search",
+        hiddenInputId: "dashboard-soin-patient",
+        resultsId: "dashboard-soin-patient-results",
+        onSelect: patient => {
+            dashboardPatientSelection = patient;
+        },
+        onClear: () => {
+            dashboardPatientSelection = null;
+        }
+    });
+    initPatientSearchField({
+        wrapperId: "select-patient-vitaux-search-box",
+        inputId: "select-patient-vitaux-search",
+        hiddenInputId: "select-patient-vitaux",
+        resultsId: "select-patient-vitaux-results",
+        onSelect: patient => {
+            vitauxPatientSelection = patient;
+            updateVitauxPatientUI(patient);
+        },
+        onClear: () => {
+            vitauxPatientSelection = null;
+            updateVitauxPatientUI(null);
+        }
+    });
+    initPatientSearchField({
+        wrapperId: "up-patient-search-box",
+        inputId: "up-patient-search",
+        hiddenInputId: "up-patient",
+        resultsId: "up-patient-results",
+        onSelect: patient => {
+            uploadPatientSelection = patient;
+        },
+        onClear: () => {
+            uploadPatientSelection = null;
+        }
+    });
     const sbAvatar = document.getElementById("sb-avatar");
     if (sbAvatar) sbAvatar.textContent = mockInfirmier.initiales;
     const sbName = document.getElementById("sb-name");

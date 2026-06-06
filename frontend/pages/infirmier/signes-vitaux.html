@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediBook – Signes vitaux</title>
+  <title>MediBook - Signes vitaux</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/main.css">
   <link rel="stylesheet" href="../../css/infirmier.css">
   <script defer src="../../js/entry-guard.js"></script>
-
 </head>
 <body>
 <div class="app-shell">
-
   <aside class="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-inner">
         <div class="sb-logo-mark">🏥</div>
-        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail médical</div></div>
+        <div><div class="sb-logo-text">MediBook</div><div class="sb-logo-sub">Portail medical</div></div>
       </div>
     </div>
     <div class="sb-role-badge sb-role-infirmier"><span>💉</span><span>Infirmier</span></div>
@@ -34,7 +32,7 @@
     <div class="sb-footer">
       <a class="sb-user" href="profil-infirmier.html">
         <div class="sb-avatar" id="sb-avatar" data-infirmier-avatar data-infirmier-initiales>KM</div>
-        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Koné Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
+        <div><div class="sb-user-name" id="sb-name" data-infirmier-name>Kone Marie</div><div class="sb-user-role" data-infirmier-role>Infirmier · Urgences</div></div>
         <span class="sb-user-link">↗</span>
       </a>
     </div>
@@ -49,22 +47,23 @@
     </header>
 
     <div class="content-area">
-
-      <!-- Sélection patient -->
       <div class="card" style="margin-bottom:14px">
-        <div class="card-title" style="margin-bottom:12px">Sélectionner un patient</div>
+        <div class="card-title" style="margin-bottom:12px">Rechercher un patient par numero CMU</div>
         <div style="display:flex;gap:10px">
-          <select id="select-patient-vitaux" class="filtre-select" style="flex:1">
-            <option value="">-- Choisir un patient --</option>
-            <option value="1">Kouadio Jean Baptiste – CMU-2024-08821</option>
-            <option value="2">Assi Koffi Martial – CMU-2023-04512</option>
-            <option value="3">N'guessan Kouamé – CMU-2024-11032</option>
-          </select>
+          <div class="patient-search" id="select-patient-vitaux-search-box" style="flex:1">
+            <input
+              type="text"
+              id="select-patient-vitaux-search"
+              class="filtre-select patient-search-input"
+              placeholder="Rechercher un patient par numero CMU"
+              autocomplete="off">
+            <input type="hidden" id="select-patient-vitaux">
+            <div class="patient-search-results" id="select-patient-vitaux-results"></div>
+          </div>
           <button class="btn btn-primary" onclick="ouvrirModal('modal-vitaux')">+ Nouvelle mesure</button>
         </div>
       </div>
 
-      <!-- Bannière patient sélectionné -->
       <div id="patient-banner-vitaux" style="display:none" class="patient-banner">
         <div class="patient-ava sm" id="vit-ava">KJ</div>
         <div class="flex-1">
@@ -74,17 +73,13 @@
         <div id="vit-alertes"></div>
       </div>
 
-      <!-- Contenu vitaux (masqué jusqu'à sélection patient) -->
       <div id="section-vitaux" style="display:none">
-
-        <!-- Dernières mesures -->
         <div class="card" style="margin-bottom:14px">
-          <div class="card-title" style="margin-bottom:14px" id="titre-derniere-mesure">Dernières mesures</div>
+          <div class="card-title" style="margin-bottom:14px" id="titre-derniere-mesure">Dernieres mesures</div>
           <div class="vital-grid" id="vitaux-display"></div>
           <div class="vital-grid" style="margin-top:10px" id="vitaux-display-2"></div>
         </div>
 
-        <!-- Historique -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Historique des mesures</div>
@@ -93,37 +88,33 @@
           <div class="table-wrap">
             <table>
               <thead>
-                <tr>
-                  <th>Date / Heure</th>
-                  <th>TA (mmHg)</th>
-                  <th>Temp. (°C)</th>
-                  <th>FC (bpm)</th>
-                  <th>SpO₂ (%)</th>
-                  <th>Poids (kg)</th>
-                  <th>Glycémie</th>
-                  <th>Inf.</th>
-                  <th></th>
-                </tr>
+              <tr>
+                <th>Date / Heure</th>
+                <th>TA (mmHg)</th>
+                <th>Temp. (°C)</th>
+                <th>FC (bpm)</th>
+                <th>SpO2 (%)</th>
+                <th>Poids (kg)</th>
+                <th>Glycemie</th>
+                <th>Inf.</th>
+                <th></th>
+              </tr>
               </thead>
               <tbody id="tbody-historique-vitaux"></tbody>
             </table>
           </div>
         </div>
-
       </div>
 
-      <!-- État vide initial -->
       <div id="vitaux-empty" class="empty-state">
         <div class="empty-icon">❤️</div>
-        <div class="empty-txt">Sélectionnez un patient</div>
-        <div class="empty-sub">pour voir et enregistrer ses signes vitaux</div>
+        <div class="empty-txt">Recherchez un patient</div>
+        <div class="empty-sub">par son numero CMU pour voir et enregistrer ses signes vitaux</div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- MODAL : Nouvelle mesure vitaux -->
 <div class="modal-overlay" id="modal-vitaux" onclick="fermerModalOverlay(event, 'modal-vitaux')">
   <div class="modal-box">
     <div class="modal-header">
@@ -141,23 +132,22 @@
         <div class="fld"><label>FC (bpm)</label><input type="number" id="vit-fc" placeholder="72"></div>
         <div class="fld"><label>Poids (kg)</label><input type="number" step="0.1" id="vit-poids" placeholder="70"></div>
         <div class="fld"><label>Taille (cm)</label><input type="number" id="vit-taille" placeholder="170"></div>
-        <div class="fld"><label>SpO₂ (%)</label><input type="number" id="vit-spo2" placeholder="98"></div>
-        <div class="fld"><label>Glycémie (mmol/L)</label><input type="number" step="0.1" id="vit-glycemie" placeholder="5.5"></div>
+        <div class="fld"><label>SpO2 (%)</label><input type="number" id="vit-spo2" placeholder="98"></div>
+        <div class="fld"><label>Glycemie (mmol/L)</label><input type="number" step="0.1" id="vit-glycemie" placeholder="5.5"></div>
         <div class="fld"><label>FR (/min)</label><input type="number" id="vit-fr" placeholder="16"></div>
         <div class="fld" id="imc-display" style="align-items:center;justify-content:center">
-          <label>IMC calculé</label>
+          <label>IMC calcule</label>
           <div class="imc-val" id="imc-val">—</div>
         </div>
       </div>
-      <div class="fld" style="margin-top:4px"><label>Notes</label>
-        <textarea id="vit-notes" rows="2" placeholder="Observations particulières…"></textarea>
+      <div class="fld" style="margin-top:4px">
+        <label for="vit-notes">Notes</label>
+        <textarea id="vit-notes" rows="2" placeholder="Observations particulieres..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="fermerModal('modal-vitaux')">Annuler</button>
-      <button class="btn btn-primary" onclick="enregistrerSigneVital()">
-        Enregistrer
-      </button>
+      <button class="btn btn-primary" onclick="enregistrerSigneVital()">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -166,6 +156,3 @@
 <script src="../../js/infirmier.js"></script>
 </body>
 </html>
-
-
-
