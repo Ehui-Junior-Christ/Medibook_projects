@@ -2,6 +2,7 @@ package com.medibook.medibook_springboot.infirmier.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import com.medibook.medibook_springboot.infirmier.entity.*;
 import com.medibook.medibook_springboot.infirmier.repository.*;
@@ -36,5 +37,9 @@ public class SoinInfirmierService {
         soin.setInfirmier(infirmier);
 
         return soinRepo.save(soin);
+    }
+
+    public List<SoinInfirmier> getAllSoins() {
+        return soinRepo.findAll();
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import com.medibook.medibook_springboot.infirmier.dto.SigneVitalDTO;
 import com.medibook.medibook_springboot.infirmier.entity.SigneVital;
 import com.medibook.medibook_springboot.infirmier.service.SigneVitalService;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/signes-vitaux")
@@ -21,4 +22,10 @@ public class SigneVitalController {
     public SigneVital creer(@RequestBody SigneVitalDTO dto) {
         return service.enregistrer(dto);
     }
-}
+
+
+    @GetMapping("/patient/{patientId}")
+    public List<SigneVital> getMesuresParPatient(@PathVariable Long patientId) {
+        return service.getMesuresParPatient(patientId);
+    }
+    }

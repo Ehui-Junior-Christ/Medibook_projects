@@ -103,6 +103,12 @@ window.AdminAPI = {
 };
 
 window.InfirmierAPI = {
+    getPatients() {
+        return apiRequest("/patients", {
+            method: "GET"
+        }, "Erreur chargement patients");
+    },
+
     searchPatients(query) {
         return apiRequest(`/patients/search?q=${encodeURIComponent(query)}`, {
             method: "GET"
@@ -116,6 +122,11 @@ window.InfirmierAPI = {
             body: JSON.stringify(payload)
         }, "Erreur enregistrement soin");
     },
+    getSoinsByPatient(patientId) {
+        return apiRequest(`/soins/patient/${patientId}`, {
+            method: "GET"
+        }, "Erreur chargement soins");
+    },
 
     createSigneVital(payload) {
         return apiRequest("/signes-vitaux", {
@@ -123,6 +134,12 @@ window.InfirmierAPI = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }, "Erreur enregistrement signes vitaux");
+    },
+
+    getSignesVitauxByPatient(patientId) {
+        return apiRequest(`/signes-vitaux/patient/${patientId}`, {
+            method: "GET"
+        }, "Erreur chargement signes vitaux");
     },
 
     uploadDocument(formData) {
