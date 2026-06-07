@@ -55,6 +55,17 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- 🟣 Turso (libSQL/SQLite) -->
+        <dependency>
+            <groupId>tech.turso</groupId>
+            <artifactId>turso</artifactId>
+            <version>0.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+        </dependency>
+
         <!-- 🔐 Security (pour BCrypt) -->
 
 
