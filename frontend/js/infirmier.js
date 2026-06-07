@@ -28,17 +28,20 @@ function saveInfirmierSession(updates) {
     localStorage.setItem("infirmierSession", JSON.stringify(mockInfirmier));
 }
 
-// ========== PATIENTS MOCK ==========
-const mockPatients = [
+// ========== PATIENTS ==========
+const fallbackPatients = [
     { id: 1, nom: "Kouadio Jean Baptiste", cmu: "CMU-2024-08821" },
     { id: 2, nom: "Assi Koffi Martial", cmu: "CMU-2023-04512" },
     { id: 3, nom: "N'guessan Kouamé", cmu: "CMU-2024-11032" }
 ];
+const mockPatients = fallbackPatients;
+let patientListCache = [...fallbackPatients];
 
 let mockDocumentsUploades = [];
 
 function getPatientById(id) {
-    return mockPatients.find(p => String(p.id) === String(id));
+    return patientListCache.find(p => String(p.id) === String(id))
+        || fallbackPatients.find(p => String(p.id) === String(id));
 }
 
 let soinsPatientSelection = null;
@@ -46,13 +49,146 @@ let dashboardPatientSelection = null;
 let vitauxPatientSelection = null;
 let uploadPatientSelection = null;
 const patientSearchCache = new Map();
+const treatedPatientsStorageKey = "medibook.infirmier.treatedPatients";
 
 function mapApiPatient(patient) {
+    if (!patient) return null;
     return {
         id: patient.id,
         nom: patient.nomComplet || [patient.nom, patient.prenom].filter(Boolean).join(" "),
-        cmu: patient.numeroAssure || ""
+        cmu: patient.numeroAssure || patient.cmu || "",
+        dateNaissance: patient.dateNaissance || "",
+        sexe: patient.sexe || "",
+        groupeSanguin: patient.groupeSanguin || "",
+        allergies: patient.allergies || patient.carnetMedical?.allergies || "",
+        maladiesChroniques: patient.maladiesChroniques || patient.carnetMedical?.maladiesChroniques || "",
+        conditions: patient.carnetMedical?.conditions || []
     };
+}
+
+function getCurrentInfirmierId() {
+    return Number(mockInfirmier?.id) || DEFAULT_INFIRMIER_SESSION.id;
+}
+
+function readTreatedPatientsStore() {
+    try {
+        const value = JSON.parse(localStorage.getItem(treatedPatientsStorageKey) || "[]");
+        return Array.isArray(value) ? value : [];
+    } catch {
+        return [];
+    }
+}
+
+function writeTreatedPatientsStore(items) {
+    localStorage.setItem(treatedPatientsStorageKey, JSON.stringify(items));
+}
+
+function rememberTreatedPatient(patientId, action = "soin") {
+    if (!patientId) return;
+
+    const infirmierId = getCurrentInfirmierId();
+    const store = readTreatedPatientsStore();
+    const withoutDuplicate = store.filter(item =>
+        !(String(item.patientId) === String(patientId) && String(item.infirmierId) === String(infirmierId))
+    );
+
+    withoutDuplicate.unshift({
+        patientId: Number(patientId),
+        infirmierId,
+        action,
+        date: new Date().toISOString()
+    });
+
+    writeTreatedPatientsStore(withoutDuplicate.slice(0, 100));
+}
+
+function getTreatedPatientMeta(patientId) {
+    const infirmierId = getCurrentInfirmierId();
+    return readTreatedPatientsStore().find(item =>
+        String(item.patientId) === String(patientId) && String(item.infirmierId) === String(infirmierId)
+    );
+}
+
+function getKnownTreatedPatientIds() {
+    const infirmierId = getCurrentInfirmierId();
+    return new Set(readTreatedPatientsStore()
+        .filter(item => String(item.infirmierId) === String(infirmierId))
+        .map(item => String(item.patientId)));
+}
+
+function upsertPatientCache(patient) {
+    if (!patient?.id) return;
+    const isBackendShape = Object.prototype.hasOwnProperty.call(patient, "numeroAssure")
+        || Object.prototype.hasOwnProperty.call(patient, "prenom")
+        || Object.prototype.hasOwnProperty.call(patient, "carnetMedical");
+    const mapped = isBackendShape ? mapApiPatient(patient) : patient;
+    if (!mapped) return;
+
+    patientListCache = [
+        mapped,
+        ...patientListCache.filter(item => String(item.id) !== String(mapped.id))
+    ];
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function calculateAge(dateNaissance) {
+    if (!dateNaissance) return "Non renseigne";
+    const birthDate = new Date(dateNaissance);
+    if (Number.isNaN(birthDate.getTime())) return "Non renseigne";
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age -= 1;
+    }
+    return age >= 0 ? `${age} ans` : "Non renseigne";
+}
+
+function formatLastTreatment(patientId) {
+    const meta = getTreatedPatientMeta(patientId);
+    if (!meta?.date) {
+        return "Non renseignee";
+    }
+
+    const date = new Date(meta.date);
+    if (Number.isNaN(date.getTime())) {
+        return "Non renseignee";
+    }
+
+    return date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+function renderPatientConditions(patient) {
+    const labels = [];
+    if (patient.maladiesChroniques) labels.push(patient.maladiesChroniques);
+    if (patient.allergies) labels.push(`Allergie: ${patient.allergies}`);
+    if (Array.isArray(patient.conditions)) {
+        patient.conditions
+            .map(condition => condition?.libelle)
+            .filter(Boolean)
+            .forEach(label => labels.push(label));
+    }
+
+    if (!labels.length) {
+        return '<span class="badge badge-slate">Aucune</span>';
+    }
+
+    return labels.slice(0, 2)
+        .map(label => `<span class="badge badge-amber">${escapeHtml(label)}</span>`)
+        .join(" ");
 }
 
 function getPatientInitiales(patient) {
@@ -76,7 +212,8 @@ async function searchPatientsFromBackend(term) {
     }
 
     const patients = await window.InfirmierAPI.searchPatients(normalized);
-    const mapped = patients.map(mapApiPatient);
+    const mapped = patients.map(mapApiPatient).filter(Boolean);
+    mapped.forEach(upsertPatientCache);
     patientSearchCache.set(normalized, mapped);
     return mapped;
 }
@@ -156,6 +293,102 @@ function updateVitauxPatientUI(patient) {
     if (metaElement) metaElement.textContent = patient.cmu || "";
     if (avatarElement) avatarElement.textContent = getPatientInitiales(patient);
     if (modalNameElement) modalNameElement.textContent = patient.nom || "Patient";
+}
+async function chargerHistoriqueVitaux(patientId) {
+    const tbody = document.getElementById("tbody-historique-vitaux");
+    const badge = document.getElementById("badge-nb-mesures");
+
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    try {
+        const mesures = await window.InfirmierAPI.getSignesVitauxByPatient(patientId);
+
+        if (badge) {
+            badge.textContent = `${mesures.length} mesure${mesures.length > 1 ? "s" : ""}`;
+        }
+
+        if (!mesures.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align:center;padding:18px;color:#64748b">
+                        Aucune mesure enregistrée pour ce patient.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        mesures.forEach(m => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${m.dateHeure || m.createdAt || ""}</td>
+                    <td>${m.taSystolique || ""}/${m.taDiastolique || ""}</td>
+                    <td>${m.temperature || ""}</td>
+                    <td>${m.frequenceCardiaque || ""}</td>
+                    <td>${m.spo2 || ""}</td>
+                    <td>${m.poids || ""}</td>
+                    <td>${m.glycemie || ""}</td>
+                    <td>${m.infirmier?.prenom || ""} ${m.infirmier?.nom || ""}</td>
+                    <td></td>
+                </tr>
+            `;
+        });
+
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align:center;padding:18px;color:red">
+                    ${error.message}
+                </td>
+            </tr>
+        `;
+    }
+}
+async function chargerHistoriqueSoins(patientId) {
+    const tbody = document.getElementById("tbody-soins");
+    const total = document.getElementById("total-soins");
+
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    try {
+        const soins = await window.InfirmierAPI.getSoinsByPatient(patientId);
+
+        if (total) {
+            total.textContent = `${soins.length} soin(s) enregistré(s)`;
+        }
+
+        if (!soins.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align:center">
+                        Aucun soin enregistré
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        soins.forEach(s => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.dateHeure || ""}</td>
+                    <td>${s.patient?.nomComplet || ""}</td>
+                    <td>${s.typeSoin || ""}</td>
+                    <td>${s.description || ""}</td>
+                    <td>${s.infirmier?.nom || ""}</td>
+                    <td>-</td>
+                </tr>
+            `;
+        });
+
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function initPatientSearchField(config) {
@@ -385,13 +618,39 @@ window.dropFichier = function(e) {
 };
 
 // ========== LISTE DES PATIENTS ==========
-window.initListePatients = function() {
+window.initListePatients = async function() {
     const tbody = document.getElementById("tbody-patients");
     if (!tbody) return;
 
+    const emptyDiv = document.getElementById("empty-patients");
+    const searchInput = document.getElementById("search-input");
+    const subTitle = document.querySelector(".card-sub");
+    let patientsSource = [];
+
+    function afficherChargement() {
+        if (emptyDiv) emptyDiv.style.display = "none";
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;color:var(--slate-500);padding:22px">
+                    Chargement des patients depuis la base...
+                </td>
+            </tr>
+        `;
+    }
+
+    function afficherErreur(message) {
+        if (emptyDiv) emptyDiv.style.display = "none";
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;color:var(--red);padding:22px">
+                    ${escapeHtml(message)}
+                </td>
+            </tr>
+        `;
+    }
+
     function afficherPatients(liste) {
         tbody.innerHTML = "";
-        const emptyDiv = document.getElementById("empty-patients");
         if (liste.length === 0) {
             if (emptyDiv) emptyDiv.style.display = "block";
             return;
@@ -400,22 +659,22 @@ window.initListePatients = function() {
 
         const couleurs = ["#0D8E94", "#7c3aed", "#059669", "#dc2626", "#f59e0b"];
         liste.forEach(p => {
-            const initiales = p.nom.split(' ').map(n => n[0]).join('').toUpperCase();
+            const initiales = getPatientInitiales(p) || "PT";
             const couleur = couleurs[p.id % couleurs.length];
-            const age = Math.floor(Math.random() * (65 - 25 + 1) + 25);
-            const conditions = p.id === 1 ? '<span class="badge badge-amber">HTA</span>' : '';
-            const derniereMesure = "Aujourd'hui";
+            const age = calculateAge(p.dateNaissance);
+            const conditions = renderPatientConditions(p);
+            const derniereMesure = formatLastTreatment(p.id);
             tbody.innerHTML += `
                 <tr>
                     <td>
                         <div style="display:flex; align-items:center; gap:10px">
                             <div style="width:36px;height:36px;background:${couleur};border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold">${initiales}</div>
-                            ${p.nom}
+                            ${escapeHtml(p.nom || "Patient")}
                         </div>
                     </td>
-                    <td>${p.cmu}</td>
-                    <td>${age} ans</td>
-                    <td>${conditions || '<span class="badge badge-slate">Aucune</span>'}</td>
+                    <td>${escapeHtml(p.cmu || "Non renseigne")}</td>
+                    <td>${escapeHtml(age)}</td>
+                    <td>${conditions}</td>
                     <td>${derniereMesure}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="window.location.href='signes-vitaux.html?id=${p.id}'">Vitaux</button>
@@ -426,18 +685,52 @@ window.initListePatients = function() {
         });
     }
 
-    afficherPatients(mockPatients);
+    function filtrerPatients() {
+        if (!searchInput) {
+            afficherPatients(patientsSource);
+            return;
+        }
 
-    const champRecherche = document.getElementById("search-input");
-    if (champRecherche) {
-        champRecherche.addEventListener("input", function() {
-            const texte = this.value.toLowerCase();
-            const filtre = mockPatients.filter(p =>
-                p.nom.toLowerCase().includes(texte) ||
-                p.cmu.toLowerCase().includes(texte)
-            );
-            afficherPatients(filtre);
-        });
+        const texte = searchInput.value.toLowerCase().trim();
+        const filtre = patientsSource.filter(p =>
+            (p.nom || "").toLowerCase().includes(texte) ||
+            (p.cmu || "").toLowerCase().includes(texte)
+        );
+        afficherPatients(filtre);
+    }
+
+    afficherChargement();
+
+    try {
+        const result = await window.InfirmierAPI.getPatients();
+        const patients = Array.isArray(result) ? result : result?.value || [];
+        const mappedPatients = patients.map(mapApiPatient).filter(Boolean);
+        const treatedIds = getKnownTreatedPatientIds();
+        patientsSource = [...mappedPatients].sort((left, right) =>
+            Number(treatedIds.has(String(right.id))) - Number(treatedIds.has(String(left.id)))
+        );
+
+        patientListCache = mappedPatients.length ? mappedPatients : [...fallbackPatients];
+
+        if (subTitle) {
+            subTitle.textContent = treatedIds.size
+                ? "Patients BD - patients traites sur ce poste en premier"
+                : "Patients recuperes depuis la base de donnees";
+        }
+
+        afficherPatients(patientsSource);
+    } catch (error) {
+        console.error(error);
+        patientsSource = [...fallbackPatients];
+        patientListCache = [...fallbackPatients];
+        if (subTitle) {
+            subTitle.textContent = "Impossible de charger la base - donnees locales de secours";
+        }
+        afficherErreur(error.message || "Erreur chargement patients");
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filtrerPatients);
     }
 };
 
@@ -523,7 +816,7 @@ window.enregisterSoin = async function() {
         typeSoin: typeSoin,
         description: description,
         dateHeure: dateHeure,
-        infirmierId: 2,
+        infirmierId: getCurrentInfirmierId(),
         patientId: Number(patientId)
     };
 
@@ -533,6 +826,8 @@ window.enregisterSoin = async function() {
 
     try {
         const result = await window.InfirmierAPI.createSoin(soinData);
+        rememberTreatedPatient(patientId, "soin");
+        upsertPatientCache(result?.patient || soinsPatientSelection || dashboardPatientSelection);
         alert(`✅ Soin enregistré en base (ID ${result.id})`);
 
         const modal = document.getElementById("modal-soin-form");
@@ -573,7 +868,7 @@ window.enregistrerSigneVital = async function () {
 
     const data = {
         patientId: Number(patientId),
-        infirmierId: 2,
+        infirmierId: getCurrentInfirmierId(),
 
         taSystolique: Number(taSyst),
         taDiastolique: Number(taDiast),
@@ -594,8 +889,11 @@ window.enregistrerSigneVital = async function () {
 
     try {
         const result = await window.InfirmierAPI.createSigneVital(data);
+        rememberTreatedPatient(patientId, "signe-vital");
+        upsertPatientCache(result?.patient || vitauxPatientSelection);
         alert("✅ Signes vitaux enregistrés (ID " + result.id + ")");
         fermerModal("modal-vitaux");
+        chargerHistoriqueVitaux(patientId);
     } catch (error) {
         console.error(error);
         alert("❌ " + error.message);
@@ -613,6 +911,7 @@ document.addEventListener("DOMContentLoaded", function() {
         onSelect: patient => {
             soinsPatientSelection = patient;
             syncSelectedPatientToModal();
+            chargerHistoriqueSoins(patient.id);
         },
         onClear: () => {
             soinsPatientSelection = null;
@@ -662,12 +961,14 @@ document.addEventListener("DOMContentLoaded", function() {
         onSelect: patient => {
             vitauxPatientSelection = patient;
             updateVitauxPatientUI(patient);
+            chargerHistoriqueVitaux(patient.id);
         },
         onClear: () => {
             vitauxPatientSelection = null;
             updateVitauxPatientUI(null);
         }
     });
+
     initPatientSearchField({
         wrapperId: "up-patient-search-box",
         inputId: "up-patient-search",
@@ -680,8 +981,11 @@ document.addEventListener("DOMContentLoaded", function() {
             uploadPatientSelection = null;
         }
     });
+
     const sbAvatar = document.getElementById("sb-avatar");
     if (sbAvatar) sbAvatar.textContent = mockInfirmier.initiales;
+
     const sbName = document.getElementById("sb-name");
     if (sbName) sbName.textContent = mockInfirmier.prenom + " " + mockInfirmier.nom;
+
 });

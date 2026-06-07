@@ -7,6 +7,7 @@ import com.medibook.medibook_springboot.infirmier.repository.*;
 import com.medibook.medibook_springboot.infirmier.dto.SigneVitalDTO;
 import com.medibook.medibook_springboot.patient.repository.PatientRepository;
 import com.medibook.medibook_springboot.patient.entity.Patient;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,4 +47,7 @@ public class SigneVitalService {
 
         return signeRepo.save(signe);
     }
-}
+    public List<SigneVital> getMesuresParPatient(Long patientId) {
+        return signeRepo.findByPatient_Id(patientId);
+    }
+    }
